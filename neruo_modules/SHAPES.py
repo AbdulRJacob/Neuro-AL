@@ -338,7 +338,7 @@ class Colour(Enum):
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
-        data_dir: str = "training_data",
+        data_dir: str = "datasets/training_data",
         transform=None,
         target_transform=None,
         cache: bool = True,
@@ -349,7 +349,7 @@ class SHAPESDATASET(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.num_slots = 10
-        self.classes = 7
+        self.classes = 9
         self.label_to_index = {label: index for index, label in enumerate(list(self._get_all_labels()))}
         
 
@@ -357,8 +357,8 @@ class SHAPESDATASET(Dataset):
         self.dataset = DatasetFolder(
             root=data_dir,
             loader=lambda x: Image.open(x).convert("RGB"),
-            extensions=".png",  # Adjust the extension based on your image format
-            transform=ToTensor(),  # Adjust the transformation based on your needs
+            extensions=".png",  
+            transform=ToTensor(),  
         )
 
         if self.cache:
@@ -388,7 +388,7 @@ class SHAPESDATASET(Dataset):
 
 
         labels = [tuple(map(str, t.split(',')[1:])) for t in labels]
-        labels.append(("",""))
+        labels.append(("","",""))
 
 
         img_label = [np.zeros(self.classes) for _ in range(0,self.num_slots)]
@@ -402,21 +402,21 @@ class SHAPESDATASET(Dataset):
         
         img_label = np.array(img_label, dtype=np.int64)
 
-        return image_path, np.array(img_label, dtype=np.int64)
+        return image_path, np.array(img_label, dtype=np.int64), np.ones((1,self.num_slots,self.classes))
 
     def __len__(self):
         return len(self.dataset)
     
     def _get_all_labels(self):
-        all_labels = all_labels = ["Triangle","Circle","Square","Red","Green","Blue",""]
+        all_labels = all_labels = ["","Triangle","Circle","Square","Red","Green","Blue","L","S"]
     
         return all_labels
 
     def __getitem__(self, idx: int):
         if self.cache:
-            image_path, label = self._images[idx]
+            image_path, label, slots = self._images[idx]
         else:
-            image_path, label = self.dataset.samples[idx]
+            image_path, label, slots = self.dataset.samples[idx]
 
         image = Image.open(image_path).convert("RGB")
 

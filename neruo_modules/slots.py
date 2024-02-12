@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
 from SHAPES import SHAPESDATASET
-
+import utils
 
 
 def init_params(p):
@@ -130,7 +130,7 @@ class SlotAutoencoder(nn.Module):
         num_slots: int = 10,
         slot_dim: int = 64,
         routing_iters: int = 3,
-        classes: int = 7
+        classes: int = 9
     ):
         super().__init__()
         enc_act = nn.ReLU()
@@ -173,8 +173,14 @@ class SlotAutoencoder(nn.Module):
                 width, in_shape[0] + 1, 3, stride=1, padding=1
             ),  # 4 output channels
         )
-       
 
+        self.classification_head = nn.Sequential(
+            nn.Linear(width, 64), 
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, classes),
+        )
 
      
     def forward(self, x: Tensor):
@@ -203,9 +209,15 @@ class SlotAutoencoder(nn.Module):
         masks = masks.softmax(dim=1)
         # (b, c, h, w)
         recon_combined = torch.sum(recons * masks, dim=1)
+
+        z = slots
+        batch_size, num_elements, input_size = z.size()
+        z = z.view(-1, input_size)
+        z = self.classification_head(z)
+        z = z.view(batch_size, num_elements, -1)
     
 
-        return recon_combined, recons, masks, slots
+        return recon_combined, recons, masks, slots, z
 
 
 
@@ -228,10 +240,16 @@ def run_epoch(
         y = y.view(-1,y.size(-1))
         model.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(training):
-            recon_combined , _ ,masks ,_  = model(x)
+            recon_combined , _ ,_ ,_, y_hat = model(x)
 
-            ## Reconstruction Loss
-            loss = torch.mean((x - recon_combined) ** 2)
+            y = y.unsqueeze(0)
+            cost_matrix = utils.calculate_distances(y,y_hat)
+            h_match = utils.hungarian_algorithm(cost_matrix)
+            h_loss = torch.sum(h_match[0])
+
+            r_loss = torch.mean((x - recon_combined) ** 2) 
+
+            loss = h_loss + r_loss
 
         if training:
             loss.backward()
@@ -252,7 +270,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument("--data_dir", type=str, default="training_data")
+    parser.add_argument("--data_dir", type=str, default="../datasets/training_data")
     parser.add_argument("--max_num_obj", type=int, default=9)
     parser.add_argument("--input_res", type=int, default=64)
     # model
