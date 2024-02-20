@@ -12,8 +12,8 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from SHAPES import SHAPESDATASET
-import utils
+from neruo_modules.SHAPES import SHAPESDATASET
+import neruo_modules.utils as utils
 
 
 def init_params(p):
@@ -130,7 +130,7 @@ class SlotAutoencoder(nn.Module):
         num_slots: int = 10,
         slot_dim: int = 64,
         routing_iters: int = 3,
-        classes: int = 9
+        classes: Tuple[int,int,int] = 4
     ):
         super().__init__()
         enc_act = nn.ReLU()
@@ -174,13 +174,34 @@ class SlotAutoencoder(nn.Module):
             ),  # 4 output channels
         )
 
-        self.classification_head = nn.Sequential(
+        self.classification_head_shape = nn.Sequential(
             nn.Linear(width, 64), 
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
             nn.Linear(32, classes),
+            nn.Softmax()
         )
+
+        self.classification_head_colour = nn.Sequential(
+            nn.Linear(width, 64), 
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, classes),
+            nn.Softmax()
+        )
+
+        self.classification_head_size = nn.Sequential(
+            nn.Linear(width, 64), 
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, classes),
+            nn.Softmax()
+        )
+
+        ## Multiple classification head
 
      
     def forward(self, x: Tensor):
@@ -213,11 +234,17 @@ class SlotAutoencoder(nn.Module):
         z = slots
         batch_size, num_elements, input_size = z.size()
         z = z.view(-1, input_size)
-        z = self.classification_head(z)
-        z = z.view(batch_size, num_elements, -1)
+        z_colour = self.classification_head_colour(z)
+        z_colour = z_colour.view(batch_size, num_elements, -1)
+        z_shape = self.classification_head_shape(z)
+        z_shape = z_shape.view(batch_size, num_elements, -1)
+        z_size = self.classification_head_size(z)
+        z_size= z_size.view(batch_size, num_elements, -1)
+
+        output = np.concatenate([[z_shape,z_colour,z_size]], axis=0)
     
 
-        return recon_combined, recons, masks, slots, z
+        return recon_combined, recons, masks, slots, output
 
 
 
@@ -232,6 +259,7 @@ def run_epoch(
         mininterval=(0.1 if os.environ.get("IS_NOHUP") is None else 60),
     )
     total_loss, count = 0, 0
+    alpha = 0.7
 
 
     for _, (x, y) in loader:
@@ -242,14 +270,14 @@ def run_epoch(
         with torch.set_grad_enabled(training):
             recon_combined , _ ,_ ,_, y_hat = model(x)
 
-            y = y.unsqueeze(0)
-            cost_matrix = utils.calculate_distances(y,y_hat)
+
+            cost_matrix = utils.calculate_distances(y,y_hat,args.num_slots)
             h_match = utils.hungarian_algorithm(cost_matrix)
             h_loss = torch.sum(h_match[0])
 
             r_loss = torch.mean((x - recon_combined) ** 2) 
 
-            loss = h_loss + r_loss
+            loss = alpha * h_loss + r_loss ## Tune Alpha so it comparable with r_loss
 
         if training:
             loss.backward()

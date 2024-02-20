@@ -349,8 +349,8 @@ class SHAPESDATASET(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.num_slots = 10
-        self.classes = 9
-        self.label_to_index = {label: index for index, label in enumerate(list(self._get_all_labels()))}
+        self.classes = [4,4,4]
+        self.label_to_index = self.get_index(self._get_all_labels())
         
 
 
@@ -375,6 +375,13 @@ class SHAPESDATASET(Dataset):
                     )
                 )
 
+    def get_index(self,labels):
+        lab_to_idx = []
+
+        for l in labels:
+            lab_to_idx.append({label: index for index, label in enumerate(list(l))})
+        
+        return lab_to_idx
 
 
     def _load_image(self, sample):
@@ -390,33 +397,47 @@ class SHAPESDATASET(Dataset):
         labels = [tuple(map(str, t.split(',')[1:])) for t in labels]
         labels.append(("","",""))
 
+        img_label = []
+        
+        for _ in range(0,self.num_slots):
+            slot_labels = []
+            for num_class in self.classes:
+                slot_labels.append(np.zeros(num_class))
 
-        img_label = [np.zeros(self.classes) for _ in range(0,self.num_slots)]
+            img_label.append(slot_labels)
+        
 
         for i in range(0,self.num_slots):
-            label = labels[i]
-            idx = [self.label_to_index[label[0]],self.label_to_index[label[1]]]
-            for j in idx:
-                img_label[i][j] = 1
+            i_label = labels[i]
+            m_label = img_label[i]
+            idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]],self.label_to_index[2][i_label[2]]]
+            for j,k in enumerate(idx):
+                m_label[j][k] = 1
 
+
+            m_label = [np.array(l, dtype=np.int64) for l in m_label]
+            img_label[i] = np.concatenate(m_label, axis=0)
+    
         
-        img_label = np.array(img_label, dtype=np.int64)
-
-        return image_path, np.array(img_label, dtype=np.int64), np.ones((1,self.num_slots,self.classes))
-
+        return image_path, img_label
+    
     def __len__(self):
         return len(self.dataset)
     
     def _get_all_labels(self):
-        all_labels = all_labels = ["","Triangle","Circle","Square","Red","Green","Blue","L","S"]
+        shape_labels = ["","Triangle","Circle","Square"]
+        colour_labels = ["","Red","Green","Blue"]
+        size_labels = ["","L","S","M"]
+
+        all_labels =  [shape_labels,colour_labels,size_labels]
     
         return all_labels
 
     def __getitem__(self, idx: int):
         if self.cache:
-            image_path, label, slots = self._images[idx]
+            image_path, label = self._images[idx]
         else:
-            image_path, label, slots = self.dataset.samples[idx]
+            image_path, label = self.dataset.samples[idx]
 
         image = Image.open(image_path).convert("RGB")
 
