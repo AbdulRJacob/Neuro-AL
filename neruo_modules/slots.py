@@ -12,8 +12,8 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from neruo_modules.SHAPES import SHAPESDATASET
-import neruo_modules.utils as utils
+from SHAPES import SHAPESDATASET
+import utils as utils
 
 
 def init_params(p):
@@ -241,8 +241,9 @@ class SlotAutoencoder(nn.Module):
         z_size = self.classification_head_size(z)
         z_size= z_size.view(batch_size, num_elements, -1)
 
-        output = np.concatenate([[z_shape,z_colour,z_size]], axis=0)
-    
+
+        output = torch.stack((z_shape,z_colour,z_size), axis=2)
+
 
         return recon_combined, recons, masks, slots, output
 
@@ -265,10 +266,14 @@ def run_epoch(
     for _, (x, y) in loader:
         x = (x / 127.5 ) - 1
         y = y.float()
-        y = y.view(-1,y.size(-1))
+        y = y.cuda()
+        x = x.cuda()
         model.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(training):
             recon_combined , _ ,_ ,_, y_hat = model(x)
+
+            print(y.shape)
+            print(y_hat.shape)
 
 
             cost_matrix = utils.calculate_distances(y,y_hat,args.num_slots)
@@ -298,7 +303,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument("--data_dir", type=str, default="../datasets/training_data")
+    parser.add_argument("--data_dir", type=str, default="../d")
     parser.add_argument("--max_num_obj", type=int, default=9)
     parser.add_argument("--input_res", type=int, default=64)
     # model
@@ -310,7 +315,7 @@ if __name__ == "__main__":
     parser.add_argument("--exp_name", type=str, default="default")
     parser.add_argument("--seed", type=int, default=8)
     parser.add_argument("--epochs", type=int, default=1500)
-    parser.add_argument("--batch_size", type=int, default=5)
+    parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--learning_rate", type=float, default=2e-4)
     parser.add_argument("--weight_decay", type=float, default=1e-6)
     parser.add_argument("--deterministic", action="store_true", default=True)
@@ -372,7 +377,7 @@ if __name__ == "__main__":
         num_slots=args.num_slots,
         slot_dim=args.slot_dim,
         routing_iters=args.routing_iters,
-    )
+    ).cuda()
     model.apply(init_params)
     print(f"{model}\n#params: {sum(p.numel() for p in model.parameters()):,}")
     for k in sorted(vars(args)):

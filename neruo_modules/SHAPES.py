@@ -274,7 +274,7 @@ class SHAPES:
             colour = "Red"
 
         if shape == "":
-            self.label.append([str(q),"",""])
+            self.label.append([str(q),"","",""])
             return
 
         label = [str(q)]
@@ -338,7 +338,7 @@ class Colour(Enum):
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
-        data_dir: str = "datasets/training_data",
+        data_dir: str = "d",
         transform=None,
         target_transform=None,
         cache: bool = True,
@@ -406,20 +406,20 @@ class SHAPESDATASET(Dataset):
 
             img_label.append(slot_labels)
         
-
         for i in range(0,self.num_slots):
             i_label = labels[i]
             m_label = img_label[i]
             idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]],self.label_to_index[2][i_label[2]]]
+  
             for j,k in enumerate(idx):
                 m_label[j][k] = 1
 
 
             m_label = [np.array(l, dtype=np.int64) for l in m_label]
-            img_label[i] = np.concatenate(m_label, axis=0)
-    
-        
-        return image_path, img_label
+            
+            img_label[i] = np.stack(m_label)
+
+        return image_path, np.array(img_label,dtype=np.int64)
     
     def __len__(self):
         return len(self.dataset)

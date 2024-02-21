@@ -54,8 +54,6 @@ def hungarian_algorithm(cost_matrix: torch.Tensor,
 
 def get_distance(data,labels):
 
-    labels = np.split(labels, 3)
-    data = np.split(data, 3)
     bce_losses = []
 
     for d, l in zip(data,labels):
@@ -68,7 +66,8 @@ def get_distance(data,labels):
     return average_loss
 
 def calculate_distances(labels, data,size):
-    cost_matrix = torch.zeros((size,size))
+    cost_matrix = torch.zeros(size,size)
+    print(cost_matrix.shape)
 
     for i, l in enumerate(labels):
         for j, d in enumerate(data):
