@@ -6,7 +6,7 @@ import numpy as np
 
 def get_image():
     shape_generator = SHAPES(300,300,"")
-    shape_generator.generate_shape("A blue square", "testF",1)
+    shape_generator.generate_shape("A blue square", "t",1)
 
 
 def get_slot_info(img_id, labels =""):
