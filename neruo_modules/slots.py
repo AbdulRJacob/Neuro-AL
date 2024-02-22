@@ -271,12 +271,9 @@ def run_epoch(
         model.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(training):
             recon_combined , _ ,_ ,_, y_hat = model(x)
-
-            print(y.shape)
-            print(y_hat.shape)
-
-
+            
             cost_matrix = utils.calculate_distances(y,y_hat,args.num_slots)
+
             h_match = utils.hungarian_algorithm(cost_matrix)
             h_loss = torch.sum(h_match[0])
 
@@ -303,7 +300,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument("--data_dir", type=str, default="../d")
+    parser.add_argument("--data_dir", type=str, default="../datasets/training_data")
     parser.add_argument("--max_num_obj", type=int, default=9)
     parser.add_argument("--input_res", type=int, default=64)
     # model

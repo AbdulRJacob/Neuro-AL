@@ -66,11 +66,11 @@ def get_distance(data,labels):
     return average_loss
 
 def calculate_distances(labels, data,size):
-    cost_matrix = torch.zeros(size,size)
-    print(cost_matrix.shape)
+    cost_matrix = torch.zeros(labels.size(0),size,size)
 
-    for i, l in enumerate(labels):
-        for j, d in enumerate(data):
-            cost_matrix[i, j] = get_distance(d, l)
+    for i in range(labels.size(0)):
+        for j in range(size):
+            for k in range(size):
+                cost_matrix[i, j, k] = get_distance(data[i, j], labels[i, k])
 
     return cost_matrix

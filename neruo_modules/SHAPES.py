@@ -338,7 +338,7 @@ class Colour(Enum):
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
-        data_dir: str = "d",
+        data_dir: str = "datasets/training_data",
         transform=None,
         target_transform=None,
         cache: bool = True,
