@@ -375,14 +375,33 @@ if __name__ == "__main__":
         slot_dim=args.slot_dim,
         routing_iters=args.routing_iters,
     ).cuda()
-    model.apply(init_params)
-    print(f"{model}\n#params: {sum(p.numel() for p in model.parameters()):,}")
-    for k in sorted(vars(args)):
-        print(f"--{k}={vars(args)[k]}")
+
 
     optimizer = AdamW(
         model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
     )
+
+    checkpoint_path = '/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/neruo_modules/checkpoints/default/8736_ckpt.pt'
+    if os.path.exists(checkpoint_path):
+        checkpoint = torch.load(checkpoint_path)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch = checkpoint['epoch']
+        best_loss = checkpoint['best_loss']
+        step = checkpoint['step']
+    else:
+        model.apply(init_params)
+        
+
+    print(f"{model}\n#params: {sum(p.numel() for p in model.parameters()):,}")
+    for k in sorted(vars(args)):
+        print(f"--{k}={vars(args)[k]}")
+
+
+    if os.path.exists(checkpoint_path):
+        optimizer = AdamW(
+            model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
+        )
 
     best_loss = 1e6
     print("\nRunning sanity check...")
