@@ -53,7 +53,7 @@ def hungarian_algorithm(cost_matrix: torch.Tensor,
 
 
 def get_distance(data,labels):
-
+    ## May use cross entropy loss
     bce_losses = []
 
     for d, l in zip(data,labels):

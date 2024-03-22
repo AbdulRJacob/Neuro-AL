@@ -1,6 +1,6 @@
 class ABA:
 
-    def __init__(self,slots,isABALearn):
+    def __init__(self,slots = 9,f_name = "aba_shape.pl",predict=False):
 
         self.num_slots = slots
         self.img_id = 1
@@ -8,31 +8,14 @@ class ABA:
         self.ruleId = 1
         self.posId = 1
         self.negId = 1
-        self.f_name = "aba_shapes.pl"
+        self.f_name = f_name
         self.plabels = []
         self.nlabels = []
         self.b_k = []
+        self.predict = predict
 
 
     def init_aba_shape(self):
-    #     labels = {0: "top_left",
-    #               1: "top_center",
-    #               2: "top_right",
-    #               3: "mid_left",
-    #               4: "mid_center",
-    #               5: "mid_right",
-    #               6: "bot_left",
-    #               7: "bot_center",
-    #               8: "bot_right",
-    #               }
-        
-    #     rules = []
-        
-    #     for i in range(self.num_slots):
-    #         attr = labels[i]
-    #         slot = f"slot{i}"
-    #         rules.append(f"my_rule(r{self.ruleId},{attr}(X,Y), [{slot}(X,Y)]).")
-    #         self.ruleId += 1
 
         with open(self.f_name, 'w') as file:
             file.write("% SHAPES ABA Framework")
@@ -42,9 +25,15 @@ class ABA:
 
     
     def add_background_knowledge(self,entities,isPositve):
+        # print(len(entities))
         
-        for i in range(self.num_slots):
-            _ ,shape, colour, size = entities[i]
+        for i in range(len(entities)):
+            # print(i)
+            if self.predict:
+                shape, colour, size = entities[i]
+            else:
+                 _ ,shape, colour, size = entities[i]
+
 
             shape = shape.lower()
             colour = colour.lower()
@@ -52,17 +41,21 @@ class ABA:
             if shape == "":
                 continue
 
-            in_rule = f"my_rule(r{self.get_ruleId()},in(X,Y,Z),[X=img_{self.img_id}, Y={shape}, Z={shape}_{self.obj_id}])."
-            colour_rule = f"my_rule(r{self.get_ruleId()},{colour}(X),[X={shape}_{self.obj_id}])."
+            in_rule = f"in(A,B) :- A=img_{self.img_id},B={shape}_{self.obj_id}."
+            shape_rule = f"{shape}({shape}_{self.obj_id})."
+            colour_rule = f"{colour}({shape}_{self.obj_id})."
+            img_rule = f"image(img_{self.img_id})."
             self.obj_id +=1
             
             self.b_k.append(in_rule)
+            self.b_k.append(shape_rule)
             self.b_k.append(colour_rule)
+            self.b_k.append(img_rule)
 
         if isPositve:
-            self.plabels.append(f"img_{self.img_id}")
+            self.plabels.append(f"c(img_{self.img_id})")
         else:
-            self.nlabels.append(f"img_{self.img_id}")
+            self.nlabels.append(f"c(img_{self.img_id})")
 
 
         self.img_id += 1
@@ -106,4 +99,9 @@ class ABA:
                 file.write('\n')
             
             file.close()
+
+    def generate_command(self):
+        command = f"aba_asp('<aba_asp_directory>/{self.f_name}',[{', '.join(self.plabels)}],[{', '.join(self.nlabels)}])."
+        print(command)
+        return command
          

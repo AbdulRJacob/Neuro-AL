@@ -12,8 +12,8 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from SHAPES import SHAPESDATASET
-import utils as utils
+from neuro_modules.SHAPES import SHAPESDATASET
+import neuro_modules.utils as utils
 
 
 def init_params(p):
@@ -231,7 +231,7 @@ class SlotAutoencoder(nn.Module):
         # (b, c, h, w)
         recon_combined = torch.sum(recons * masks, dim=1)
 
-        z = slots
+        z = slots.detach()
         batch_size, num_elements, input_size = z.size()
         z = z.view(-1, input_size)
         z_colour = self.classification_head_colour(z)

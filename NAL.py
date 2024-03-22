@@ -1,15 +1,17 @@
-from neruo_modules.SHAPES import SHAPES, SHAPESDATASET
+from neuro_modules.SHAPES import SHAPES, SHAPESDATASET
 from ABA import ABA
 import numpy as np
+import neuro_modules.slots_eval as se
+import subprocess
 
 
 
 def get_image():
     shape_generator = SHAPES(300,300,"")
-    shape_generator.generate_shape("A blue square", "t",1)
+    shape_generator.generate_shape("A blue square", "test",5)
 
 
-def get_slot_info(img_id, labels =""):
+def get_true_slot_info(img_id, labels =""):
     with open(labels, "r") as file:
         lines = file.readlines()
 
@@ -21,16 +23,31 @@ def get_slot_info(img_id, labels =""):
 
         
         return data
+    
+def get_predicted_slot_info(img_path):
+    return se.get_predicted_symbols(img_path)
+    
 
 def image_to_background(slot_nums, slots_info,isPostive):
     pass
 
 if __name__ == "__main__":
-   get_image()
-#    aba = ABA(9,True)
-#    aba.init_aba_shape()
-#    aba.add_background_knowledge(get_slot_info(0,"test_s0/labels.txt"),True)
-#    aba.add_background_knowledge(get_slot_info(1,"testF_s0/labels.txt"),False)
-#    aba.write_aba_framework()
-#    aba.add_pos_example()
-#    aba.add_neg_example()
+   rule = "c(A) :- blue(B),square(B),in(A,B),image(A)."
+   # get_image(rule)
+   aba_framework_1 = ABA(f_name="bk_true.aba")   
+   aba_framework_2 = ABA(f_name="bk_pred.aba", predict=True)
+   aba_framework_1.init_aba_shape()
+   aba_framework_2.init_aba_shape()
+
+   for i in range(0,10):
+       is_pos = i <= 4
+       aba_framework_1.add_background_knowledge(get_true_slot_info(i+1,f"datasets/testing_data/test_s{i}/labels.txt"),is_pos)
+       aba_framework_2.add_background_knowledge(get_predicted_slot_info(f"datasets/testing_data/test_s{i}/test_{i}.png"),is_pos)
+       
+   aba_framework_1.write_aba_framework()
+   aba_framework_2.write_aba_framework()
+   aba_framework_1.generate_command()
+   aba_framework_2.generate_command()
+
+#    result = subprocess.run(["python3", "evaluation.py"], capture_output=True, text=True)
+#    print(result.stdout)

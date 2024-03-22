@@ -102,7 +102,7 @@ class SHAPES:
     def check_image(self,image,rule):
 
         r, r_obj = rule[0]
-        negated = True
+        negated = False
         cond_satisfied = False
         
         if r == Rule.BASIC:
