@@ -23,12 +23,6 @@ def calculate_accuracy(predicted, true):
     accuracy = correct_predictions / total_predictions
     return accuracy
 
-# def calculate_precision(predicted, true):
-#     true_positive = len(set(predicted) & set(true))
-#     total_predicted_positive = len(predicted)
-#     precision = true_positive / total_predicted_positive
-#     return precision
-
 
 
 true_models = get_answer_sets("symbolic_modules/aba_asp/examples/true_smodels.asp")

@@ -1,5 +1,6 @@
 import copy
 import os
+import re
 import random
 from typing import Callable, Optional, Tuple
 from enum import Enum
@@ -28,11 +29,11 @@ class SHAPES:
         self.label = []
 
 
-    def generate_shape(self, rule: str, label: str, batch_size: int):
+    def generate_shape(self, rule: str, negated: bool, label: str, batch_size: int):
       
-        print(f"Generating Data for rule: \"{rule.lower()}\"")
+        print(f"Generating Data for rule(s): \"{rule}\"")
 
-        parsed_rules = self.parse_rule(rule.lower())
+        parsed_rules = self.parse_rule(rule)
         
         for i in range(batch_size):
             if (i % 500 == 0):
@@ -42,83 +43,169 @@ class SHAPES:
                 print("Invalid Rule")
                 return 0
             
-            self.generate_image(parsed_rules,label,i)
+            self.generate_image(parsed_rules,negated,label,i)
         
         print("Done!")
         return 1
     
 
-    def parse_rule(self, rule: str): 
-        ## Grammar
-        shape = one_of(["square","circle","triangle"], caseless=True)
-        colour = one_of(["red","green","blue"] ,caseless=True)
-        pos = one_of(["left","right","above","below"], caseless=True)
-        con = CaselessLiteral("and") | CaselessLiteral("a") | CaselessLiteral("contains") | CaselessLiteral("of")
-
-
-        nonSpacialGrammar = Combine(con + " " + Optional(colour + " ") + shape)
-        nonSpatialRule = delimitedList(nonSpacialGrammar, delim=con)
-
-
-        spatialGrammar = con + Optional(colour) + shape + pos + Optional(con) + Optional(colour) + shape
-        spatialRule = delimitedList(spatialGrammar, delim=con)
-
+    def parse_rule(self, rules: list[str]): 
         
-        compoundSpatialGrammar = con + Optional(colour) + shape + pos + Optional(con) + shape + OneOrMore(con + pos + Optional(colour) + Optional(con) + shape)
-        compoundspatialRule = delimitedList(compoundSpatialGrammar, delim=con)
+        pos_pattern = r'\b(above|right|left|below)\(([^)]*)\)'
+        
+        pos = ["above","below","left","right"]
+        objs = [f"O{i}" for i in range(1,10)]
+
+        parsed_rule= [] ## (Rule_ID, Predicates, Postinal_Predicates, Exception Rule)
+        obj_id = []
 
 
-        parsed_rule = []
+        for i in range(len(rules)):
+    
+            negation = False
+            head, rule = rules[i].split("-")                 ## remove head of rule  
+            rule = re.split(r',(?![^()]*\))', rule)          ## retrives list of predictes in the rule
 
-        try:
-            parsed_rule.append((Rule.COMPOUND,compoundspatialRule.parseString(rule, parse_all=True) ))
-        except:
-            split_rules = rule.split("and")
+    
+            if "exception" in head:
+                negation = True
 
-            for split_rule in split_rules:
-                try:
-                    parsed_rule.append((Rule.SPATIAL,spatialRule.parseString(split_rule, parse_all=True)))
-                except:
-                    try:
-                        parsed_rule.append((Rule.BASIC,nonSpatialRule.parseString(split_rule, parse_all=True)))
-                    except:
-                        parsed_rule = []
 
+            if any(any(p in pred for pred in rule) for p in pos):
+                # Positional Rule 
+                position  = re.findall(pos_pattern, ' '.join(rule))
+                item_list = []
+                for obj in objs:
+                    item = list(filter(lambda i: obj in i, rule))
+                    if item != []:
+                        item_list.append(item)
+                        obj_id.append(obj)
+
+                parsed_rule.append((Rule.Postional, [' '.join(i) for i in item_list],position,negation))
+
+            else:
+                # Basic Rule 
+                for obj in objs:
+                    item = list(filter(lambda i: obj in i, rule))
+                    
+                    if item != []:
+                        parsed_rule.append((Rule.BASIC,' '.join(item),None,negation))
+                        obj_id.append(obj)
 
         output = []
-        for i in range(len(parsed_rule)):
-            obj = {"shape": "", "colour": "", "size": ""}
-            if (parsed_rule[i][0] == Rule.BASIC):
-                rule = parsed_rule[i][1][0]
-                obj["shape"] = self.get_shape(rule)
-                obj["colour"] = self.get_colour(rule)
-                obj["size"] = self.get_size(rule)
-                output.append((parsed_rule[i][0], obj))
+        entry = {}
 
+        # Initialse dic of shapes included in rules 
+        for i in range(len(obj_id)):
+            entry[obj_id[i]] = {"shape": "", "colour": "", "size": ""}
+
+        for i in range(len(parsed_rule)):            
+
+            if (parsed_rule[i][0] == Rule.BASIC):
+                rule = parsed_rule[i][1] 
+                entry[obj_id[i]]["shape"] = self.get_shape(rule)
+                entry[obj_id[i]]["colour"] = self.get_colour(rule)
+                entry[obj_id[i]]["size"] = self.get_size(rule)
+                output.append((parsed_rule[i][0], entry, obj_id[i], None, parsed_rule[i][-1]))
+            elif (parsed_rule[i][0] == Rule.Postional):
+                rules = parsed_rule[i][1]
+                for j in range(len(obj_id[i])): ## obj_id corresponds to each positional rule element 
+                    entry[obj_id[j]]["shape"] = self.get_shape(rules[j])
+                    entry[obj_id[j]]["colour"] = self.get_colour(rules[j])
+                    entry[obj_id[j]]["size"] = self.get_size(rules[j])
+
+                output.append((parsed_rule[i][0], entry, obj_id, parsed_rule[i][2],parsed_rule[i][-1]))
 
         return output
     
 
-    def check_image(self,image,rule):
-
-        r, r_obj = rule[0]
-        negated = False
-        cond_satisfied = False
+    def check_image(self,image,rule,negated,idx=0):
         
+        if idx >= len(rule):
+            return True
+
+        r, r_obj, obj_id , pos, negated = rule[idx]
+    
+        cond_satisfied = False
+        same_shape = lambda i,s: i["shape"] == s["shape"] and (i["colour"] == s["colour"] or s["colour"] == None ) and (i["size"] == s["size"] or s["size"] == None)
+        
+        ## Rule Basic: Checks whether the image contains the object specified
         if r == Rule.BASIC:
+            r_obj = r_obj[obj_id]
             for i in image:
-                cond = i["shape"] == r_obj["shape"] and (i["colour"] == r_obj["colour"] or r_obj["colour"] == None ) and (i["size"] == r_obj["size"] or r_obj["size"] == None)
+                cond = same_shape(i,r_obj)
                 if cond:
                     cond_satisfied = True
 
             if negated:
-                return not cond_satisfied
+                return not cond_satisfied and self.check_image(image,rule,negated,idx + 1)
             else:
-                return cond_satisfied
-    
+                return cond_satisfied and self.check_image(image,rule,negated,idx + 1)
+            
+        ## Rule Postinal: 
+        elif r == Rule.Postional:
+            obj_pos = {}
+            present = [False for i in obj_id]
+            cond = False
+            for i in image:
+                for j in range(len(obj_id)):
+                    obj = obj_id[j]
+                    cond = same_shape(i,r_obj[obj])
+                    if cond: 
+                        obj_pos[obj] = i["quad"]
+                        present[j] = True
+                        cond = False
+                        continue
+
+            if not all(present):
+                return negated 
+            else:
+                if negated:
+                    return  not self.check_position(obj_pos,pos) and self.check_image(image,rule,negated,idx + 1)
+                else:
+                    return self.check_position(obj_pos,pos) and self.check_image(image,rule,negated,idx + 1)
+            
+    def check_position(self,obj_pos,postions,idx=0):
+        
+        if idx >= len(postions):
+            return True
+        
+        p = postions[idx]
+        cur_pos = self.get_position(p[0])
+        obj_1 = p[1].split(",")[0]
+        obj_2 = p[1].split(",")[1]
+
+        if cur_pos == Position.RIGHT:
+            temp = obj_1
+            obj_1 = obj_2
+            obj_2 = temp 
+            cur_pos = Position.LEFT
+
+        if cur_pos == Position.BELOW:
+            temp = obj_1
+            obj_1 = obj_2
+            obj_2 = temp 
+            cur_pos = Position.ABOVE
+
+        if cur_pos == Position.LEFT:
+            if obj_pos[obj_2] in [0,3,6]:
+                return False
+            elif obj_pos[obj_2] in [1,4,7] and obj_pos[obj_1] in [0,3,6] or obj_pos[obj_2] in [2,5,8] and obj_pos[obj_1] in [0,1,3,4,6,7]:
+                return  True and self.check_position(obj_pos,postions,idx+1)
+            
+        if cur_pos  == Position.ABOVE:
+            if obj_pos[obj_2] in [0,1,2]:
+                return False 
+            elif obj_pos[obj_2] in [3,4,5] and obj_pos[obj_1] in [0,1,2] or obj_pos[obj_2] in [6,7,8] and obj_pos[obj_1] in [0,1,2,3,4,5]:
+                return True and self.check_position(obj_pos,postions,idx+1)
+        
+
+
+
     def draw_shape(self, grid_info,image):
 
         s = ""
+        sz = ""
         quad, shape, colour, size = list(grid_info.values())
 
         if colour == "":
@@ -136,17 +223,20 @@ class SHAPES:
             image = self.draw_circle(image, quad, colour,size)
             s = "Circle"
 
+        if size == Size.LARGE:
+            sz = "L"
+        else:
+            sz = "S"
         
-        self.get_label(s,colour,quad,size)
+        self.get_label(s,colour,quad,sz)
 
 
         return image
     
     def draw_square(self, image, quadrant, colour, size=""):
-        points = {"L": (5,5,95,95), "S": (30,30,70,70)}
-        choice = ["L", "S"]
+        points = {Size.LARGE: (5,5,95,95), Size.SMALL: (30,30,70,70)}
 
-        (x_1,y_1,x_2,y_2) = points[random.choice(choice)]
+        (x_1,y_1,x_2,y_2) = points[size]
 
         offset_x , offset_y = self.get_offset(quadrant)
 
@@ -156,10 +246,9 @@ class SHAPES:
     
     def draw_triangle(self, image, quadrant, colour,size=""):
 
-        points = {"L": (5,95,95,95,50,95,90), "S": (30,70,70,70,50,70,40)}
-        choice = ["L", "S"]
+        points = {Size.LARGE: (5,95,95,95,50,95,90), Size.SMALL: (30,70,70,70,50,70,40)}
 
-        (x_1,y_1,x_2,y_2,x_3,y_3,s) = points[random.choice(choice)]
+        (x_1,y_1,x_2,y_2,x_3,y_3,s) = points[size]
     
         offset_x , offset_y = self.get_offset(quadrant)
        
@@ -178,10 +267,9 @@ class SHAPES:
 
     def draw_circle(self, image, quadrant, colour,size=""):
 
-        points = {"L": 45, "S": 20}
-        choice = ["L", "S"]
+        points = {Size.LARGE: 45, Size.SMALL: 20}
 
-        r = points[random.choice(choice)]
+        r = points[size]
       
         offset_x , offset_y = self.get_offset(quadrant)
 
@@ -195,7 +283,7 @@ class SHAPES:
         
         shapes = [Shape.CIRCLE,Shape.TRIANGLE,Shape.SQUARE,""]
         colours = [self.blue,self.green,self.red]
-        sizes = ["L","S"]
+        sizes = [Size.SMALL,Size.LARGE]
 
         for i in range(0,len(image_map)):
             image_map[i] = {"quad": i,
@@ -207,21 +295,22 @@ class SHAPES:
         return image_map
 
 
-    def generate_image(self,rule,label,id):
+    def generate_image(self,rule,negated,label,id):
         self.label = []
         image =  np.zeros((self.height, self.width, 3), dtype=np.uint8)
         rule_satisified = False
         image_map = np.zeros(9)
 
-        
+        ## Generates images by checking if image satisfies the rule 
         while not rule_satisified:
             image_map = self.generate_random_image()
-            rule_satisified = self.check_image(image_map,rule)
+            rule_satisified = self.check_image(image_map,rule,negated)
 
         for i in range(0,len(image_map)):
             image = self.draw_shape(image_map[i],image)
 
         
+        ## Writes labels and writes to file
         labels_text = '\n'.join(','.join(l) for l in self.label)
 
         folderpath = os.getcwd() +  self.filepath + "/" + label + "_s"+ str(id)
@@ -324,7 +413,7 @@ class Shape(Enum):
     CIRCLE = 3
 class Rule(Enum):
     BASIC = 1 
-    SPATIAL = 2
+    Postional = 2
     COMPOUND = 3
 class Position(Enum):
     LEFT = 1

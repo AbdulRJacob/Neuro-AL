@@ -6,9 +6,9 @@ import subprocess
 
 
 
-def get_image():
-    shape_generator = SHAPES(300,300,"")
-    shape_generator.generate_shape("A blue square", "test",5)
+def get_image(rule):
+    shape_generator = SHAPES(300,300,"/datasets/training_data/") 
+    shape_generator.generate_shape(rule, False,"sample", 1)
 
 
 def get_true_slot_info(img_id, labels =""):
@@ -32,8 +32,10 @@ def image_to_background(slot_nums, slots_info,isPostive):
     pass
 
 if __name__ == "__main__":
-   rule = "c(A) :- blue(B),square(B),in(A,B),image(A)."
-   # get_image(rule)
+   rule = ["c(A) :- blue(O1),square(O1),in(A,o1),green(O2),square(O2),in(A,O2)image(A)."]
+   get_image(rule)
+   se.get_visualisation("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/testF_s0/testF_0.png")
+   se.get_classification_accuracy("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/datasets/training_data/",1)
    aba_framework_1 = ABA(f_name="bk_true.aba")   
    aba_framework_2 = ABA(f_name="bk_pred.aba", predict=True)
    aba_framework_1.init_aba_shape()

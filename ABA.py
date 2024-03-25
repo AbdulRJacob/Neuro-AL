@@ -44,13 +44,15 @@ class ABA:
             in_rule = f"in(A,B) :- A=img_{self.img_id},B={shape}_{self.obj_id}."
             shape_rule = f"{shape}({shape}_{self.obj_id})."
             colour_rule = f"{colour}({shape}_{self.obj_id})."
-            img_rule = f"image(img_{self.img_id})."
             self.obj_id +=1
             
             self.b_k.append(in_rule)
             self.b_k.append(shape_rule)
             self.b_k.append(colour_rule)
-            self.b_k.append(img_rule)
+            
+
+        img_rule = f"image(img_{self.img_id})."
+        self.b_k.append(img_rule)
 
         if isPositve:
             self.plabels.append(f"c(img_{self.img_id})")
@@ -58,6 +60,7 @@ class ABA:
             self.nlabels.append(f"c(img_{self.img_id})")
 
 
+      
         self.img_id += 1
 
     def add_pos_example(self):
@@ -97,6 +100,12 @@ class ABA:
             for item in self.b_k:
                 file.write(item)
                 file.write('\n')
+
+            
+            command = f"% aba_asp('aba_asp/example/{self.f_name}',[{', '.join(self.plabels)}],[{', '.join(self.nlabels)}])."
+            file.write('\n')
+            file.write('\n')
+            file.write(command)
             
             file.close()
 

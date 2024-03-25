@@ -16,7 +16,7 @@ from torchvision import transforms
 from neuro_modules.slots import SlotAutoencoder
 
 
-model_path = '/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/models/fmodel.pt'
+model_path = '/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/models/69888_ckpt.pt'
 
 ckpt = torch.load(model_path,map_location='cpu')
 
@@ -155,7 +155,56 @@ def get_predicted_symbols(image):
 
     return sym_table
 
+def get_true_symbols(labels):
+    with open(labels, "r") as file:
+        lines = file.readlines()
 
+        sym_table = {}
+        for line in lines:
+            item = line.strip().split(",") 
+            if len(item) == 4: 
+                sym_table[int(item[0])] = item[1:]
+        
+
+        
+        return sym_table
+
+def get_classification_accuracy(data_path, dataset_size):
+    ## Assume data_path is a directory of folders of the form 
+    ## sample_data
+    ##   |---img.png
+    ##   |---labels.txt
+
+    total_slot = 0
+    total_correct_slot = 0
+    total_correct_img = 0
+
+    for i in range(dataset_size):
+    
+        img_path = data_path + f"test_s{i}/test_{i}.png"
+        label_path = data_path + f"test_s{i}/labels.txt"
+
+        pred_slots = get_predicted_symbols(img_path)
+        true_slots = get_true_symbols(label_path)
+        get_visualisation(img_path)
+        print(pred_slots)
+        print(true_slots)
+
+        same = all([set(pred_slots[key]) == set(true_slots[key]) for key in true_slots])
+
+
+        if same:
+            total_correct_img + 1
+
+        for j in range(0,9):
+            if pred_slots[j] == true_slots[j]:
+                total_correct_slot+=1
+            total_slot+=1
+
+        
+    print("-------Slot Classification Accuracy-----------")
+    print("Slot Classification: ", total_correct_slot / total_slot)
+    print("Full Image Accuracy: ", total_correct_img / dataset_size)
 
     
 
