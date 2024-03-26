@@ -16,8 +16,7 @@ from torchvision import transforms
 from neuro_modules.slots import SlotAutoencoder
 
 
-model_path = '/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/models/69888_ckpt.pt'
-
+model_path = os.getcwd() + "/models/99216_ckpt.pt"
 ckpt = torch.load(model_path,map_location='cpu')
 
 model = SlotAutoencoder(
@@ -179,16 +178,30 @@ def get_classification_accuracy(data_path, dataset_size):
     total_correct_slot = 0
     total_correct_img = 0
 
-    for i in range(dataset_size):
+    class_id = 1
+
+    for i in range(1,dataset_size):
+
+        k = i % 100
+        offset = 900
+
+        if (k == 0):
+            class_id+=1
+     
+        
     
-        img_path = data_path + f"test_s{i}/test_{i}.png"
-        label_path = data_path + f"test_s{i}/labels.txt"
+        img_path = data_path + f"c{class_id}_s{k+offset}/c{class_id}_{k+offset}.png"
+        label_path = data_path + f"c{class_id}_s{k+offset}/labels.txt"
 
         pred_slots = get_predicted_symbols(img_path)
         true_slots = get_true_symbols(label_path)
-        get_visualisation(img_path)
-        print(pred_slots)
-        print(true_slots)
+
+        if i == 1:
+            get_visualisation(img_path)
+            print("Predicted:")
+            print(pred_slots)
+            print("Ground Truth: ")
+            print(true_slots)
 
         same = all([set(pred_slots[key]) == set(true_slots[key]) for key in true_slots])
 

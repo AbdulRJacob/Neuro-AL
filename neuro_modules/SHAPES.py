@@ -29,7 +29,7 @@ class SHAPES:
         self.label = []
 
 
-    def generate_shape(self, rule: str, negated: bool, label: str, batch_size: int):
+    def generate_shape(self, rule: str, negated: bool, label: str, batch_size: int,label_offset=0):
       
         print(f"Generating Data for rule(s): \"{rule}\"")
 
@@ -43,7 +43,7 @@ class SHAPES:
                 print("Invalid Rule")
                 return 0
             
-            self.generate_image(parsed_rules,negated,label,i)
+            self.generate_image(parsed_rules,negated,label,i + label_offset)
         
         print("Done!")
         return 1
@@ -109,7 +109,7 @@ class SHAPES:
                 output.append((parsed_rule[i][0], entry, obj_id[i], None, parsed_rule[i][-1]))
             elif (parsed_rule[i][0] == Rule.Postional):
                 rules = parsed_rule[i][1]
-                for j in range(len(obj_id[i])): ## obj_id corresponds to each positional rule element 
+                for j in range(len(obj_id)): ## obj_id corresponds to each positional rule element  ## TODO: Bug with index taking objs from pre exceptions
                     entry[obj_id[j]]["shape"] = self.get_shape(rules[j])
                     entry[obj_id[j]]["colour"] = self.get_colour(rules[j])
                     entry[obj_id[j]]["size"] = self.get_size(rules[j])
@@ -313,7 +313,7 @@ class SHAPES:
         ## Writes labels and writes to file
         labels_text = '\n'.join(','.join(l) for l in self.label)
 
-        folderpath = os.getcwd() +  self.filepath + "/" + label + "_s"+ str(id)
+        folderpath = os.getcwd() + "/" +  self.filepath + "/" + label + "_s"+ str(id)
         os.makedirs(folderpath, exist_ok=True)
 
 
@@ -327,6 +327,9 @@ class SHAPES:
         filename = label + "_" + str(id) + ".png"
         file_path = os.path.join(folderpath, filename)
         cv2.imwrite(file_path, image)
+
+    def change_filepath(self,filepath):
+        self.filepath = filepath
 
 
 
