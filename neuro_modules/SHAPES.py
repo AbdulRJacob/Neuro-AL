@@ -430,7 +430,7 @@ class Colour(Enum):
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
-        data_dir: str = "datasets/training_data",
+        data_dir: str = "datasets/SHAPES/training_data",
         transform=None,
         target_transform=None,
         cache: bool = True,
@@ -440,8 +440,8 @@ class SHAPESDATASET(Dataset):
         self.data_dir = data_dir
         self.transform = transform
         self.target_transform = target_transform
-        self.num_slots = 10
-        self.classes = [4,4,4]
+        self.num_slots = 9
+        self.classes = {"position": 9, "shape": 4,"colour": 4, "size": 3}
         self.label_to_index = self.get_index(self._get_all_labels())
         
 
@@ -468,11 +468,14 @@ class SHAPESDATASET(Dataset):
                 )
 
     def get_index(self,labels):
+
         lab_to_idx = []
+        offset = 0
 
         for l in labels:
-            lab_to_idx.append({label: index for index, label in enumerate(list(l))})
-        
+            lab_to_idx.append({label: index + offset for index, label in enumerate(list(l))})
+            offset += len(l)
+
         return lab_to_idx
 
 
@@ -486,30 +489,29 @@ class SHAPESDATASET(Dataset):
             labels = file.read().splitlines()
 
 
-        labels = [tuple(map(str, t.split(',')[1:])) for t in labels]
-        labels.append(("","",""))
+        labels = [tuple(map(str, t.split(','))) for t in labels]
 
         img_label = []
         
         for _ in range(0,self.num_slots):
-            slot_labels = []
-            for num_class in self.classes:
-                slot_labels.append(np.zeros(num_class))
+            slot_labels = np.zeros(sum(self.classes.values()))
 
             img_label.append(slot_labels)
+
+        final_labels = []
         
         for i in range(0,self.num_slots):
             i_label = labels[i]
             m_label = img_label[i]
-            idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]],self.label_to_index[2][i_label[2]]]
+
+            idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]],self.label_to_index[2][i_label[2]],self.label_to_index[3][i_label[3]]]
   
-            for j,k in enumerate(idx):
-                m_label[j][k] = 1
+            for j in idx:
+                m_label[j] = 1
 
-
-            m_label = [np.array(l, dtype=np.int64) for l in m_label]
+            final_labels.append(np.array(m_label, dtype=np.int64) )
             
-            img_label[i] = np.stack(m_label)
+        img_label = np.stack(final_labels)
 
         return image_path, np.array(img_label,dtype=np.int64)
     
@@ -519,9 +521,10 @@ class SHAPESDATASET(Dataset):
     def _get_all_labels(self):
         shape_labels = ["","Triangle","Circle","Square"]
         colour_labels = ["","Red","Green","Blue"]
-        size_labels = ["","L","S","M"]
+        position_labels = [str(i) for i in range(0,9)]
+        size_labels = ["","L","S"]
 
-        all_labels =  [shape_labels,colour_labels,size_labels]
+        all_labels = [position_labels, shape_labels, colour_labels, size_labels] 
     
         return all_labels
 

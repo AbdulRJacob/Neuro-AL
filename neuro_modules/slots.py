@@ -12,8 +12,10 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from neuro_modules.SHAPES import SHAPESDATASET
-import neuro_modules.utils as utils
+from SHAPES import SHAPESDATASET
+import utils as utils
+import logging
+
 
 
 def init_params(p):
@@ -130,7 +132,7 @@ class SlotAutoencoder(nn.Module):
         num_slots: int = 10,
         slot_dim: int = 64,
         routing_iters: int = 3,
-        classes: Tuple[int,int,int] = 4
+        classes: dict = {"position": 9, "shape": 4,"colour": 4, "size": 3}
     ):
         super().__init__()
         enc_act = nn.ReLU()
@@ -174,12 +176,21 @@ class SlotAutoencoder(nn.Module):
             ),  # 4 output channels
         )
 
+        self.classification_head_position = nn.Sequential(
+            nn.Linear(width, 64), 
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, classes["position"]),
+            nn.Softmax()
+        )
+
         self.classification_head_shape = nn.Sequential(
             nn.Linear(width, 64), 
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(32, classes),
+            nn.Linear(32, classes["shape"]),
             nn.Softmax()
         )
 
@@ -188,7 +199,7 @@ class SlotAutoencoder(nn.Module):
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(32, classes),
+            nn.Linear(32, classes["colour"]),
             nn.Softmax()
         )
 
@@ -197,7 +208,7 @@ class SlotAutoencoder(nn.Module):
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(32, classes),
+            nn.Linear(32, classes["size"]),
             nn.Softmax()
         )
 
@@ -234,6 +245,8 @@ class SlotAutoencoder(nn.Module):
         z = slots.detach()
         batch_size, num_elements, input_size = z.size()
         z = z.view(-1, input_size)
+        z_position = self.classification_head_position(z)
+        z_position = z_position.view(batch_size, num_elements, -1)
         z_colour = self.classification_head_colour(z)
         z_colour = z_colour.view(batch_size, num_elements, -1)
         z_shape = self.classification_head_shape(z)
@@ -242,7 +255,7 @@ class SlotAutoencoder(nn.Module):
         z_size= z_size.view(batch_size, num_elements, -1)
 
 
-        output = torch.stack((z_shape,z_colour,z_size), axis=2)
+        output = torch.cat((z_position, z_shape, z_colour,z_size), dim=2)
 
 
         return recon_combined, recons, masks, slots, output
@@ -305,7 +318,7 @@ if __name__ == "__main__":
     parser.add_argument("--input_res", type=int, default=64)
     # model
     parser.add_argument("--width", type=int, default=32)
-    parser.add_argument("--num_slots", type=int, default=10)
+    parser.add_argument("--num_slots", type=int, default=9)
     parser.add_argument("--slot_dim", type=int, default=32)
     parser.add_argument("--routing_iters", type=int, default=3)
     # training
@@ -381,7 +394,8 @@ if __name__ == "__main__":
         model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
     )
 
-    checkpoint_path = '/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/neruo_modules/checkpoints/default/8736_ckpt.pt'
+    checkpoint_path = os.getcwd() + '/checkpoints/default/ckpt.pt'
+
     if os.path.exists(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -407,7 +421,13 @@ if __name__ == "__main__":
     print("\nRunning sanity check...")
     _ = run_epoch(model, dataloaders["val"])
 
+    # Configure logging
+    log_file_path = "./logs/training_log.txt"
+    logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
     for epoch in range(1, args.epochs):
+        logging.info("\nEpoch {}:".format(epoch))
         print("\nEpoch {}:".format(epoch))
         train_loss = run_epoch(model, dataloaders["train"], optimizer)
 
@@ -426,3 +446,7 @@ if __name__ == "__main__":
                     "optimizer_state_dict": optimizer.state_dict(),
                 }
                 torch.save(save_dict, f"./checkpoints/{args.exp_name}/{step}_ckpt.pt")
+
+            logging.info("Epoch {}: Train loss: {:.6f}, Valid loss: {:.6f}".format(epoch, train_loss, valid_loss))
+        else:
+            logging.info("Epoch {}: Train loss: {:.6f}".format(epoch, train_loss))

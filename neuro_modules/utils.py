@@ -52,25 +52,14 @@ def hungarian_algorithm(cost_matrix: torch.Tensor,
     return smallest_cost_matrix.to(cost_matrix.device), indices
 
 
-def get_distance(data,labels):
-    ## May use cross entropy loss
-    bce_losses = []
-
-    for d, l in zip(data,labels):
+def calculate_distances(labels, data, size):
+    batch_size, _, _ = labels.shape
     
-        bce_loss = F.binary_cross_entropy(d, l)
-        bce_losses.append(bce_loss)
+    labels_reshaped = labels.unsqueeze(1).repeat(1, size, 1, 1).reshape(-1, labels.size(2))
+    data_reshaped = data.unsqueeze(2).repeat(1, 1, size, 1).reshape(-1, data.size(2))
 
-    average_loss = torch.mean(torch.stack(bce_losses))
+    bce_losses = F.binary_cross_entropy(data_reshaped, labels_reshaped, reduction='none')
 
-    return average_loss
-
-def calculate_distances(labels, data,size):
-    cost_matrix = torch.zeros(labels.size(0),size,size)
-
-    for i in range(labels.size(0)):
-        for j in range(size):
-            for k in range(size):
-                cost_matrix[i, j, k] = get_distance(data[i, j], labels[i, k])
+    cost_matrix = bce_losses.view(batch_size, size, size, -1).mean(dim=-1)
 
     return cost_matrix
