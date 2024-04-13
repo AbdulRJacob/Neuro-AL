@@ -2,12 +2,10 @@ import copy
 import os
 import re
 import random
-from typing import Callable, Optional, Tuple
 from enum import Enum
 
 import numpy as np
 import cv2
-from pyparsing import one_of, OneOrMore, Optional, ParseException, Combine, CaselessLiteral, delimitedList
 import torch.nn as nn
 from PIL import Image
 from torch.utils.data import Dataset
@@ -109,7 +107,7 @@ class SHAPES:
                 output.append((parsed_rule[i][0], entry, obj_id[i], None, parsed_rule[i][-1]))
             elif (parsed_rule[i][0] == Rule.Postional):
                 rules = parsed_rule[i][1]
-                for j in range(len(obj_id)): ## obj_id corresponds to each positional rule element  ## TODO: Bug with index taking objs from pre exceptions
+                for j in range(len(obj_id) - 1): ## obj_id corresponds to each positional rule element  ## TODO: Bug with index taking objs from pre exceptions
                     entry[obj_id[j]]["shape"] = self.get_shape(rules[j])
                     entry[obj_id[j]]["colour"] = self.get_colour(rules[j])
                     entry[obj_id[j]]["size"] = self.get_size(rules[j])
@@ -304,7 +302,7 @@ class SHAPES:
         ## Generates images by checking if image satisfies the rule 
         while not rule_satisified:
             image_map = self.generate_random_image()
-            rule_satisified = self.check_image(image_map,rule,negated)
+            rule_satisified = not self.check_image(image_map,rule,negated)
 
         for i in range(0,len(image_map)):
             image = self.draw_shape(image_map[i],image)
@@ -441,7 +439,7 @@ class SHAPESDATASET(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.num_slots = 9
-        self.classes = {"position": 9, "shape": 4,"colour": 4, "size": 3}
+        self.classes = {"shape": 4,"colour": 4, "size": 3}
         self.label_to_index = self.get_index(self._get_all_labels())
         
 
@@ -489,7 +487,7 @@ class SHAPESDATASET(Dataset):
             labels = file.read().splitlines()
 
 
-        labels = [tuple(map(str, t.split(','))) for t in labels]
+        labels = [tuple(map(str, t.split(',')[1:])) for t in labels]
 
         img_label = []
         
@@ -504,15 +502,15 @@ class SHAPESDATASET(Dataset):
             i_label = labels[i]
             m_label = img_label[i]
 
-            idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]],self.label_to_index[2][i_label[2]],self.label_to_index[3][i_label[3]]]
+
+            idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]],self.label_to_index[2][i_label[2]]]
   
             for j in idx:
                 m_label[j] = 1
 
-            final_labels.append(np.array(m_label, dtype=np.int64) )
+            final_labels.append(np.array(m_label, dtype=np.int64))
             
         img_label = np.stack(final_labels)
-
         return image_path, np.array(img_label,dtype=np.int64)
     
     def __len__(self):
@@ -521,10 +519,9 @@ class SHAPESDATASET(Dataset):
     def _get_all_labels(self):
         shape_labels = ["","Triangle","Circle","Square"]
         colour_labels = ["","Red","Green","Blue"]
-        position_labels = [str(i) for i in range(0,9)]
         size_labels = ["","L","S"]
 
-        all_labels = [position_labels, shape_labels, colour_labels, size_labels] 
+        all_labels = [shape_labels, colour_labels, size_labels] 
     
         return all_labels
 

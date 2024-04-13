@@ -12,8 +12,8 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from SHAPES import SHAPESDATASET
-import utils as utils
+from datasets.SHAPES.SHAPES import SHAPESDATASET
+import neuro_modules.utils as utils
 import logging
 
 
@@ -176,6 +176,7 @@ class SlotAutoencoder(nn.Module):
             ),  # 4 output channels
         )
 
+
         self.classification_head_position = nn.Sequential(
             nn.Linear(width, 64), 
             nn.ReLU(),
@@ -184,6 +185,7 @@ class SlotAutoencoder(nn.Module):
             nn.Linear(32, classes["position"]),
             nn.Softmax()
         )
+
 
         self.classification_head_shape = nn.Sequential(
             nn.Linear(width, 64), 
@@ -279,8 +281,8 @@ def run_epoch(
     for _, (x, y) in loader:
         x = (x / 127.5 ) - 1
         y = y.float()
-        y = y.cuda()
-        x = x.cuda()
+        y = y
+        x = x
         model.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(training):
             recon_combined , _ ,_ ,_, y_hat = model(x)
@@ -313,7 +315,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument("--data_dir", type=str, default="../datasets/training_data")
+    parser.add_argument("--data_dir", type=str, default="../datasets/SHAPES/training_data")
     parser.add_argument("--max_num_obj", type=int, default=9)
     parser.add_argument("--input_res", type=int, default=64)
     # model
@@ -387,7 +389,7 @@ if __name__ == "__main__":
         num_slots=args.num_slots,
         slot_dim=args.slot_dim,
         routing_iters=args.routing_iters,
-    ).cuda()
+    )
 
 
     optimizer = AdamW(
