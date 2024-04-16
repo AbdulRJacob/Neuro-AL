@@ -150,12 +150,25 @@ class TestABAFramework(unittest.TestCase):
         self.assertGreater(len(aba_framework.learnt_rules), 0, "Error Populating Learnt Rules")
         self.assertGreater(len(aba_framework.assumptions), 0, "Error Should have some assumptions")
         self.assertGreater(len(aba_framework.contraries), 0, "Error Should have some contraries")
-  
 
+    
+    def test_loading_aba_framework(self):
+        filename_bk = FILEPATH + "test2_bk.aba"
+        filename_aba = FILEPATH + "test2_bk.sol.aba"
+        filename_asp= FILEPATH + "test2_bk.sol.asp"
 
+        aba_framework = ABAFramework()
+
+        aba_framework.load_background_knowledge(filename_bk)
+        self.assertGreater(len(aba_framework.background_knowledge["loaded_rule"]), 0, "Error Populating Background Knowledge")
+
+        aba_framework.load_learnt_rules(filename_asp)
+        self.assertGreater(len(aba_framework.learnt_rules), 0, "Error Populating Learnt Rules")
+
+        aba_framework.load_assumptions_and_contraries(filename_aba)
+        self.assertGreater(len(aba_framework.assumptions), 0, "Error Should have some assumptions")
+        self.assertGreater(len(aba_framework.contraries), 0, "Error Should have some contraries")
         
-
-
 
 
 if __name__ == '__main__':

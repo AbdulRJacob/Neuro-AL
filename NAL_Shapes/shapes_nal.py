@@ -13,7 +13,6 @@ from torchvision import transforms
 
 from slots import SlotAutoencoder
 from data_structures.aba_framework import ABAFramework
-from shapes_metics import get_classificaiton_result
 
 
 class SHAPES_NAL:
@@ -100,10 +99,10 @@ class SHAPES_NAL:
         return input_batch
 
 
-    def to_numpy(x):
+    def to_numpy(self, x):
         return x.cpu().detach().numpy()
 
-    def renormalize(x):
+    def renormalize(self, x):
         # x = x.clamp(min=-1, max=1)
         return x / 2. + 0.5  # [-1, 1] to [0, 1]
 
@@ -122,7 +121,7 @@ class SHAPES_NAL:
         masks = self.to_numpy(masks.permute(0,2,3,1))
         slots = self.to_numpy(slots)
 
-        num_slots = 9
+        num_slots = 10
         fig, ax = plt.subplots(1, num_slots + 2, figsize=(18, 4))
         ax[0].imshow(image)
         ax[0].set_title('Input')
@@ -143,7 +142,7 @@ class SHAPES_NAL:
 
     def get_attended_bounding_box(self,mask):
         # Threshold the mask to identify the attended region
-        threshold_value = 0.6
+        threshold_value = 0.1
         
         attended_region = (mask > threshold_value).astype(int)
 
@@ -162,13 +161,12 @@ class SHAPES_NAL:
         return bounding_box
 
 
-    def get_labels(self,pos,shape,colour,size):
-        position_labels = [i for i in range(0,9)]
+    def get_labels(self, shape: int ,colour : int, size: int) -> Tuple[str,str,str]:
         shape_labels = ["","Triangle","Circle","Square"]
         colour_labels = ["","Red","Green","Blue"]
         size_labels = ["","L","S"]
 
-        return position_labels[pos], shape_labels[shape], colour_labels[colour], size_labels[size]
+        return shape_labels[shape], colour_labels[colour], size_labels[size]
     
     def run_model(self,image):
         self.neuro_model.eval()
@@ -181,31 +179,27 @@ class SHAPES_NAL:
         res =  []
 
         for i in range(10):
-            # region = self.get_attended_bounding_box(masks[i][0].numpy())
-            pos = torch.argmax(out[i][:9]).item()
-            pos_conf = out[i][:9][pos].item()
-            shape = torch.argmax(out[i][9:13]).item()
-            shape_conf = out[i][9:13][shape].item()
-            colour = torch.argmax(out[i][13:17]).item()
-            colour_conf = out[i][13:17][colour].item()
-            size = torch.argmax(out[i][17:]).item()
-            size_conf = out[i][17:][size].item()
+            region = self.get_attended_bounding_box(masks[i][0].numpy())
+            # region = (0,0,0,0)
+            shape = torch.argmax(out[i][:4]).item()
+            shape_conf = out[i][:4][shape].item()
+            colour = torch.argmax(out[i][4:8]).item()
+            colour_conf = out[i][4:8][colour].item()
+            size = torch.argmax(out[i][8:]).item()
+            size_conf = out[i][8:][size].item()
 
-            res.append([(pos,pos_conf),(shape,shape_conf),(colour,colour_conf),(size,size_conf)])
+            res.append([(region,1),(shape,shape_conf),(colour,colour_conf),(size,size_conf)])
         
         return res
 
 
     def get_prediction(self, img_path: str):
-        sym_table = {}
         image  = self.preprocess_image(img_path)
         results = self.run_model(image)
 
-        sym_table = {}
+        set_results = []
         image_conf = 0
 
-
-        results = sorted(results, key=lambda x: x[0])
 
         for info in results:
             pos, pc = info[0]
@@ -213,34 +207,31 @@ class SHAPES_NAL:
             colour, cc = info[2]
             size, zc = info[3]
 
-            pos, shape, colour, size = self.get_labels(pos,shape,colour,size)
+            shape, colour, size = self.get_labels(shape,colour,size)
 
             total_conf = pc + sc + cc + zc
             image_conf += total_conf
 
-
-            if pos in sym_table.keys():
-                confidence = sym_table[pos][1]
-                if total_conf > confidence:
-                     sym_table[pos] = ([shape,colour,size], total_conf)
-                     image_conf = image_conf - confidence
-            else:
-                sym_table[pos] = ([shape,colour,size],total_conf)
+            set_results.append(((pos,shape,colour,size), total_conf))
 
 
-        return sym_table, image_conf / 9
+        return set_results, image_conf / 9
     
     def get_ground_truth(self, label_path:str ):
         with open(label_path, "r") as file:
             lines = file.readlines()
 
-            sym_table = {}
+            set_result = []
             for line in lines:
                 item = line.strip().split(",") 
                 if len(item) == 4: 
-                    sym_table[int(item[0])] = (item[1:],1) ## (slot_info, confidence = 1)
+                    info = [int(item[0])]
+                    info = info + item[1:]
+                    set_result.append((tuple(info), 1))
+                
+            set_result.append(((0,'','',''),1))
              
-            return sym_table
+            return set_result
     
 
     def init_aba_framework(self, rules : list[str]):
@@ -248,36 +239,31 @@ class SHAPES_NAL:
             self.aba_framework.add_bk_rule(rule)
     
 
-    def populate_aba_framework(self,entities,isPositive):
-        keys = list(entities.keys())
-        values = list(entities.values())
-
+    def populate_aba_framework(self,entities: set[Tuple[Tuple[Tuple[int,int,int,int],str,str,str],float]] ,isPositive: bool):
+    
         img_label = f"img_{self.img_id}"
 
-        for i in range(len(keys)):
-            slot = int(keys[i])
-            vals = values[i][0]
-            shape, colour, size = vals
-
+        for entity in entities:
+            pos, shape, colour, size = entity[0]
+            
             if shape == "":
                 continue
 
             shape = shape.lower()
-            colour = colour.lower()
-
-            if colour == "":
-                colour = "blue"
-
-            size = self.size_labels[size]
             shape_label = f"{shape}_{self.obj_id}"
-
 
             self.aba_framework.add_bk_fact(img_label,pred_name="in",arity=2, args=[img_label,shape_label])
             self.aba_framework.add_bk_fact(img_label,pred_name=shape,arity=1, args=[shape_label])
-            self.aba_framework.add_bk_fact(img_label,pred_name=colour,arity=1, args=[shape_label])
+
+            if not colour == "":
+                colour = colour.lower()
+                self.aba_framework.add_bk_fact(img_label,pred_name=colour,arity=1, args=[shape_label])
+
+
+            size = self.size_labels[size]
             self.aba_framework.add_bk_fact(img_label,pred_name=size,arity=1, args=[shape_label])
-            # slot_rule = f"box(I,S,X1,Y1,X2,Y2) :- I={img_label}, S={shape_label},{self.slot_labels[slot]}"
-            # self.aba_framework.add_bk_rule(slot_rule,img_label)
+            slot_info = [img_label, shape_label] + [str(c) for c in list(pos)]
+            self.aba_framework.add_bk_fact(img_label,pred_name="box",arity=6,args=slot_info)
             self.obj_id += 1
 
         
@@ -322,17 +308,30 @@ class SHAPES_NAL:
         
         self.img_id += 1
 
+    def get_classificaiton_result(self, s_models, c_label) -> bool: 
+        is_instance = False
+
+        for symbol_sequence in s_models:
+            for symbol in symbol_sequence:
+                if f"{c_label}(img_"in str(symbol): 
+                    is_instance = True
+
+        return is_instance
+
 
 if __name__ == "__main__":  
 
     shapes_nal = SHAPES_NAL()
     
-    ## Initialisnig Model
+    # ## Initialisnig Model
 
     model = SlotAutoencoder(in_shape=(3,64,64), width=32, num_slots=10, slot_dim=32, routing_iters=3)
-    shapes_nal.model_params = os.getcwd() + "/models/fmodel2.pt"
+    shapes_nal.model_params = os.getcwd() + "/models/232128_ckpt.pt"
     shapes_nal.neuro_model = model
     shapes_nal.init_model()
+
+    shapes_nal.visualise_slots("sample_s0/sample_0.png")
+    exit()
 
 
     ## Populating ABA Framework
@@ -347,7 +346,7 @@ if __name__ == "__main__":
                 "left(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), X2 - X12 < 0.",
                 "right(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), X22 - X1 < 0."]
     
-    # shapes_nal.init_aba_framework(bk_rules)
+    shapes_nal.init_aba_framework(bk_rules)
 
     for i in classes : ## range(1, SHAPES_CLASSESS + 1)
         for j in range(NUM_EXAMPLES):
@@ -361,36 +360,40 @@ if __name__ == "__main__":
     aba = shapes_nal.aba_framework
 
     ## Training ABA Framework 
-    filename = "shapes_bk.aba"
+    filename = "test_bk.aba"
 
     aba.write_aba_framework(filename)
-    # aba.ground_aba_framework(filename)
-    aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
+    aba.ground_aba_framework(filename)
+    # aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
 
-    aba.run_aba_framework()
+    # aba.run_aba_framework()
 
     ## Inference Example
 
-    msg = lambda x : "is a positvie instance!" if x else "is a negative instance!"
+    # aba.load_background_knowledge("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/shapes_bk.aba")
+    # aba.load_learnt_rules("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/shapes_bk.sol.asp")
+    # aba.load_assumptions_and_contraries("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/shapes_bk.sol.aba")
 
-    img_path_1 = "datasets/MOCK/testing_data/c1_s222/c1_222.png"
-    prediction, confidence = shapes_nal.get_prediction(img_path_1)
-    shapes_nal.populate_aba_framework_inference(prediction)
-    models = aba.get_prediction()
-    is_positive_example = get_classificaiton_result(models,"c")
+    # msg = lambda x : "is a positvie instance!" if x else "is a negative instance!"
 
-    print(f"Image 1 {msg(is_positive_example)}")
+    # img_path_1 = "datasets/MOCK/testing_data/c1_s222/c1_222.png"
+    # prediction, confidence = shapes_nal.get_prediction(img_path_1)
+    # shapes_nal.populate_aba_framework_inference(prediction)
+    # models = aba.get_prediction()
+    # is_positive_example = get_classificaiton_result(models,"c")
 
-    shapes_nal.aba_framework.reset_inference()
+    # print(f"Image 1 {msg(is_positive_example)}")
 
-    img_path_2 = "datasets/MOCK/testing_data/c2_s222/c2_222.png"
-    prediction, confidence = shapes_nal.get_prediction(img_path_2)
-    shapes_nal.populate_aba_framework_inference(prediction)
-    models = aba.get_prediction()
-    is_positive_example = get_classificaiton_result(models,"c")
+    # shapes_nal.aba_framework.reset_inference()
+
+    # img_path_2 = "datasets/MOCK/testing_data/c2_s222/c2_222.png"
+    # prediction, confidence = shapes_nal.get_prediction(img_path_2)
+    # shapes_nal.populate_aba_framework_inference(prediction)
+    # models = aba.get_prediction()
+    # is_positive_example = get_classificaiton_result(models,"c")
 
     
-    print(f"Image 2 {msg(is_positive_example)}")
+    # print(f"Image 2 {msg(is_positive_example)}")
 
 
 

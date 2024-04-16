@@ -438,7 +438,7 @@ class SHAPESDATASET(Dataset):
         self.data_dir = data_dir
         self.transform = transform
         self.target_transform = target_transform
-        self.num_slots = 9
+        self.num_slots = 10
         self.classes = {"shape": 4,"colour": 4, "size": 3}
         self.label_to_index = self.get_index(self._get_all_labels())
         
@@ -488,6 +488,8 @@ class SHAPESDATASET(Dataset):
 
 
         labels = [tuple(map(str, t.split(',')[1:])) for t in labels]
+        labels.append(("","",""))
+
 
         img_label = []
         

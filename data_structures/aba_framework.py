@@ -150,7 +150,7 @@ class ABAFramework:
             for line in f:
                 rule = line.strip()
 
-                if '%' in rule:
+                if '%' in rule or rule == "":
                     continue  # comment
 
                 self.add_bk_rule(rule,"loaded_rule")
@@ -188,9 +188,9 @@ class ABAFramework:
             return False 
 
 
-        if self.positive_examples == []:
-            print("Error: Must have postives to extract learnt rules")
-            return False
+        # if self.positive_examples == []:
+        #     print("Error: Must have postives to extract learnt rules")
+        #     return False
         
 
         f = open(filepath, "r")
