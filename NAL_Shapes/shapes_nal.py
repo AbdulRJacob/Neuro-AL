@@ -13,6 +13,7 @@ from torchvision import transforms
 
 from slots import SlotAutoencoder
 from data_structures.aba_framework import ABAFramework
+import shapes_metics
 
 
 class SHAPES_NAL:
@@ -121,7 +122,7 @@ class SHAPES_NAL:
         masks = self.to_numpy(masks.permute(0,2,3,1))
         slots = self.to_numpy(slots)
 
-        num_slots = 10
+        num_slots = self.num_of_slots
         fig, ax = plt.subplots(1, num_slots + 2, figsize=(18, 4))
         ax[0].imshow(image)
         ax[0].set_title('Input')
@@ -142,12 +143,15 @@ class SHAPES_NAL:
 
     def get_attended_bounding_box(self,mask):
         # Threshold the mask to identify the attended region
-        threshold_value = 0.1
+        threshold_value = 0.65
         
         attended_region = (mask > threshold_value).astype(int)
 
         # Find the indices of non-zero elements in the attended region
         non_zero_indices = np.nonzero(attended_region)
+        
+        if non_zero_indices[0].size == 0:
+            return (-1,-1,-1,-1)
 
         # Calculate the bounding box coordinates
         x_min = np.min(non_zero_indices[1])
@@ -178,9 +182,8 @@ class SHAPES_NAL:
         out = output.squeeze(0)
         res =  []
 
-        for i in range(10):
+        for i in range(self.num_of_slots):
             region = self.get_attended_bounding_box(masks[i][0].numpy())
-            # region = (0,0,0,0)
             shape = torch.argmax(out[i][:4]).item()
             shape_conf = out[i][:4][shape].item()
             colour = torch.argmax(out[i][4:8]).item()
@@ -209,13 +212,13 @@ class SHAPES_NAL:
 
             shape, colour, size = self.get_labels(shape,colour,size)
 
-            total_conf = pc + sc + cc + zc
+            total_conf = pc * sc * cc * zc
             image_conf += total_conf
 
             set_results.append(((pos,shape,colour,size), total_conf))
 
 
-        return set_results, image_conf / 9
+        return set_results, image_conf / self.num_of_slots
     
     def get_ground_truth(self, label_path:str ):
         with open(label_path, "r") as file:
@@ -262,8 +265,11 @@ class SHAPES_NAL:
 
             size = self.size_labels[size]
             self.aba_framework.add_bk_fact(img_label,pred_name=size,arity=1, args=[shape_label])
-            slot_info = [img_label, shape_label] + [str(c) for c in list(pos)]
-            self.aba_framework.add_bk_fact(img_label,pred_name="box",arity=6,args=slot_info)
+
+            if not pos[0] == -1:
+                slot_info = [img_label, shape_label] + [str(c) for c in list(pos)]
+                self.aba_framework.add_bk_fact(img_label,pred_name="box",arity=6,args=slot_info)
+            
             self.obj_id += 1
 
         
@@ -272,49 +278,46 @@ class SHAPES_NAL:
         
         self.img_id += 1
 
-    def populate_aba_framework_inference(self,entitiies):
-        keys = list(entitiies.keys())
-        values = list(entitiies.values())
+    def populate_aba_framework_inference(self,entities):
 
         img_label = f"img_{self.img_id}"
 
-        for i in range(len(keys)):
-            slot = int(keys[i])
-            vals = values[i][0]
-            shape, colour, size = vals
-
+        for entity in entities:
+            pos, shape, colour, size = entity[0]
+            
             if shape == "":
                 continue
 
             shape = shape.lower()
-            colour = colour.lower()
-
-            if colour == "":
-                colour = "blue"
-
-            size = self.size_labels[size]
             shape_label = f"{shape}_{self.obj_id}"
 
             self.aba_framework.add_inference_bk_fact(pred_name="in",arity=2, args=[img_label,shape_label])
             self.aba_framework.add_inference_bk_fact(pred_name=shape,arity=1, args=[shape_label])
-            self.aba_framework.add_inference_bk_fact(pred_name=colour,arity=1, args=[shape_label])
+
+            if not colour == "":
+                colour = colour.lower()
+                self.aba_framework.add_inference_bk_fact(pred_name=colour,arity=1, args=[shape_label])
+
+
+            size = self.size_labels[size]
             self.aba_framework.add_inference_bk_fact(pred_name=size,arity=1, args=[shape_label])
-            # slot_rule = f"box(I,S,X1,Y1,X2,Y2) :- I={img_label}, S={shape_label},{self.slot_labels[slot]}"
-            # self.aba_framework.add_bk_rule(slot_rule,img_label)
+
+            if not pos[0] == -1:
+                slot_info = [img_label, shape_label] + [str(c) for c in list(pos)]
+                self.aba_framework.add_inference_bk_fact(pred_name="box",arity=6,args=slot_info)
+            
             self.obj_id += 1
 
         
         self.aba_framework.add_inference_bk_fact(pred_name="image",arity=1, args=[img_label])
         
-        self.img_id += 1
 
     def get_classificaiton_result(self, s_models, c_label) -> bool: 
         is_instance = False
 
-        for symbol_sequence in s_models:
-            for symbol in symbol_sequence:
-                if f"{c_label}(img_"in str(symbol): 
-                    is_instance = True
+        for symbol in s_models:
+            if f"{c_label}(img_"in str(symbol): 
+                is_instance = True
 
         return is_instance
 
@@ -326,20 +329,17 @@ if __name__ == "__main__":
     # ## Initialisnig Model
 
     model = SlotAutoencoder(in_shape=(3,64,64), width=32, num_slots=10, slot_dim=32, routing_iters=3)
-    shapes_nal.model_params = os.getcwd() + "/models/232128_ckpt.pt"
+    shapes_nal.model_params = os.getcwd() + "/models/shapes_m1.pt"
     shapes_nal.neuro_model = model
     shapes_nal.init_model()
 
-    shapes_nal.visualise_slots("sample_s0/sample_0.png")
-    exit()
+    # Populating ABA Framework
 
+    NUM_EXAMPLES = 10
+    THRESHOLD = 0.85
+    classes = [15,16]
 
-    ## Populating ABA Framework
-
-    NUM_EXAMPLES = 5
-    classes = [1,2]
-
-    data = shapes_nal.get_SHAPES_dataset(NUM_EXAMPLES)
+    data = shapes_nal.get_SHAPES_dataset(200) ## Max Examples
 
     bk_rules = ["above(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y12 - Y2 > 0.",
                 "below(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y1 - Y22 > 0.",
@@ -349,30 +349,34 @@ if __name__ == "__main__":
     shapes_nal.init_aba_framework(bk_rules)
 
     for i in classes : ## range(1, SHAPES_CLASSESS + 1)
-        for j in range(NUM_EXAMPLES):
+        j = 0
+        while j < NUM_EXAMPLES:
             img_path = data[i][j]  ## Tuple of (img_path, label_path)
             prediction, confidence = shapes_nal.get_prediction(img_path[0])
-            if confidence < 2.5:
-                continue
-            
-            shapes_nal.populate_aba_framework(prediction, i == classes[0])
+
+            if confidence > THRESHOLD:
+                shapes_nal.populate_aba_framework(prediction, i == classes[0])
+                j = j + 1
 
     aba = shapes_nal.aba_framework
 
     ## Training ABA Framework 
-    filename = "test_bk.aba"
+    filename = "shape_r4_bk.aba"
 
     aba.write_aba_framework(filename)
     aba.ground_aba_framework(filename)
-    # aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
+    aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
 
     # aba.run_aba_framework()
 
     ## Inference Example
 
-    # aba.load_background_knowledge("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/shapes_bk.aba")
-    # aba.load_learnt_rules("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/shapes_bk.sol.asp")
-    # aba.load_assumptions_and_contraries("/home/abdul/Imperial_College/Year_4/70011_Individual_Project/Neuro-AL/shapes_bk.sol.aba")
+    aba.load_background_knowledge("shape_r4_bk.aba")
+    aba.load_learnt_rules("shape_r4_bk.sol.asp")
+    aba.load_assumptions_and_contraries("shape_r4_bk.sol.aba")
+
+    shapes_metics.calculate_aba_classification_accuracy(shapes_nal,"7","c")
+    shapes_metics.calculate_aba_classification_accuracy(shapes_nal,"8","c")
 
     # msg = lambda x : "is a positvie instance!" if x else "is a negative instance!"
 

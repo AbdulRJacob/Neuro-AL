@@ -4,14 +4,13 @@ from collections import Counter
 from NAL_Shapes.shapes_nal import SHAPES_NAL
 from data_structures.aba_framework import ABAFramework
 
-def calculate_aba_classification_accuracy(learnt_framework: ABAFramework, classID: str, c_label: str): 
+def calculate_aba_classification_accuracy(shape_nal: SHAPES_NAL, classID: str, c_label: str): 
    correct_predictions = 0
    total_predictions = 100
 
    USE_GROUND_TRUTH  = False
 
-   shape_nal = SHAPES_NAL()
-   shape_nal.aba_framework = learnt_framework
+   learnt_framework = shape_nal.aba_framework
    
    for i in range(200,300):
        
@@ -168,5 +167,3 @@ def calculate_slots_classification_accuracy(data_path, dataset_size):
 if __name__ == "__main__":  
     dataset_path = "datasets/SHAPES/testing_data/"
     dataset_size = 1000
-
-    calculate_slots_classification_accuracy(dataset_path,dataset_size)

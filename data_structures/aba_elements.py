@@ -60,6 +60,11 @@ class Rule:
 
 
     def split_and_clean_rule(input: str) -> tuple[str,list[tuple[str,bool]]]:
+        if not ":-" in input:
+            input.strip()
+            input.replace(".", "")
+            return (input, [])
+
         head, body = input.split(":-")
         head = head.strip()
 
