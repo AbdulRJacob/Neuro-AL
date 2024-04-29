@@ -21,13 +21,14 @@ def calculate_aba_classification_accuracy(shape_nal: SHAPES_NAL, classID: str, c
     learnt_framework.reset_inference()
     prediction, _ = shape_nal.get_prediction(img_path)
     shape_nal.populate_aba_framework_inference(prediction)
-    s_models = learnt_framework.get_prediction()[0]
+    s_models = learnt_framework.get_prediction()
 
     if shape_nal.get_classificaiton_result(s_models,c_label):
         correct_predictions += 1
  
-
    print(f"Classification Accuracy for Class c{classID}: {correct_predictions / total_predictions} ")
+
+   return correct_predictions / total_predictions
 
 
 def metrics(predicted_list, actual_list):

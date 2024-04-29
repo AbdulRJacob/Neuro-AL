@@ -313,13 +313,81 @@ class SHAPES_NAL:
         
 
     def get_classificaiton_result(self, s_models, c_label) -> bool: 
-        is_instance = False
+        
+        present = 0
+        total_model = len(s_models)
 
-        for symbol in s_models:
-            if f"{c_label}(img_"in str(symbol): 
-                is_instance = True
+        for model in s_models:
+            for symbol in model:
+                if f"{c_label}(img_"in str(symbol): 
+                    present+=1
 
-        return is_instance
+        
+        absent = total_model - present
+        return present > absent
+    
+
+
+def evauate():
+
+    classes = [[],[1,2],[3,4],[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[17,18],[19,20]]
+
+    for c in range (1, len(classes) + 1):
+        print("------------------Increment Example---------------------------")
+        shapes_nal = SHAPES_NAL()
+
+        model = SlotAutoencoder(in_shape=(3,64,64), width=32, num_slots=10, slot_dim=32, routing_iters=3)
+        shapes_nal.model_params = os.getcwd() + "/models/shapes_m1.pt"
+        shapes_nal.neuro_model = model
+        shapes_nal.init_model()
+
+        # Populating ABA Framework
+
+        NUM_EXAMPLES = 10
+        MAX_EXAMPLES = 200
+        THRESHOLD = 0.85
+        klasses = classes[c]
+
+        data = shapes_nal.get_SHAPES_dataset(MAX_EXAMPLES) ## Max Examples
+        
+        bk_rules = ["above(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y12 - Y2 > 0.",
+                    "below(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y1 - Y22 > 0.",
+                    "left(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), X2 - X12 < 0.",
+                    "right(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), X22 - X1 < 0."]
+        
+        shapes_nal.init_aba_framework(bk_rules)
+
+        for i in klasses : ## range(1, SHAPES_CLASSESS + 1)
+            j = 0
+            history = []
+            while j < NUM_EXAMPLES:
+                choosen_exp = random.randint(0, MAX_EXAMPLES - 1)
+                img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
+                prediction, confidence = shapes_nal.get_prediction(img_path[0])
+
+                if confidence > THRESHOLD and choosen_exp not in history:
+                    # print(img_path[0])
+                    shapes_nal.populate_aba_framework(prediction, i == klasses[0])
+                    j = j + 1
+                    history.append(choosen_exp)
+
+        aba = shapes_nal.aba_framework
+
+        # Training ABA Framework 
+        filename = f"shapes_r{c}_bk_{10}.aba"
+
+        aba.write_aba_framework(filename)
+        # aba.ground_aba_framework(filename)
+        aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
+
+        aba.run_aba_framework(10)
+
+        pos_class = shapes_metics.calculate_aba_classification_accuracy(shapes_nal,str(klasses[0]),"c")
+        neg_class = shapes_metics.calculate_aba_classification_accuracy(shapes_nal,str(klasses[1]),"c")
+
+
+        print("Positive: ", pos_class)
+        print("Negatve : ",  1 - neg_class)
 
 
 if __name__ == "__main__":  
@@ -335,11 +403,12 @@ if __name__ == "__main__":
 
     # Populating ABA Framework
 
-    NUM_EXAMPLES = 10
+    NUM_EXAMPLES = 20
+    MAX_EXAMPLES = 200
     THRESHOLD = 0.85
-    classes = [15,16]
+    classes = [1,2]
 
-    data = shapes_nal.get_SHAPES_dataset(200) ## Max Examples
+    data = shapes_nal.get_SHAPES_dataset(MAX_EXAMPLES) ## Max Examples
 
     bk_rules = ["above(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y12 - Y2 > 0.",
                 "below(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y1 - Y22 > 0.",
@@ -350,41 +419,49 @@ if __name__ == "__main__":
 
     for i in classes : ## range(1, SHAPES_CLASSESS + 1)
         j = 0
+        history = []
         while j < NUM_EXAMPLES:
-            img_path = data[i][j]  ## Tuple of (img_path, label_path)
+            choosen_exp = random.randint(0, MAX_EXAMPLES - 1)
+            img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
             prediction, confidence = shapes_nal.get_prediction(img_path[0])
 
-            if confidence > THRESHOLD:
+            if confidence > THRESHOLD and choosen_exp not in history:
+                # print(img_path[0])
                 shapes_nal.populate_aba_framework(prediction, i == classes[0])
                 j = j + 1
+                history.append(choosen_exp)
 
     aba = shapes_nal.aba_framework
 
-    ## Training ABA Framework 
-    filename = "shape_r4_bk.aba"
+    # Training ABA Framework 
+    filename = "shapes_r1_bk_20.aba"
 
     aba.write_aba_framework(filename)
     aba.ground_aba_framework(filename)
     aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
 
-    # aba.run_aba_framework()
+    aba.run_aba_framework()
 
     ## Inference Example
 
-    aba.load_background_knowledge("shape_r4_bk.aba")
-    aba.load_learnt_rules("shape_r4_bk.sol.asp")
-    aba.load_assumptions_and_contraries("shape_r4_bk.sol.aba")
+    aba.load_background_knowledge(filename)
+    shapes_nal.init_aba_framework(bk_rules)
+    aba.load_learnt_rules("shapes_r1_bk_20.sol.asp")
 
-    shapes_metics.calculate_aba_classification_accuracy(shapes_nal,"7","c")
-    shapes_metics.calculate_aba_classification_accuracy(shapes_nal,"8","c")
+    aba.load_assumptions_and_contraries("shapes_r1_bk_20.sol.aba")
+    pos_class = shapes_metics.calculate_aba_classification_accuracy(shapes_nal,"1","c")
+    neg_class = shapes_metics.calculate_aba_classification_accuracy(shapes_nal,"2","c")
 
-    # msg = lambda x : "is a positvie instance!" if x else "is a negative instance!"
+    print("Positive: ", pos_class)
+    print("Negatve : ",  1 - neg_class)
+
+    # msg = lambda x : "is a positive instance!" if x else "is a negative instance!"
 
     # img_path_1 = "datasets/MOCK/testing_data/c1_s222/c1_222.png"
     # prediction, confidence = shapes_nal.get_prediction(img_path_1)
     # shapes_nal.populate_aba_framework_inference(prediction)
     # models = aba.get_prediction()
-    # is_positive_example = get_classificaiton_result(models,"c")
+    # is_positive_example = shapes_nal.get_classificaiton_result(models,"c")
 
     # print(f"Image 1 {msg(is_positive_example)}")
 
@@ -394,7 +471,7 @@ if __name__ == "__main__":
     # prediction, confidence = shapes_nal.get_prediction(img_path_2)
     # shapes_nal.populate_aba_framework_inference(prediction)
     # models = aba.get_prediction()
-    # is_positive_example = get_classificaiton_result(models,"c")
+    # is_positive_example = shapes_nal.get_classificaiton_result(models,"c")
 
     
     # print(f"Image 2 {msg(is_positive_example)}")

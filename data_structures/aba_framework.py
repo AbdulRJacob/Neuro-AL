@@ -102,7 +102,7 @@ class ABAFramework:
 
         return command
     
-    def run_aba_framework(self) -> bool:
+    def run_aba_framework(self,id) -> bool:
 
         if self.aba_solver_path == "":
             print("Error: Need to set aba_solver_path")
@@ -113,13 +113,16 @@ class ABAFramework:
 
         command = self.get_command(self.filename).replace(".aba", "").replace("%","")
 
-
         prolog_commands = f"""
             consult('{self.aba_solver_path}').
+            set_lopt(learning_mode(brave)).
             {command}
             """
+        
+        log_name = f"logs_{id}.txt"
+        log_file = open(log_name, 'w')
 
-        process = subprocess.Popen(['swipl', '-q'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(['swipl', '-q'], stdin=subprocess.PIPE, stdout=log_file, stderr=subprocess.PIPE, text=True)
         output, errors = process.communicate(prolog_commands)
 
         generated_files = ["asp.clingo","cc.pl","cc.clingo","clingo.stderr.log"]
@@ -238,7 +241,11 @@ class ABAFramework:
             print("Error: Need to have some background knowledge to get prediction")
             return False
         
-        ctrl = cc.Control()
+        ctrl = cc.Control(["0"])
+
+        if "bk_rules" in self.background_knowledge.keys():
+            for rule in self.background_knowledge["bk_rules"]:
+                ctrl.add("base", [], str(rule))
 
         for rule in self.inference:
             ctrl.add("base", [], str(rule))
@@ -247,15 +254,25 @@ class ABAFramework:
             ctrl.add("base", [], str(rule))
 
 
+        ctrl.add("base", [], "#show c/1.")
         ctrl.ground([("base", [])])
 
+
+        models = []
         
-        s_models = []
-        on_model = lambda x: s_models.append(x.symbols(shown=True))
+        on_model = lambda x: models.append(x.symbols(shown=True))
 
-        ctrl.solve(on_model=on_model)
+        with ctrl.solve(yield_=True) as hnd:
+            count = 0
+            for m in hnd:
+                count += 1
+                on_model(m)
 
-        return s_models
+                if count > 1000:
+                    break
+    
+
+        return models
         
 
 
