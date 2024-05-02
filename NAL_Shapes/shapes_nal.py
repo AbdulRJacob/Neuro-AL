@@ -374,13 +374,13 @@ def evauate():
         aba = shapes_nal.aba_framework
 
         # Training ABA Framework 
-        filename = f"shapes_r{c}_bk_{10}.aba"
+        filename = f"shapes_r{c}_bk_{NUM_EXAMPLES}.aba"
 
         aba.write_aba_framework(filename)
         # aba.ground_aba_framework(filename)
         aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
 
-        aba.run_aba_framework(10)
+        aba.run_aba_framework(NUM_EXAMPLES)
 
         pos_class = shapes_metics.calculate_aba_classification_accuracy(shapes_nal,str(klasses[0]),"c")
         neg_class = shapes_metics.calculate_aba_classification_accuracy(shapes_nal,str(klasses[1]),"c")
@@ -440,7 +440,7 @@ if __name__ == "__main__":
     aba.ground_aba_framework(filename)
     aba.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
 
-    aba.run_aba_framework()
+    aba.run_aba_framework(NUM_EXAMPLES)
 
     ## Inference Example
 
