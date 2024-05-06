@@ -1,9 +1,0 @@
-0,Circle,Blue,L
-1,Square,Green,L
-2,Square,Blue,L
-3,Circle,Red,L
-4,,,
-5,Circle,Blue,L
-6,,,
-7,Square,Green,S
-8,Triangle,Green,S
