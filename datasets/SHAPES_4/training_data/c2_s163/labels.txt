@@ -1,0 +1,4 @@
+0,Circle,Green
+1,Circle,Red
+2,Triangle,Red
+3,,

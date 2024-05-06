@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from datasets.SHAPES.SHAPES import SHAPES
+from datasets.SHAPES_9.SHAPES import SHAPES
 from datasets.SHAPES_4.SHAPES4 import SHAPES_4
 
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
    print("--------- Generating SHAPES ---------")
 
 
-   train_test_split = (2,1)
+   train_test_split = (200,100)
    labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"]]
    rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
             ["c(A) :- red(O1), circle(O1), in(A,O1), image(A)"],

@@ -2,7 +2,7 @@ import unittest
 import clingo.symbol as cs
 
 from data_structures.aba_elements import Rule, Atom, Example
-from data_structures.aba_framework import ABAFramework
+from symbolic_modules.aba_framework import ABAFramework
 
 
 ABA_ASP_PATH = "../symbolic_modules/aba_asp/aba_asp.pl"

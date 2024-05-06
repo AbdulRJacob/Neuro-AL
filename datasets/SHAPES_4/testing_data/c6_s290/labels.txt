@@ -1,0 +1,4 @@
+0,Square,Red
+1,Triangle,Red
+2,Triangle,Red
+3,,

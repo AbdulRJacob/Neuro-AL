@@ -1,6 +1,8 @@
 from typing import Literal, Optional, Sequence, Tuple, Union
 
 import numpy as np
+from sklearn.decomposition import PCA
+from scipy.spatial.distance import cosine
 import scipy
 import torch
 from torch import nn
@@ -63,3 +65,59 @@ def calculate_distances(labels, data, size):
     cost_matrix = bce_losses.view(batch_size, size, size, -1).mean(dim=-1)
 
     return cost_matrix
+
+def get_attended_bounding_box(mask):
+    # Threshold the mask to identify the attended region
+    threshold_value = 0.65
+    
+    attended_region = (mask > threshold_value).astype(int)
+
+    # Find the indices of non-zero elements in the attended region
+    non_zero_indices = np.nonzero(attended_region)
+    
+    if non_zero_indices[0].size == 0:
+        return (-1,-1,-1,-1)
+
+    # Calculate the bounding box coordinates
+    x_min = np.min(non_zero_indices[1])
+    y_min = np.min(non_zero_indices[0])
+    x_max = np.max(non_zero_indices[1])
+    y_max = np.max(non_zero_indices[0])
+
+    # Represent the bounding box coordinates
+    bounding_box = (x_min, y_min, x_max, y_max)
+
+    return bounding_box
+
+
+def get_dissimilar_ranking(imgs, model ,num_slots):
+    num_img = len(imgs)
+
+    model.eval()
+    inputs = (imgs / 127.5 ) - 1
+    _, _, _, slots , _ = model(inputs)
+    slots = slots.detach().numpy()
+
+
+    pca_models = []
+    reduced_slots = []
+    for img_idx in range(num_img):
+        pca = PCA(n_components=2)
+        reduced_slot = pca.fit_transform(slots[img_idx])
+        pca_models.append(pca)
+        reduced_slots.append(reduced_slot)
+
+    dissimilarity_scores = np.zeros((num_img, num_img))
+    for i in range(num_img):
+        for j in range(num_img):
+            if i != j:
+                distance_sum = 0
+                for k in range(num_slots):
+                    distance_sum += cosine(reduced_slots[i][k], reduced_slots[j][k])
+                dissimilarity_scores[i, j] = distance_sum
+
+
+    total_dissimilarity = np.sum(dissimilarity_scores, axis=1)
+    ranking = np.argsort(total_dissimilarity)
+
+    return ranking
