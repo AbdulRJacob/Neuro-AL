@@ -231,18 +231,27 @@ class SHAPES:
 
         return image
     
-    def draw_square(self, image, quadrant, colour, size=""):
+    def draw_square(self, image, quadrant, colour, size="", attention_map = None, get_map=False):
         points = {Size.LARGE: (5,5,95,95), Size.SMALL: (30,30,70,70)}
 
         (x_1,y_1,x_2,y_2) = points[size]
 
         offset_x , offset_y = self.get_offset(quadrant)
 
+
+        if get_map:
+             attention_map[offset_y + y_1:offset_y + y_2, offset_x + x_1:offset_x + x_2] = quadrant + 1
+
+             return attention_map
+
         cv2.rectangle(image, (offset_x + x_1, offset_y + y_1), (offset_x + x_2, offset_y + y_2), colour, -1) 
+
+        
+
 
         return image
     
-    def draw_triangle(self, image, quadrant, colour,size=""):
+    def draw_triangle(self, image, quadrant, colour,size="", attention_map=None, get_map=False):
 
         points = {Size.LARGE: (5,95,95,95,50,95,90), Size.SMALL: (30,70,70,70,50,70,40)}
 
@@ -258,18 +267,26 @@ class SHAPES:
 
         vertices = np.array([c1, c2, c3], np.int32).reshape((-1, 1, 2))
 
+        if get_map:
+            cv2.fillPoly(attention_map, [vertices], color=quadrant + 1)
+            return attention_map
+
         cv2.fillPoly(image, [vertices], color=colour)
 
         return image
 
 
-    def draw_circle(self, image, quadrant, colour,size=""):
+    def draw_circle(self, image, quadrant, colour, size="", attention_map=None, get_map=False ):
 
         points = {Size.LARGE: 45, Size.SMALL: 20}
 
         r = points[size]
       
         offset_x , offset_y = self.get_offset(quadrant)
+
+        if get_map:
+            cv2.circle(attention_map, (offset_x + 50, offset_y + 50), r, quadrant + 1, -1) 
+            return attention_map
 
         cv2.circle(image,(offset_x + 50, offset_y + 50), r, colour, -1) 
 
@@ -291,6 +308,22 @@ class SHAPES:
 
 
         return image_map
+    
+    def generate_attention_map(self,labels): 
+        map = np.zeros((300,300), dtype=np.uint8)
+        image =  np.zeros((self.height, self.width, 3), dtype=np.uint8)
+
+        for label in labels:
+            quad, shape,  _ , size = label
+            size = "small" if size == "S" else "large"
+            if shape == "Square":
+                map = self.draw_square(image,int(quad),"",self.get_size(size),map,True)
+            elif shape == "Circle":
+                map = self.draw_circle(image,int(quad),"",self.get_size(size),map,True)
+            elif shape == "Triangle":
+                map = self.draw_triangle(image,int(quad),"",self.get_size(size),map,True)
+
+        return map
 
 
     def generate_image(self,rule,negated,label,id):

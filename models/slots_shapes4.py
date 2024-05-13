@@ -14,8 +14,8 @@ from torchvision import transforms
 from tqdm import tqdm
 from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET
 import neuro_modules.utils as utils
+from neuro_modules.slots import SlotAutoencoder
 import logging
-
 
 
 def init_params(p):
@@ -33,212 +33,6 @@ def seed_all(seed, deterministic=True):
     if deterministic:
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
-
-
-class SlotAttention(nn.Module):
-    def __init__(
-        self,
-        input_dim: int = 64,
-        num_slots: int = 7,
-        slot_dim: int = 64,
-        routing_iters: int = 3,
-        hidden_dim: int = 128,
-    ):
-        super().__init__()
-        self.num_slots = num_slots
-        self.slot_dim = slot_dim
-        self.routing_iters = routing_iters
-
-        self.ln_inputs = nn.LayerNorm(input_dim)
-        self.ln_slots = nn.LayerNorm(self.slot_dim)
-
-        self.W_q = nn.Parameter(torch.rand(self.slot_dim, self.slot_dim))
-        self.W_k = nn.Parameter(torch.rand(input_dim, self.slot_dim))
-        self.W_v = nn.Parameter(torch.rand(input_dim, self.slot_dim))
-        self.loc = nn.Parameter(torch.zeros(1, self.slot_dim))
-        self.logscale = nn.Parameter(torch.zeros(1, self.slot_dim))
-
-        self.gru = nn.GRUCell(self.slot_dim, self.slot_dim)
-        self.mlp = nn.Sequential(
-            nn.LayerNorm(self.slot_dim),
-            nn.Linear(self.slot_dim, hidden_dim),
-            nn.ReLU()
-        )
-
-    def forward(self, x: Tensor, num_slots: Optional[int] = None):
-        # b: batch_size, n: num_inputs, c: input_dim, K: num_slots, d: slot_dim
-        b = x.shape[0]
-        # (b, n, c)
-        x = self.ln_inputs(x)
-        # (b, n, d)
-        k = torch.einsum("bnc,cd->bnd", x, self.W_k)
-        v = torch.einsum("bnc,cd->bnd", x, self.W_v)
-        # (b, k, d)
-        K = num_slots if num_slots is not None else self.num_slots
-        slots = self.loc + self.logscale.exp() * torch.randn(
-            b, K, self.slot_dim, device=x.device
-        )
-
-        for _ in range(self.routing_iters):
-            slots_prev = slots
-            slots = self.ln_slots(slots)
-            # (b, k, d)
-            q = torch.einsum("bkd,dd->bkd", slots, self.W_q)
-            q = q * self.slot_dim**-0.5
-            # (b, k, n)
-            agreement = torch.einsum("bkd,bdn->bkn", q, k.transpose(-2, -1))
-            attn = agreement.softmax(dim=1) + 1e-8
-            attn = attn / attn.sum(dim=-1, keepdim=True)  # weighted mean
-            # (b, k, d)
-            updates = torch.einsum("bkn,bnd->bkd", attn, v)
-            # (b*k, d)
-            slots = self.gru(
-                updates.reshape(-1, self.slot_dim),
-                slots_prev.reshape(-1, self.slot_dim),
-            )
-            # (b, k, d)
-            slots = slots.reshape(b, -1, self.slot_dim)
-            slots = slots + self.mlp(slots)
-        return slots
-
-
-
-class PositionEmbed(nn.Module):
-    def __init__(self, out_channels: int, resolution: Tuple[int, int]):
-        super().__init__()
-        # (1, height, width, 4)
-        self.register_buffer("grid", self.build_grid(resolution))
-        self.mlp = nn.Linear(4, out_channels)  # 4 for (x, y, 1-x, 1-y)
-
-    def forward(self, x: Tensor):
-        # (1, height, width, out_channels)
-        grid = self.mlp(self.grid)
-        # (batch_size, out_channels, height, width)
-        return x + grid.permute(0, 3, 1, 2)
-
-    def build_grid(self, resolution: Tuple[int, int]) -> Tensor:
-        xy = [torch.linspace(0.0, 1.0, steps=r) for r in resolution]
-        xx, yy = torch.meshgrid(xy, indexing="ij")
-        grid = torch.stack([xx, yy], dim=-1)
-        grid = grid.unsqueeze(0)
-        return torch.cat([grid, 1.0 - grid], dim=-1)
-
-
-class SlotAutoencoder(nn.Module):
-    def __init__(
-        self,
-        in_shape: Tuple[int, int, int],
-        width: int = 64,
-        num_slots: int = 10,
-        slot_dim: int = 64,
-        routing_iters: int = 3,
-        classes: dict = {"position": 9, "shape": 4,"colour": 4, "size": 3}
-    ):
-        super().__init__()
-        enc_act = nn.ReLU()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(in_shape[0], width, 5, padding=2),
-            enc_act,
-            *[nn.Conv2d(width, width, 5, padding=2), enc_act] * 3,
-            PositionEmbed(width, in_shape[1:]),
-        )
-
-        self.mlp = nn.Sequential(
-            nn.LayerNorm(width),
-            nn.Linear(width, width),
-            nn.ReLU(),
-            nn.Linear(width, width),
-        )
-
-        self.slot_attention = SlotAttention(
-                input_dim=width,
-                num_slots=num_slots,
-                slot_dim=slot_dim,
-                routing_iters=routing_iters,
-                hidden_dim=width,
-            )
-
-        self.slot_grid = (in_shape[1] // 16, in_shape[2] // 16)
-        dec_act = nn.LeakyReLU()
-        self.decoder = nn.Sequential(
-            PositionEmbed(slot_dim, self.slot_grid),
-            *[
-                nn.ConvTranspose2d(
-                    width, width, 5, stride=2, padding=2, output_padding=1
-                ),
-                dec_act,
-            ]
-            * 4,
-            nn.ConvTranspose2d(width, width, 5, stride=1, padding=2),
-            dec_act,
-            nn.ConvTranspose2d(
-                width, in_shape[0] + 1, 3, stride=1, padding=1
-            ),  # 4 output channels
-        )
-
-        self.classification_head_shape = nn.Sequential(
-            nn.Linear(width, 64), 
-            nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, classes["shape"]),
-            nn.Softmax()
-        )
-
-        self.classification_head_colour = nn.Sequential(
-            nn.Linear(width, 64), 
-            nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, classes["colour"]),
-            nn.Softmax()
-        )
-
-        ## Multiple classification head
-
-     
-    def forward(self, x: Tensor):
-        # b: batch_size, c: channels, h: height, w: width, d: out_channels
-        b, c, h, w = x.shape
-        # (b, d, h, w)
-        x = self.encoder(x)
-        # (b, h*w, d)
-        x = self.mlp(x.reshape(*x.shape[:2], -1).permute(0, 2, 1))  # flatten img
-
-        # (b, num_slots, slot_dim)
-        slots = self.slot_attention(x)
-
-        # (b*num_slots, slot_dim, init_h, init_w)
-        x = slots.view(-1, slots.shape[-1])[:, :, None, None]
-        x = x.repeat(1, 1, *self.slot_grid)
-
-       
-        # (b*num_slots, c + 1, h, w)
-        x = self.decoder(x)
-
-        # (b, num_slots, c + 1, h, w)
-        x = x.view(b, -1, c + 1, h, w)
-        # (b, num_slots, c, h, w), (b, num_slots, 1, h, w)
-        recons, masks = torch.split(x, [c, 1], dim=2)
-        masks = masks.softmax(dim=1)
-        # (b, c, h, w)
-        recon_combined = torch.sum(recons * masks, dim=1)
-
-        z = slots.detach()
-        batch_size, num_elements, input_size = z.size()
-        z = z.view(-1, input_size)
-
-        z_colour = self.classification_head_colour(z)
-        z_colour = z_colour.view(batch_size, num_elements, -1)
-        z_shape = self.classification_head_shape(z)
-        z_shape = z_shape.view(batch_size, num_elements, -1)
-
-
-        output = torch.cat((z_shape, z_colour), dim=2)
-
-
-        return recon_combined, recons, masks, slots, output
-
 
 
 def run_epoch(
@@ -366,6 +160,7 @@ if __name__ == "__main__":
         num_slots=args.num_slots,
         slot_dim=args.slot_dim,
         routing_iters=args.routing_iters,
+        classes= {"shape": 4,"color": 9}
     ).cuda()
 
 

@@ -4,7 +4,7 @@ from collections import Counter
 from neuro_modules.NAL import NAL
 from symbolic_modules.aba_framework import ABAFramework
 
-def calculate_aba_classification_accuracy(shape_nal: NAL, classID: str, c_label: str): 
+def calculate_aba_classification_accuracy(shape_nal: NAL, slots: int, classID: str, c_label: str): 
    correct_predictions = 0
    total_predictions = 100
 
@@ -19,12 +19,19 @@ def calculate_aba_classification_accuracy(shape_nal: NAL, classID: str, c_label:
 
    
     learnt_framework.reset_inference()
-    prediction = shape_nal.run_slot_attention_model(img_path, 5)
+    prediction = shape_nal.run_slot_attention_model(img_path, slots)
+    img = f":- not c(img_{shape_nal.img_id})."
     shape_nal.populate_aba_framework_inference(prediction)
-    s_models = learnt_framework.get_prediction()
+    t_models = learnt_framework.get_prediction()
+    s_models = learnt_framework.get_prediction(img)
 
-    if shape_nal.get_classificaiton_result(s_models,c_label):
-        correct_predictions += 1
+    if len(t_models) == 0:
+        continue
+    
+    if (len(s_models) / len(t_models) >= 0.5):
+        correct_predictions+=1
+  
+    
  
    print(f"Classification Accuracy for Class c{classID}: {correct_predictions / total_predictions} ")
 
@@ -71,7 +78,7 @@ def calculate_slots_classification_accuracy(data_path, dataset_size):
 
     avg_confidence = 0
 
-    shape_nal = SHAPES_NAL()
+    shape_nal = NAL()
     shape_nal.model_params = os.getcwd() + "/models/shapes_m1.pt"
     shape_nal.init_model()
 

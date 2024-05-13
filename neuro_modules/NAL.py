@@ -12,9 +12,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from symbolic_modules.aba_framework import ABAFramework
 
-from NAL_Shapes.slots import SlotAutoencoder
-import utils
-
+import neuro_modules.utils as utils
 
 class NAL:
     def __init__(self, model, object_info) -> None:
@@ -77,7 +75,7 @@ class NAL:
                 idx += len(item)
 
             results.append(slot_results)
-        return results
+        return results, masks
     
 
     def check_prediction_quailty(self,predictions,threshold):

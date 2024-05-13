@@ -236,7 +236,7 @@ class ABAFramework:
 
         self.inference.append(new_rule)
 
-    def get_prediction(self):
+    def get_prediction(self, restrict=""):
         if len(self.inference) == 0:
             print("Error: Need to have some background knowledge to get prediction")
             return False
@@ -253,8 +253,10 @@ class ABAFramework:
         for rule in self.learnt_rules:
             ctrl.add("base", [], str(rule))
 
+        if restrict != "":
+             ctrl.add("base", [], restrict)
 
-        ctrl.add("base", [], "#show c/1.")
+
         ctrl.ground([("base", [])])
 
 
@@ -262,15 +264,13 @@ class ABAFramework:
         
         on_model = lambda x: models.append(x.symbols(shown=True))
 
+       
+
         with ctrl.solve(yield_=True) as hnd:
             count = 0
             for m in hnd:
                 count += 1
                 on_model(m)
-
-                if count > 1000:
-                    break
-    
 
         return models
         
