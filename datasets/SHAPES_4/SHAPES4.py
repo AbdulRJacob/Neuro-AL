@@ -12,6 +12,8 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 from torchvision.datasets import DatasetFolder
 from torchvision.transforms import ToTensor
+from sklearn.preprocessing import OneHotEncoder
+
 
 class SHAPES_4:
 
@@ -203,24 +205,29 @@ class SHAPES_4:
     def draw_shape(self, grid_info,image):
 
         s = ""
+        loc = (0,0)
         quad, shape, colour, size = list(grid_info.values())
 
         if colour == "":
             colour = self.get_colour(colour)
 
         if shape == Shape.TRIANGLE:
-            image = self.draw_triangle(image, quad, colour,size)
+            image ,centrioid = self.draw_triangle(image, quad, colour,size)
             s = "Triangle"
+            loc = centrioid
 
         elif shape == Shape.SQUARE:
-            image = self.draw_square(image, quad, colour,size)
+            image ,centrioid = self.draw_square(image, quad, colour,size)
             s = "Square"
+            loc = centrioid
+
 
         elif shape == Shape.CIRCLE:
-            image = self.draw_circle(image, quad, colour,size)
+            image ,centrioid = self.draw_circle(image, quad, colour,size)
             s = "Circle"
+            loc = centrioid
 
-        self.get_label(s,colour,quad)
+        self.get_label(s,colour,loc)
 
 
         return image
@@ -232,6 +239,11 @@ class SHAPES_4:
 
         offset_x , offset_y = self.get_offset(quadrant)
 
+        center_x = (offset_x + x_1 + offset_x + x_2) // 2
+        center_y = (offset_y + y_1 + offset_y + y_2) // 2
+
+        centroid = (center_x,center_y)
+
 
         if get_map:
              attention_map[offset_y + y_1:offset_y + y_2, offset_x + x_1:offset_x + x_2] = quadrant + 1
@@ -240,10 +252,7 @@ class SHAPES_4:
 
         cv2.rectangle(image, (offset_x + x_1, offset_y + y_1), (offset_x + x_2, offset_y + y_2), colour, -1) 
 
-        
-
-
-        return image
+        return image , centroid
     
     def draw_triangle(self, image, quadrant, colour,size="", attention_map=None, get_map=False):
 
@@ -261,13 +270,17 @@ class SHAPES_4:
 
         vertices = np.array([c1, c2, c3], np.int32).reshape((-1, 1, 2))
 
+        centroid_x = (c1[0] + c2[0] + c3[0]) / 3
+        centroid_y = (c1[1] + c2[1] + c3[1]) / 3
+        centroid = (centroid_x, centroid_y)
+
         if get_map:
             cv2.fillPoly(attention_map, [vertices], color=quadrant + 1)
             return attention_map
 
         cv2.fillPoly(image, [vertices], color=colour)
 
-        return image
+        return image, centroid
 
 
     def draw_circle(self, image, quadrant, colour, size="", attention_map=None, get_map=False ):
@@ -278,13 +291,16 @@ class SHAPES_4:
       
         offset_x , offset_y = self.get_offset(quadrant)
 
+        center_x = offset_x + 50
+        center_y =  offset_y + 50
+
         if get_map:
-            cv2.circle(attention_map, (offset_x + 50, offset_y + 50), r, quadrant + 1, -1) 
+            cv2.circle(attention_map, (center_x, center_y), r, quadrant + 1, -1) 
             return attention_map
 
         cv2.circle(image,(offset_x + 50, offset_y + 50), r, colour, -1) 
 
-        return image 
+        return image, (center_x,center_y)
 
 
     def generate_random_image(self):
@@ -384,7 +400,7 @@ class SHAPES_4:
              return None
         
 
-    def get_label(self,shape,colour,q):
+    def get_label(self,shape,colour,loc):
 
         if colour[0] == 255:
             colour = "Blue"
@@ -394,10 +410,11 @@ class SHAPES_4:
             colour = "Red"
 
         if shape == "":
-            self.label.append([str(q),"",""])
             return
 
-        label = [str(q)]
+        label = []
+        label.append(str(loc[0]))
+        label.append(str(loc[1]))
         label.append(shape)
         label.append(colour)
 
@@ -469,11 +486,9 @@ class SHAPESDATASET(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.num_slots = 5
-        self.classes = {"shape": 4,"colour": 4}
-        self.label_to_index = self.get_index(self._get_all_labels())
+        self.num_object = 4
+        self.classes = {"shape": 3,"colour": 3}   
         
-
-
         self.dataset = DatasetFolder(
             root=data_dir,
             loader=lambda x: Image.open(x).convert("RGB"),
@@ -495,18 +510,6 @@ class SHAPESDATASET(Dataset):
                     )
                 )
 
-    def get_index(self,labels):
-
-        lab_to_idx = []
-        offset = 0
-
-        for l in labels:
-            lab_to_idx.append({label: index + offset for index, label in enumerate(list(l))})
-            offset += len(l)
-
-        return lab_to_idx
-
-
     def _load_image(self, sample):
         image_path, label = sample[0], sample[1]
 
@@ -517,33 +520,27 @@ class SHAPESDATASET(Dataset):
             labels = file.read().splitlines()
 
 
-        labels = [tuple(map(str, t.split(',')[1:])) for t in labels]
-        labels.append(("",""))
+        labels_arr = [list(map(str, t.split(','))) for t in labels]
+        all_labels = self._get_all_labels()
+        feature_list = [l[2:] for  l in labels_arr]
 
+        loc_list = np.array([l[:2] for  l in labels_arr], dtype=float) / 300
 
-        img_label = []
-        
-        for _ in range(0,self.num_slots):
-            slot_labels = np.zeros(sum(self.classes.values()))
+        encoder = OneHotEncoder(categories=all_labels,sparse_output=False)
+        one_hot_encoded = encoder.fit_transform(feature_list)
 
-            img_label.append(slot_labels)
+        result = np.hstack((loc_list, one_hot_encoded))
 
-        final_labels = []
-        
-        for i in range(0,self.num_slots):
-            i_label = labels[i]
-            m_label = img_label[i]
+        is_real = np.ones((result.shape[0], 1)) 
+        result_with_real = np.hstack((result, is_real))
 
+        # Paading
+        pad_rows = self.num_object - result_with_real.shape[0]
+        pad_cols = 0  
 
-            idx = [self.label_to_index[0][i_label[0]],self.label_to_index[1][i_label[1]]]
-  
-            for j in idx:
-                m_label[j] = 1
+        final_labels = np.pad(result_with_real, ((0, pad_rows), (0, pad_cols)), mode='constant', constant_values=0)
 
-            final_labels.append(np.array(m_label, dtype=np.int64))
-            
-        img_label = np.stack(final_labels)
-        return image_path, np.array(img_label,dtype=np.int64)
+        return image_path, final_labels
     
     def __len__(self):
         return len(self.dataset)

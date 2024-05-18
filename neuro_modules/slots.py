@@ -138,7 +138,7 @@ class SlotAutoencoder(nn.Module):
         num_slots: int = 10,
         slot_dim: int = 64,
         routing_iters: int = 3,
-        classes: dict = {"position": 9, "shape": 4,"colour": 4, "size": 3}
+        classes: dict = {"coords": 2, "shape": 3, "colour": 3, "size": 2, "real": 1 }
     ):
         super().__init__()
         enc_act = nn.ReLU()

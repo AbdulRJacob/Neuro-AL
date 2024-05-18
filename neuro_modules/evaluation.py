@@ -1,6 +1,5 @@
 from sklearn.metrics import adjusted_rand_score
 from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET
-from models.slots_shapes4 import SlotAutoencoder
 import torch
 import os
 from torch.utils.data import DataLoader
@@ -38,7 +37,7 @@ def visualise_slots(model, img_path, num_slots, idx=0):
         ax[i].grid(False)
         ax[i].axis('off')
 
-    plt.savefig('slot_vis_clevr.png')
+    plt.savefig('slot_vis_shape.png')
 
 
 def analyse_SHAPES():
@@ -85,7 +84,7 @@ def assign_pixels_to_clusters(image, attention_masks, background_value=0):
         for x in range(image.shape[1]):
             # Skip background pixels
             if all(image[y, x] == background_value):
-                assigned_clusters.append(-1)  # Assign a reserved label for background pixels
+                assigned_clusters.append(-1)
                 continue
             
             pixel_value = image[y, x]

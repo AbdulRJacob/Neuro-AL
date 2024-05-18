@@ -19,7 +19,7 @@ def calculate_aba_classification_accuracy(shape_nal: NAL, slots: int, classID: s
 
    
     learnt_framework.reset_inference()
-    prediction = shape_nal.run_slot_attention_model(img_path, slots)
+    prediction, _ = shape_nal.run_slot_attention_model(img_path, slots)
     img = f":- not c(img_{shape_nal.img_id})."
     shape_nal.populate_aba_framework_inference(prediction)
     t_models = learnt_framework.get_prediction()

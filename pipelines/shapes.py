@@ -14,8 +14,7 @@ from datasets.SHAPES_4.SHAPES4 import SHAPES_4
 from datasets.SHAPES_9.SHAPES import SHAPES
 import neuro_modules.utils as utils
 
-from models.slots_shapes4 import SlotAutoencoder as SLOTS_4
-from models.slots_shapes import SlotAutoencoder as SLOTS_9
+from neuro_modules.slots import SlotAutoencoder
 from neuro_modules.NAL import NAL
 from neuro_modules import shapes_metics 
 import neuro_modules.evaluation as e
@@ -100,14 +99,15 @@ def shapes_4_nal():
                    "colour": ["","Red","Green","Blue"]
                    }
     
-    ckpt = torch.load(os.getcwd() + "/models/shapes4_m1.pt",map_location='cpu')
+    ckpt = torch.load(os.getcwd() + "/models/102336_ckpt.pt",map_location='cpu')
 
-    model = SLOTS_4(
+    model = SlotAutoencoder(
             in_shape=(3,64,64),
             width=32,
             num_slots=5,
             slot_dim=32,
             routing_iters=3,
+            classes=get_class_dict(object_info)
         )
 
     model.load_state_dict(ckpt['model_state_dict'],)
@@ -121,8 +121,8 @@ def shapes_4_nal():
     NUM_CLASSESS = 10
     MAX_EXAMPLES = 200
     NUM_SLOTS = 5
-    THRESHOLD = 0.85
-    classes = [1,2]
+    THRESHOLD = 0.9
+    classes = [5,6]
 
 
     data = get_SHAPES_dataset(DATA_DIR,MAX_EXAMPLES,NUM_CLASSESS)
@@ -131,23 +131,27 @@ def shapes_4_nal():
         j = 0
         history = []
         while j < NUM_EXAMPLES:
-            choosen_exp = random.randint(0, MAX_EXAMPLES - 1)
+            choosen_exp = random.randint(0, MAX_EXAMPLES - 2)
             img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
-            prediction = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
+            prediction , masks = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
             ground = get_rule(i) in [3,4]
             if nal.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
                 nal.populate_aba_framework(prediction, i == classes[0],include_pos=ground)
                 j = j + 1
                 history.append(choosen_exp)
+                e.visualise_slots(model,img_path[0],5)
+            
+
+
     
     
     filename = "shapes_4_bk.aba"
-    ground = get_rule(i) in [3,4]
+    ground = True # get_rule(i) in [3,4]
 
     if ground:
         nal.add_background_knowledge(get_shapes_bk())
 
-    nal.run_aba_framework(filename, id=f"shapes_r{get_rule(i)}_bk_{NUM_EXAMPLES}_ck", ground=ground)
+    nal.run_aba_framework(filename, ground=ground)
 
     pos_class = shapes_metics.calculate_aba_classification_accuracy(nal,NUM_SLOTS,str(classes[0]),"c")
     neg_class = shapes_metics.calculate_aba_classification_accuracy(nal,NUM_SLOTS,str(classes[1]),"c")
@@ -165,7 +169,7 @@ def shapes_9_nal():
 
     ckpt = torch.load(os.getcwd() + "/models/shapes_m1.pt",map_location='cpu')
 
-    model = SLOTS_9(
+    model = SlotAutoencoder(
             in_shape=(3,64,64),
             width=32,
             num_slots=10,
@@ -192,9 +196,9 @@ def shapes_9_nal():
         j = 0
         history = []
         while j < NUM_EXAMPLES:
-            choosen_exp = random.randint(0, MAX_EXAMPLES - 1)
+            choosen_exp = random.randint(0, MAX_EXAMPLES - 2)
             img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
-            prediction = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
+            prediction, _ = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
             ground = get_rule(i) in [3,4]
             if nal.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
                 nal.populate_aba_framework(prediction, i == classes[0],include_pos=ground)
@@ -230,7 +234,7 @@ def calcuate_ari_resutls():
     ckpt = torch.load(os.getcwd() + "/models/shapes_m1.pt",map_location='cpu')
     num_slots = 10
 
-    model = SLOTS_9(
+    model = SlotAutoencoder(
                 in_shape=(3,64,64),
                 width=32,
                 num_slots=num_slots,
@@ -269,17 +273,19 @@ def calcuate_ari_resutls():
     clustering_map = np.array(pixel_assignments).reshape((64,64))
     true_map = true_pixel_assignments.reshape((64, 64))
 
+    im1 = axes[0].imshow(clustering_map, cmap='viridis')
     axes[0].imshow(clustering_map, cmap='viridis')
     axes[0].set_title('Clustering Map')
     axes[0].set_xlabel('Width')  
     axes[0].set_ylabel('Height')  
-    plt.colorbar(ax=axes[0])
+    plt.colorbar(im1, ax=axes[0])
 
+    im2 = axes[1].imshow(true_map, cmap='viridis')
     axes[1].imshow(true_map, cmap='viridis')
     axes[1].set_title('A Map')
     axes[1].set_xlabel('Width')  
     axes[1].set_ylabel('Height')
-    plt.colorbar(ax=axes[1])
+    plt.colorbar(im2, ax=axes[1])
 
     plt.tight_layout()
     plt.show()
