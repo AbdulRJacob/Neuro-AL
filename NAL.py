@@ -49,7 +49,7 @@ if __name__ == "__main__":
    print("--------- Generating SHAPES 9 ---------")
 
 
-   train_test_split = (200,100)
+   train_test_split = (1000,500)
    labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"],["c11","c12"]]
    rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
             ["c(A) :- green(O1), triangle(O1), in(A,O1), image(A)"],
@@ -67,14 +67,14 @@ if __name__ == "__main__":
         pos1 = int(l1.replace("c","")) % 2 == 0
         pos2 = int(l2.replace("c","")) % 2 == 0
 
-        generate_dataset_SHAPES4(rule,l1,train_test_split,pos1)
-        generate_dataset_SHAPES4(rule,l2,train_test_split,pos2)
+        generate_dataset_SHAPES9(rule,l1,train_test_split,pos1)
+        generate_dataset_SHAPES9(rule,l2,train_test_split,pos2)
 
 
    print("--------- Generating SHAPES 4 ---------")
 
 
-   train_test_split = (200,100)
+   train_test_split = (1000,500)
    labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"],["c11","c12"]]
    rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
             ["c(A) :- red(O1), circle(O1), in(A,O1), image(A)"],

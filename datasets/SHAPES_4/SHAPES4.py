@@ -535,7 +535,7 @@ class SHAPESDATASET(Dataset):
         result_with_real = np.hstack((result, is_real))
 
         # Paading
-        pad_rows = self.num_object - result_with_real.shape[0]
+        pad_rows = self.num_slots - result_with_real.shape[0]
         pad_cols = 0  
 
         final_labels = np.pad(result_with_real, ((0, pad_rows), (0, pad_cols)), mode='constant', constant_values=0)
@@ -546,8 +546,8 @@ class SHAPESDATASET(Dataset):
         return len(self.dataset)
     
     def _get_all_labels(self):
-        shape_labels = ["","Triangle","Circle","Square"]
-        colour_labels = ["","Red","Green","Blue"]
+        shape_labels = ["Triangle","Circle","Square"]
+        colour_labels = ["Red","Green","Blue"]
 
         all_labels = [shape_labels, colour_labels]
     

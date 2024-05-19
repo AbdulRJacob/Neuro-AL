@@ -123,7 +123,7 @@ def get_dissimilar_ranking(imgs, model ,num_slots):
     return ranking
 
 
-def average_precision(pred, attributes, distance_threshold,dataset):
+def average_precision(pred, attributes, distance_threshold):
 
   [batch_size, _, element_size] = attributes.shape
   [_, predicted_elements, _] = pred.shape
@@ -154,10 +154,10 @@ def average_precision(pred, attributes, distance_threshold,dataset):
   def process_targets_shapes(target):
     """Unpacks the target into the SHAPES properties."""
     coords = target[:2]
-    shape =torch.argmax(target[2:5])
-    colour = torch.argmax(target[5:9])
-    object_size = torch.argmax(target[9:11])
-    real_obj = target[11]
+    shape =np.argmax(target[2:5])
+    colour = np.argmax(target[5:8])
+    object_size = np.argmax(target[8:10])
+    real_obj = target[10]
     return coords, shape, colour, object_size, real_obj
 
   true_positives = np.zeros(sorted_predictions.shape[0])
@@ -186,14 +186,14 @@ def average_precision(pred, attributes, distance_threshold,dataset):
     #  _) = process_targets(current_pred)
     
     (pred_coords, pred_shape, pred_color,pred_object_size ,
-     _) = process_targets(current_pred)
+     _) = process_targets_shapes(current_pred)
 
     # Loop through all objects in the ground-truth image to check for hits.
     for target_object_id in range(gt_image.shape[0]):
       target_object = gt_image[target_object_id, :]
       # Unpack the targets taking the argmax on the discrete attributes.
       (target_coords, target_shape, target_object_size,
-       target_color, target_real_obj) = process_targets(target_object)
+       target_color, target_real_obj) = process_targets_shapes(target_object)
       # Only consider real objects as matches.
       if target_real_obj:
         # For the match to be valid all attributes need to be correctly

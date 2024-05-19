@@ -538,7 +538,7 @@ class SHAPESDATASET(Dataset):
         result_with_real = np.hstack((result, is_real))
 
         # Paading
-        pad_rows = self.num_object - result_with_real.shape[0]
+        pad_rows = self.num_slots - result_with_real.shape[0]
         pad_cols = 0  
 
         final_labels = np.pad(result_with_real, ((0, pad_rows), (0, pad_cols)), mode='constant', constant_values=0)
