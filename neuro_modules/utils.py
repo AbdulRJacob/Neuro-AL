@@ -255,3 +255,24 @@ def compute_average_precision(precision, recall):
   for i in indices_recall:
     average_precision += precision[i + 1] * (recall[i + 1] - recall[i])
   return average_precision
+
+
+def assign_pixels_to_clusters(image, attention_masks, background_value=0):
+    assigned_clusters = []
+    for y in range(image.shape[0]):
+        for x in range(image.shape[1]):
+            # Skip background pixels
+            if all(image[y, x] == background_value):
+                assigned_clusters.append(-1)
+                continue
+            
+            pixel_value = image[y, x]
+            max_attention = 0
+            assigned_cluster = None
+            for cluster_id, attention_mask in enumerate(attention_masks):
+                attention_value = attention_mask[y, x]
+                if attention_value > max_attention:
+                    max_attention = attention_value
+                    assigned_cluster = cluster_id
+            assigned_clusters.append(assigned_cluster)
+    return assigned_clusters

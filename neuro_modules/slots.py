@@ -128,6 +128,21 @@ class ClassificationHead(nn.Module):
 
     def forward(self, x):
         return self.classification_head(x)
+    
+class MLPHead(nn.Module):
+    def __init__(self, input_size, output_size):
+        super(MLPHead, self).__init__()
+        self.mlp_head = nn.Sequential(
+            nn.Linear(input_size, 64), 
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, output_size),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.mlp_head(x)
 
 
 class SlotAutoencoder(nn.Module):
@@ -138,7 +153,8 @@ class SlotAutoencoder(nn.Module):
         num_slots: int = 10,
         slot_dim: int = 64,
         routing_iters: int = 3,
-        classes: dict = {"coords": 2, "shape": 3, "colour": 3, "size": 2, "real": 1 }
+        classes: dict = {"shape": 3, "colour": 3, "size": 2},
+        obj_info: dict = {"coords": 2, "real": 1}
     ):
         super().__init__()
         enc_act = nn.ReLU()
@@ -185,6 +201,11 @@ class SlotAutoencoder(nn.Module):
         ## Multiple classification head
         self.classification_heads = nn.ModuleList([
             ClassificationHead(width, config) for config in list(classes.values())
+        ])  
+
+         ## Multiple MLP head
+        self.mlp_heads = nn.ModuleList([
+            MLPHead(width, config) for config in list(obj_info.values())
         ])      
      
     def forward(self, x: Tensor):
@@ -221,6 +242,9 @@ class SlotAutoencoder(nn.Module):
         outputs = []
         for head in self.classification_heads:
             outputs.append(head(z).view(batch_size, num_elements, -1))
+
+        outputs.insert(0,self.mlp_heads[0](z).view(batch_size, num_elements, -1))
+        outputs.append(self.mlp_heads[1](z).view(batch_size, num_elements, -1))
 
 
         output = torch.cat(outputs, dim=2)

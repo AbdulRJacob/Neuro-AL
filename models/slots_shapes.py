@@ -160,7 +160,7 @@ if __name__ == "__main__":
         num_slots=args.num_slots,
         slot_dim=args.slot_dim,
         routing_iters=args.routing_iters,
-        classes= {"coords": 2, "shape": 3,"colour": 3, "size": 2,"real": 1}
+        classes= {"shape": 3,"colour": 3, "size": 2}
     ).cuda()
 
 
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 
             ap = [utils.average_precision(y_hat.cpu().detach().numpy(), y.cpu().numpy(), d) for d in [-1., 1., 0.5, 0.25, 0.125]]
             logging.info(
-                "Step {} | AP@inf: {:.2f}, AP@1: {:.2f}, AP@0.5: {:.2f}, AP@0.25: {:.2f}, AP@0.125: {:.2f}".format(global_steps, ap[0], ap[1], ap[2], ap[3], ap[4])
+                "Step {} | AP@inf: {:.2f}, AP@1: {:.2f}, AP@0.5: {:.2f}, AP@0.25: {:.2f}, AP@0.125: {:.2f}".format(step, ap[0], ap[1], ap[2], ap[3], ap[4])
             )
             logging.getLogger().handlers[0].flush()
     

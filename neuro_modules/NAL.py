@@ -11,7 +11,6 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from symbolic_modules.aba_framework import ABAFramework
-
 import neuro_modules.utils as utils
 
 class NAL:
@@ -40,7 +39,7 @@ class NAL:
         return input_batch
 
     
-    def run_slot_attention_model(self,image, num_of_slots):
+    def run_slot_attention_model(self, image, num_of_slots, num_coords = 2):
         self.model.eval()
         image = self.preprocess_image(image)
 
@@ -50,13 +49,18 @@ class NAL:
         masks = masks.squeeze(0)
         out = output.squeeze(0)
 
+        coords = (out[:, :num_coords] * 300).to(torch.int32)
+
+        real = out[:, -1]
+        out = out[:, num_coords:]
+        
+
         results =  []
 
         for i in range(num_of_slots):
             slot_results = []
-            region = utils.get_attended_bounding_box(masks[i][0].numpy())
-            slot_results.append({"attention_map": region})
-
+            slot_results.append({"object_position": coords[i].tolist()})
+            slot_results.append({"real": real[i].tolist()})
             num_classes = len(list(self.object_info.keys()))
             class_info = list(self.object_info.values())
             class_name = list(self.object_info.keys())
@@ -75,6 +79,7 @@ class NAL:
                 idx += len(item)
 
             results.append(slot_results)
+        
         return results, masks
     
 
@@ -83,7 +88,7 @@ class NAL:
 
         for slot in predictions:
             total_confidence = 1
-            slot = slot[1:]
+            slot = slot[2:]
 
             for item in slot:
                 total_confidence = total_confidence * item["confidence"]
@@ -93,20 +98,11 @@ class NAL:
             
         return min_confidence > threshold
     
-
-    def is_valid(self,slot):
-        for item in slot:
-            if "type" in list(item.keys()):
-                return item["type"] == ""
-
-        return False
     
+    def add_background_knowledge(self, rule : str, pred_name: str):
+            self.aba_framework.add_bk_rule(rule,pred_name=pred_name)
     
-    def add_background_knowledge(self, rules : list[str]):
-        for rule in rules:
-            self.aba_framework.add_bk_rule(rule)
-    
-    def populate_aba_framework(self, slots: list[dict], isPositive: bool, include_pos = False):
+    def populate_aba_framework(self, slots: list[dict], isPositive: bool, include_pos = False, concept="c"):
     
         img_label = f"img_{self.img_id}"
 
@@ -116,9 +112,9 @@ class NAL:
 
             slot = {key: value for dictionary in slot for key, value in dictionary.items()}
 
-            if slot["object"] == "":
+            if slot["real"] < 0.5:
                 continue
-
+         
             obj_label = f"object_{self.obj_id}"
             self.aba_framework.add_bk_fact(img_label,pred_name="in",arity=2, args=[img_label,obj_label])
 
@@ -130,16 +126,16 @@ class NAL:
                 self.aba_framework.add_bk_fact(img_label,pred_name=pred,arity=1, args=[obj_label])
 
             
-            pos_info = slot["attention_map"]
+            pos_info = slot["object_position"]
 
             if (include_pos and pos_info[0] != -1 ):
                 slot_info = [img_label, obj_label] + [str(c) for c in list(pos_info)]
-                self.aba_framework.add_bk_fact(img_label,pred_name="box",arity=6,args=slot_info)
+                self.aba_framework.add_bk_fact(img_label,pred_name="position",arity=4,args=slot_info)
 
             self.obj_id += 1
 
         self.aba_framework.add_bk_fact(img_label,pred_name="image",arity=1, args=[img_label])
-        self.aba_framework.add_example(pred="c", args=[img_label], isPositive=isPositive)
+        self.aba_framework.add_example(pred=concept, args=[img_label], isPositive=isPositive)
         self.img_id += 1
 
     
@@ -152,7 +148,7 @@ class NAL:
 
             slot = {key: value for dictionary in slot for key, value in dictionary.items()}
 
-            if slot["object"] == "":
+            if slot["real"] < 0.5:
                 continue
 
             obj_label = f"object_{self.obj_id}"
@@ -166,11 +162,12 @@ class NAL:
                 self.aba_framework.add_inference_bk_fact(pred_name=pred,arity=1, args=[obj_label])
 
             
-            pos_info = slot["attention_map"]
+            pos_info = slot["object_position"]
 
-            if (include_pos and pos_info[0] != -1 ):
+            if (include_pos):
                 slot_info = [img_label, obj_label] + [str(c) for c in list(pos_info)]
-                self.aba_framework.add_inference_bk_fact(pred_name="box",arity=6,args=slot_info)
+                self.aba_framework.add_inference_bk_fact(img_label,pred_name="position",arity=4,args=slot_info)
+
 
             self.obj_id += 1
 
@@ -186,18 +183,9 @@ class NAL:
         self.aba_framework.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
         self.aba_framework.run_aba_framework(id)
 
+    def run_learnt_framework(self, filepath, restrict=""):
+        self.aba_framework.load_solved_framework(filepath)
+        models = self.aba_framework.compute_stable_models(restrict)
 
+        return models
 
-    def get_classificaiton_result(self, s_models, c_label) -> bool: 
-        
-        present = 0
-        total_model = len(s_models)
-
-        for model in s_models:
-            for symbol in model:
-                if f"{c_label}(img_"in str(symbol): 
-                    present+=1
-
-        
-        absent = total_model - present
-        return present > absent

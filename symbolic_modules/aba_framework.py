@@ -11,6 +11,7 @@ class ABAFramework:
     def __init__(self) -> None:
         
         self.background_knowledge: dict[str, list[Rule]] = {}
+        self.background_pred_names: list[str] = []
         self.inference: list[Rule] = []
         self.positive_examples: list[Example] = []
         self.negative_examples: list[Example] = []
@@ -26,10 +27,7 @@ class ABAFramework:
             return False
         
         self.aba_solver_path = path
-        return True
-    
-    def reset_inference(self):
-        self.inference = []
+        return True 
     
     def add_bk_fact(self,label: str, pred_name: str, arity: int, args : list[str]):
         if label not in self.background_knowledge.keys():
@@ -40,7 +38,7 @@ class ABAFramework:
 
         self.background_knowledge[label].append(new_rule)
 
-    def add_bk_rule(self, rule: str, label="bk_rules"):
+    def add_bk_rule(self, rule: str, label="bk_rules", pred_name=""):
         if label not in self.background_knowledge.keys():
             self.background_knowledge[label] = []
 
@@ -48,6 +46,27 @@ class ABAFramework:
         new_rule.rID = len(self.background_knowledge[label])
 
         self.background_knowledge[label].append(new_rule)
+
+        if pred_name != "":
+            self.background_pred_names.append(pred_name)
+    
+
+    def add_inference_bk_fact(self, pred_name: str, arity: int, args : list[str]):
+
+            new_rule = Rule.add_fact(pred_name,arity,args)
+            new_rule.rID = len(self.inference)
+
+            self.inference.append(new_rule)
+
+    def add_inference_bk_rule(self, rule: str,):
+
+        new_rule = Rule.parse_rule(rule)
+        new_rule.rID = len(self.inference)
+
+        self.inference.append(new_rule)
+    
+    def reset_inference(self):
+        self.inference = []
 
     def add_example(self, pred: str, args: list[str], isPositive: bool):
         eg = Example.generate_example(pred,args,isPositive)
@@ -69,6 +88,24 @@ class ABAFramework:
         f.close()
 
         self.filename = filename
+
+    def write_solved_framework(self,filename: str):
+        f = open(filename, "w")
+        content = "% Background Knowledge \n"
+
+        if "bk_rules" in self.background_knowledge.keys():
+            for rule in self.background_knowledge["bk_rules"]:
+                content += str(rule)
+                content += "\n"
+
+        content +=  "% Learnt Rules \n"
+        for rule in self.learnt_rules:
+            content += str(rule)
+            content += "\n"
+
+
+        f.write(content)
+        f.close()
 
     def ground_aba_framework(self,filename: str):
         control = cc.Control()
@@ -115,7 +152,6 @@ class ABAFramework:
 
         prolog_commands = f"""
             consult('{self.aba_solver_path}').
-            set_lopt(learning_mode(brave)).
             {command}
             """
         
@@ -141,7 +177,7 @@ class ABAFramework:
 
         if res_aba and res_asp:
             print("Framework Successfully learnt")
-
+            self.write_solved_framework(self.filename.replace(".aba", "_SOLVED.aba"))
 
         return res_asp and res_aba
     
@@ -158,6 +194,31 @@ class ABAFramework:
 
                 self.add_bk_rule(rule,"loaded_rule")
 
+    def load_solved_framework(self, filepath: str):
+        rule_type = 0     # 0 == BK | 1 == Learnt Rule
+
+        with open(filepath, "r") as f:
+            for line in f:
+                rule = line.strip()
+
+                if rule == "":
+                    continue
+
+                if rule == "% Background Knowledge":
+                    rule_type = 0
+                    continue
+
+                if rule == "% Learnt Rules":
+                    rule_type = 1
+                    continue
+
+                if rule_type == 0:
+                    self.add_bk_rule(rule)
+                else:
+                    l_rule = Rule.parse_rule(rule)
+                    l_rule.rID = len(self.learnt_rules)
+                    self.learnt_rules.append(l_rule)
+
 
     def load_learnt_rules(self, filepath:str):
         if self.background_knowledge == {}:
@@ -172,7 +233,7 @@ class ABAFramework:
         for line in f:
             rule  = line.strip()
 
-            if rule in b_k or rule == "":
+            if rule in b_k or rule == "" or rule.split("(")[0] in self.background_pred_names:
                 continue
 
             l_rule = Rule.parse_rule(rule)
@@ -221,22 +282,7 @@ class ABAFramework:
 
         return True
     
-
-    def add_inference_bk_fact(self, pred_name: str, arity: int, args : list[str]):
-
-            new_rule = Rule.add_fact(pred_name,arity,args)
-            new_rule.rID = len(self.inference)
-
-            self.inference.append(new_rule)
-
-    def add_inference_bk_rule(self, rule: str,):
-
-        new_rule = Rule.parse_rule(rule)
-        new_rule.rID = len(self.inference)
-
-        self.inference.append(new_rule)
-
-    def get_prediction(self, restrict=""):
+    def compute_stable_models(self, restrict=""):
         if len(self.inference) == 0:
             print("Error: Need to have some background knowledge to get prediction")
             return False
@@ -273,27 +319,3 @@ class ABAFramework:
                 on_model(m)
 
         return models
-        
-
-
-if __name__ == "__main__":  
-
-    aba_framework = ABAFramework()
-    atom = Atom.parse_atom(input="hello(A)",isPositive=False)
-
-    rule = "c(A) :- square(B), in(A,B)."
-
-    # aba_framework.add_bk_rule(rule)
-    # aba_framework.add_example(pred="c",args=["img_1"],isPositive=True)
-    # aba_framework.add_bk_fact(label="img_1",pred_name="image",arity=1, args=["img_1"])
-    # aba_framework.add_bk_fact(label="img_1",pred_name="in",arity=2, args=["img_1","circle_1"])
-    # aba_framework.add_bk_fact(label="img_1",pred_name="shape",arity=1, args=["circle_1"])
-
-    print(Rule.split_and_clean_rule(rule))
-    print(str(atom))
-    # aba.add_bk_fact("img_1",pred_name="circle",arity=1,args=["circle_1"])
-    # aba.add_bk_fact("img_1",pred_name="in",arity=2,args=["img_1","circle_1"])
-    # aba.add_bk_rule("above(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X1',Y1',X2',Y2'), Y1' - Y2 > 0.")
-    # aba.add_example(pred="c",arg="img_1",isPositive=True)
-    # aba.add_example(pred="c",arg="img_2",isPositive=False)
-    # aba.write_aba_framework(filename="test.aba")

@@ -324,7 +324,8 @@ class SHAPES_4:
         image =  np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
         for label in labels:
-            quad, shape,  _ = label
+            x, y, shape,  _  = label
+            quad = self.find_section(x,y)
             if shape == "Square":
                 map = self.draw_square(image,int(quad),"",Size.LARGE,map,True)
             elif shape == "Circle":
@@ -386,6 +387,14 @@ class SHAPES_4:
              }
 
         return q[qudarant]
+    
+    def find_section(self,x, y):
+        section_size = 100 
+        section_x = x // section_size
+        section_y = y // section_size
+        section_index = section_y * 2 + section_x
+        return section_index
+        
         
 
     def get_shape(self,rule): 
@@ -475,7 +484,7 @@ class Colour(Enum):
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
-        data_dir: str = "datasets/SHAPES-4/training_data",
+        data_dir: str = "/mnt/d/fyp/SHAPES_4/training_data/",
         transform=None,
         target_transform=None,
         cache: bool = True,
@@ -521,6 +530,9 @@ class SHAPESDATASET(Dataset):
 
 
         labels_arr = [list(map(str, t.split(','))) for t in labels]
+        if len(labels_arr) == 0:
+            return  image_path , np.zeros((self.num_slots,9))
+        
         all_labels = self._get_all_labels()
         feature_list = [l[2:] for  l in labels_arr]
 
@@ -568,3 +580,53 @@ class SHAPESDATASET(Dataset):
             label = self.target_transform(label)
 
         return image, label
+    
+    def get_SHAPES_dataset(self,split="train"):
+        num_classes = 12
+        data_dir = self.data_dir
+        dataset = {}
+
+        if split == "train":
+            start = 0
+            stop = 1000
+            # data_dir = data_dir + "/training_data"
+
+        if split == "test":
+            start = 1000
+            stop = 1500
+            data_dir = data_dir + "/testing_data"
+        
+        for i in range(1, num_classes + 1) :
+            dataset[i] = []
+            for j in range(start,stop):
+                img_path = data_dir + f"c{i}_s{j}/c{i}_{j}.png"
+                label = data_dir + f"c{i}_s{j}/labels.txt"
+                dataset[i].append((img_path,label))
+
+        return dataset
+    
+    def get_ground_truth(self, label_path:str ):
+        with open(label_path, "r") as file:
+            lines = file.readlines()
+
+            set_result = []
+            for line in lines:
+                item = line.strip().split(",") 
+                if len(item) >= 3: 
+                    info = [float(item[0]),float(item[1])]
+                    info = info + item[2:]
+                    set_result.append((tuple(info)))
+                
+             
+            return set_result
+        
+    def get_ground_truth_map(self, label_path: str,):
+        labels = self.get_ground_truth(label_path)[:-1]
+
+        generator = SHAPES_4(200,200,"")
+
+        map = generator.generate_attention_map(labels)
+
+        map = cv2.resize(map, (64,64),interpolation=cv2.INTER_NEAREST)
+
+        return map

@@ -1,68 +1,12 @@
 import os
 import random
-import numpy as np
 import torch
-import torch.nn as nn
-import matplotlib.pyplot as plt
-from PIL import Image
-import cv2
-from torch.utils.data import DataLoader
-from torchvision import transforms
 
-from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET
-from datasets.SHAPES_4.SHAPES4 import SHAPES_4
-from datasets.SHAPES_9.SHAPES import SHAPES
-import neuro_modules.utils as utils
+from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
+from datasets.SHAPES_9.SHAPES import SHAPESDATASET as SHAPESDATASET_9
 
 from neuro_modules.slots import SlotAutoencoder
 from neuro_modules.NAL import NAL
-from neuro_modules import shapes_metics 
-import neuro_modules.evaluation as e
-
-
-def get_SHAPES_dataset(data_dir, data_size, num_classes, offset=0):
-        dataset = {}
-
-        for i in range(1, num_classes + 1) :
-            dataset[i] = []
-            for j in range(1+ offset ,offset + data_size):
-                img_path = data_dir + f"c{i}_s{j}/c{i}_{j}.png"
-                label = data_dir + f"c{i}_s{j}/labels.txt"
-                dataset[i].append((img_path,label))
-
-        return dataset
-
-def get_ground_truth(label_path:str ):
-        with open(label_path, "r") as file:
-            lines = file.readlines()
-
-            set_result = []
-            for line in lines:
-                item = line.strip().split(",") 
-                if len(item) >= 3: 
-                    info = [int(item[0])]
-                    info = info + item[1:]
-                    set_result.append((tuple(info)))
-                
-            set_result.append(((0,'','','')))
-             
-            return set_result
-        
-def get_ground_truth_map(label_path: str, dataset: int):
-    labels = get_ground_truth(label_path)[:-1]
-    generator = None
-
-    if dataset == 4:
-        generator = SHAPES_4(200,200,"")
-    else:
-        generator = SHAPES(300,300,"")
-
-    map = generator.generate_attention_map(labels)
-
-    map = cv2.resize(map, (64,64),interpolation=cv2.INTER_NEAREST)
-    print(map.shape)
-
-    return map
 
 
 def get_class_dict(object_dict : dict):
@@ -73,14 +17,61 @@ def get_class_dict(object_dict : dict):
 
     return length_dict
 
-def get_shapes_bk():
+def get_shape_9_nal_model():
+    object_info = {"object" : ["Triangle","Circle","Square"],
+                   "colour": ["Red","Green","Blue"],
+                   "size:":  ["Large","Small"]}
 
-    bk_rules = ["above(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y12 - Y2 > 0.",
-                "below(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), Y1 - Y22 > 0.",
-                "left(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), X2 - X12 < 0.",
-                "right(S1,S2,I) :- box(I,S1,X1,Y1,X2,Y2), box(I,S2,X12, Y12, X22,Y22), X22 - X1 < 0."]
+    ckpt = torch.load(os.getcwd() + "/models/229512_ckpt.pt",map_location='cpu')
+
+    model = SlotAutoencoder(
+            in_shape=(3,64,64),
+            width=32,
+            num_slots=10,
+            slot_dim=32,
+            routing_iters=3,
+            classes= get_class_dict(object_info)
+        )
+
+    model.load_state_dict(ckpt['model_state_dict'],)
+
+    nal = NAL(model,object_info)
+
+    return nal
+
+def get_shape_4_nal_model():
+    object_info = {"object" : ["Triangle","Circle","Square"],
+                   "colour": ["Red","Green","Blue"]
+                   }
+    
+    ckpt = torch.load(os.getcwd() + "/models/168204_ckpt.pt",map_location='cpu')
+
+    model = SlotAutoencoder(
+            in_shape=(3,64,64),
+            width=32,
+            num_slots=5,
+            slot_dim=32,
+            routing_iters=3,
+            classes=get_class_dict(object_info)
+        )
+
+    model.load_state_dict(ckpt['model_state_dict'],)
+    nal = NAL(model,object_info)
+
+
+    return nal
+
+def add_shape_bk(nal):
+
+    bk_rules = [("above","above(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), Y1 - Y2 > 0."),
+                ("below","below(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), Y2 - Y1 > 0."),
+                ("left","left(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), X2 - X1 > 0."),
+                ("right","right(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), X1 - X2 > 0.")]
+    
+    for pred, rule in bk_rules:
+        nal.add_background_knowledge(rule,pred)
         
-    return bk_rules
+    return True
 
 def get_rule(num_class: int):
     if num_class <= 2:
@@ -93,202 +84,145 @@ def get_rule(num_class: int):
         return 4
     if num_class <= 10:
         return 5
+    if num_class <= 12:
+        return 6
 
-def shapes_4_nal():
-    object_info = {"object" : ["","Triangle","Circle","Square"],
-                   "colour": ["","Red","Green","Blue"]
-                   }
-    
-    ckpt = torch.load(os.getcwd() + "/models/102336_ckpt.pt",map_location='cpu')
+def shapes_4_nal_training(num_examples: int, class_ids: list):
+    nal = get_shape_4_nal_model()
 
-    model = SlotAutoencoder(
-            in_shape=(3,64,64),
-            width=32,
-            num_slots=5,
-            slot_dim=32,
-            routing_iters=3,
-            classes=get_class_dict(object_info)
-        )
-
-    model.load_state_dict(ckpt['model_state_dict'],)
-
-
-    nal = NAL(model,object_info)
-
-
-    NUM_EXAMPLES = 10
-    DATA_DIR = "datasets/SHAPES_4/training_data/"
-    NUM_CLASSESS = 10
-    MAX_EXAMPLES = 200
     NUM_SLOTS = 5
     THRESHOLD = 0.9
-    classes = [5,6]
+   
 
+    data = SHAPESDATASET_4(cache=False).get_SHAPES_dataset()
+    total_items = len(data[class_ids[0]])
+    print(total_items)
+    return
 
-    data = get_SHAPES_dataset(DATA_DIR,MAX_EXAMPLES,NUM_CLASSESS)
+    ## Populating ABA Framework with Examples
 
-    for i in classes : ## range(1, SHAPES_CLASSESS + 1)
+    for i in class_ids:
         j = 0
         history = []
-        while j < NUM_EXAMPLES:
-            choosen_exp = random.randint(0, MAX_EXAMPLES - 2)
+        while j < num_examples:
+            choosen_exp = random.randint(0, total_items - 2)
             img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
-            prediction , masks = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
-            ground = get_rule(i) in [3,4]
+            prediction, _ = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
+            ground = get_rule(i) in [4,5]  
             if nal.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
-                nal.populate_aba_framework(prediction, i == classes[0],include_pos=ground)
+                nal.populate_aba_framework(prediction, i == class_ids[0],include_pos=ground)
                 j = j + 1
-                history.append(choosen_exp)
-                e.visualise_slots(model,img_path[0],5)
-            
+                history.append(choosen_exp)            
 
-
-    
     
     filename = "shapes_4_bk.aba"
-    ground = True # get_rule(i) in [3,4]
 
     if ground:
-        nal.add_background_knowledge(get_shapes_bk())
+        add_shape_bk()
 
     nal.run_aba_framework(filename, ground=ground)
 
-    pos_class = shapes_metics.calculate_aba_classification_accuracy(nal,NUM_SLOTS,str(classes[0]),"c")
-    neg_class = shapes_metics.calculate_aba_classification_accuracy(nal,NUM_SLOTS,str(classes[1]),"c")
 
-    print("Positve Accuracy: ", pos_class)
-    print("Negative Accuracy: ", 1- neg_class)
-
-    return (pos_class, 1- neg_class)
-
-
-def shapes_9_nal():
-    object_info = {"object" : ["","Triangle","Circle","Square"],
-                   "colour": ["","Red","Green","Blue"],
-                   "size:":  ["","Large","Small"]}
-
-    ckpt = torch.load(os.getcwd() + "/models/shapes_m1.pt",map_location='cpu')
-
-    model = SlotAutoencoder(
-            in_shape=(3,64,64),
-            width=32,
-            num_slots=10,
-            slot_dim=32,
-            routing_iters=3,
-        )
-
-    model.load_state_dict(ckpt['model_state_dict'],)
-
-    nal = NAL(model,object_info)
-
-    NUM_EXAMPLES = 10
-    DATA_DIR = "datasets/SHAPES_9/training_data/"
-    NUM_CLASSESS = 10
-    MAX_EXAMPLES = 200
-    NUM_SLOTS = 5
-    THRESHOLD = 0.85
-    classes = [1,2]
-
+def shapes_9_nal_training(num_examples: int, class_ids: list):
     
-    data = get_SHAPES_dataset(DATA_DIR,MAX_EXAMPLES,NUM_CLASSESS)
+    nal = get_shape_9_nal_model()
 
-    for i in classes : ## range(1, SHAPES_CLASSESS + 1)
+    NUM_SLOTS = 10
+    THRESHOLD = 0.9
+    total_items = len(data[class_ids[0]])
+
+
+    data = SHAPESDATASET_9(cache=False)
+    data = data.get_SHAPES_dataset()
+    ## Populating ABA Framework with Examples
+
+    for i in class_ids:
         j = 0
         history = []
-        while j < NUM_EXAMPLES:
-            choosen_exp = random.randint(0, MAX_EXAMPLES - 2)
+        while j < num_examples:
+            choosen_exp = random.randint(0, total_items - 2)
             img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
             prediction, _ = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
-            ground = get_rule(i) in [3,4]
+            ground = get_rule(i) in [4,5]  
             if nal.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
-                nal.populate_aba_framework(prediction, i == classes[0],include_pos=ground)
+                nal.populate_aba_framework(prediction, i == class_ids[0],include_pos=ground)
                 j = j + 1
-                history.append(choosen_exp)
-    
+                history.append(choosen_exp)            
+
     
     filename = "shapes_9_bk.aba"
-    ground = get_rule(i) in [3,4]
 
     if ground:
-        nal.add_background_knowledge(get_shapes_bk())
+        add_shape_bk(nal)
 
-    nal.run_aba_framework(filename, id=f"shapes_r{get_rule(i)}_bk_{NUM_EXAMPLES}_ck", ground=ground)
+    nal.run_aba_framework(filename, ground=ground)
 
-    pos_class = shapes_metics.calculate_aba_classification_accuracy(nal,NUM_SLOTS,str(classes[0]),"c")
-    neg_class = shapes_metics.calculate_aba_classification_accuracy(nal,NUM_SLOTS,str(classes[1]),"c")
+def shapes_4_nal_inference(img_path: str, aba_path: str, include_pos = False):
 
-    print("Positve Accuracy: ", pos_class)
-    print("Negative Accuracy: ", 1- neg_class)
+    nal = get_shape_4_nal_model()
 
-    return (pos_class, 1- neg_class)
+    NUM_SLOTS = 5
 
+    prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS)
+    nal.populate_aba_framework_inference(prediction,include_pos)
 
-
-
-def calcuate_ari_resutls():
-    ## Setting Up Slot Attention Model
-    object_info = {"object" : ["","Triangle","Circle","Square"],
-                   "colour": ["","Red","Green","Blue"],
-                   "size:":  ["","Large","Small"]}
+    """
+        Classification Task
+        if predicate c(...) is in majority stable model we classify image as positve 
     
-    ckpt = torch.load(os.getcwd() + "/models/shapes_m1.pt",map_location='cpu')
-    num_slots = 10
+    """
 
-    model = SlotAutoencoder(
-                in_shape=(3,64,64),
-                width=32,
-                num_slots=num_slots,
-                slot_dim=32,
-                routing_iters=3,
-            )
+    img = f":- not c(img_{nal.img_id})."
+    all_models = nal.run_learnt_framework(aba_path)
+    r_models = nal.run_learnt_framework(aba_path,img)
 
-    model.load_state_dict(ckpt['model_state_dict'],)
-    data = "datasets/SHAPES_9/training_data/c1_s1/c1_1.png"
-    label = "datasets/SHAPES_9/training_data/c1_s1/labels.txt"
-
-    nal = NAL(model,object_info)
-
-    ## Retrieving Attenion Map
-
-    _, mask, = nal.run_slot_attention_model(data,num_slots)
-    mask = mask.squeeze(1).numpy()
-
-    image = Image.open(data).resize((64, 64))
-    image_array = np.array(image)
-
-    ## Calcualating ARI
-
-    pixel_assignments = e.assign_pixels_to_clusters(image_array,mask)
-    true_pixel_assignments = get_ground_truth_map(label,9).flatten()
+    if len(all_models) == 0:
+        return 0
     
+    if (len(r_models) / len(all_models) >= 0.5):
+        return 1
+    
+    return 0
 
-    ari_score = e.adjusted_rand_score(true_pixel_assignments,pixel_assignments)
-    print("ARI Score: ", ari_score)
+def shapes_9_nal_inference(img_path: str, aba_path: str, include_pos = False):
+    nal = get_shape_9_nal_model()
 
-    clustering_map = np.array(pixel_assignments).reshape((64,64))
+    NUM_SLOTS = 10
 
-    ## Visualaing maps 
+    prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS)
+    nal.populate_aba_framework_inference(prediction,include_pos)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-    clustering_map = np.array(pixel_assignments).reshape((64,64))
-    true_map = true_pixel_assignments.reshape((64, 64))
+    """
+        Classification Task
+        if predicate c(...) is in majority stable model we classify image as positve 
+    
+    """
 
-    im1 = axes[0].imshow(clustering_map, cmap='viridis')
-    axes[0].imshow(clustering_map, cmap='viridis')
-    axes[0].set_title('Clustering Map')
-    axes[0].set_xlabel('Width')  
-    axes[0].set_ylabel('Height')  
-    plt.colorbar(im1, ax=axes[0])
+    img = f":- c(img_{nal.img_id})."
+    all_models = nal.run_learnt_framework(aba_path)
+    r_models = nal.run_learnt_framework(aba_path,img)
 
-    im2 = axes[1].imshow(true_map, cmap='viridis')
-    axes[1].imshow(true_map, cmap='viridis')
-    axes[1].set_title('A Map')
-    axes[1].set_xlabel('Width')  
-    axes[1].set_ylabel('Height')
-    plt.colorbar(im2, ax=axes[1])
+    print(r_models)
 
-    plt.tight_layout()
-    plt.show()
+    if len(all_models) == 0:
+        return 0
+    
+    if (len(r_models) / len(all_models) >= 0.5):
+        return 1
+    
+    return 0
+
 
 if __name__ == "__main__":
-    shapes_4_nal()
+
+    ## Example Training and Inference
+    
+    shapes_4_nal_training(5,[1,2])
+    # test_img = "datasets/SHAPES_9/training_data/c1_s10/c1_10.png"
+    # aba_path = "shapes_9_bk_SOLVED.aba"
+    # prediction = shapes_9_nal_inference(test_img,aba_path)
+
+    # if prediction:
+    #     print("positive")
+    # else:
+    #     print("negative")
