@@ -108,7 +108,7 @@ class SHAPES:
                 output.append((parsed_rule[i][0], entry, obj_id[i], None, parsed_rule[i][-1]))
             elif (parsed_rule[i][0] == Rule.Postional):
                 rules = parsed_rule[i][1]
-                for j in range(len(obj_id) - 1): ## obj_id corresponds to each positional rule element  ## TODO: Bug with index taking objs from pre exceptions
+                for j in range(len(obj_id)): ## obj_id corresponds to each positional rule element  ## TODO: Bug with index taking objs from pre exceptions
                     entry[obj_id[j]]["shape"] = self.get_shape(rules[j])
                     entry[obj_id[j]]["colour"] = self.get_colour(rules[j])
                     entry[obj_id[j]]["size"] = self.get_size(rules[j])
@@ -123,8 +123,10 @@ class SHAPES:
         if idx >= len(rule):
             return True
 
-        r, r_obj, obj_id , pos, negated = rule[idx]
-    
+        r, r_obj, obj_id , pos, negated_rule = rule[idx]
+
+        negated = negated ^ negated_rule
+      
         cond_satisfied = False
         same_shape = lambda i,s: i["shape"] == s["shape"] and (i["colour"] == s["colour"] or s["colour"] == None ) and (i["size"] == s["size"] or s["size"] == None)
         
@@ -351,7 +353,7 @@ class SHAPES:
         ## Generates images by checking if image satisfies the rule 
         while not rule_satisified:
             image_map = self.generate_random_image()
-            rule_satisified = not self.check_image(image_map,rule,negated)
+            rule_satisified = self.check_image(image_map,rule,negated)
 
         for i in range(0,len(image_map)):
             image = self.draw_shape(image_map[i],image)
@@ -586,7 +588,7 @@ class SHAPESDATASET(Dataset):
     
     def get_SHAPES_dataset(self,split="train"):
         num_classes = 12
-        data_dir = self.data_dir
+        data_dir = "/mnt/d/fyp/SHAPES_9/training_data/"
         dataset = {}
 
         if split == "train":
@@ -597,7 +599,7 @@ class SHAPESDATASET(Dataset):
         if split == "test":
             start = 1000
             stop = 1500
-            data_dir = data_dir + "testing_data"
+            # data_dir = data_dir + "testing_data"
         
         for i in range(1, num_classes + 1) :
             dataset[i] = []
@@ -624,7 +626,7 @@ class SHAPESDATASET(Dataset):
             return set_result
         
     def get_ground_truth_map(self, label_path: str,):
-        labels = self.get_ground_truth(label_path)[:-1]
+        labels = self.get_ground_truth(label_path)
 
         generator = SHAPES(300,300,"")
 

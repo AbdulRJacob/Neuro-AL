@@ -257,22 +257,109 @@ def compute_average_precision(precision, recall):
   return average_precision
 
 
+## TODO: Remove 
+def average_precision_2(pred, attributes, distance_threshold):
+
+  [batch_size, _, element_size] = attributes.shape
+  [_, predicted_elements, _] = pred.shape
+
+  def unsorted_id_to_image(detection_id, predicted_elements):
+    """Find the index of the image from the unsorted detection index."""
+    return int(detection_id // predicted_elements)
+
+  flat_size = batch_size * predicted_elements
+  flat_pred = np.reshape(pred, [flat_size, element_size])
+  sort_idx = np.argsort(flat_pred[:, -1], axis=0)[::-1]  # Reverse order.
+
+  sorted_predictions = np.take_along_axis(
+      flat_pred, np.expand_dims(sort_idx, axis=1), axis=0)
+  idx_sorted_to_unsorted = np.take_along_axis(
+      np.arange(flat_size), sort_idx, axis=0)
+
+  def process_targets(target):
+    """Unpacks the target into the CLEVR properties."""
+    coords = target[:3]
+    object_size = torch.argmax(target[3:5])
+    material = torch.argmax(target[5:7])
+    shape = torch.argmax(target[7:10])
+    color = torch.argmax(target[10:18])
+    real_obj = target[18]
+    return coords, object_size, material, shape, color, real_obj
+  
+  def process_targets_shapes(target):
+    """Unpacks the target into the SHAPES properties."""
+    coords = target[:2]
+    shape =np.argmax(target[2:5])
+    colour = np.argmax(target[5:8])
+    real_obj = target[8]
+    return coords, shape, colour, real_obj
+
+  true_positives = np.zeros(sorted_predictions.shape[0])
+  false_positives = np.zeros(sorted_predictions.shape[0])
+
+  detection_set = set()
+
+  for detection_id in range(sorted_predictions.shape[0]):
+    current_pred = sorted_predictions[detection_id, :]
+
+    original_image_idx = unsorted_id_to_image(
+        idx_sorted_to_unsorted[detection_id], predicted_elements)
+    gt_image = attributes[original_image_idx, :, :]
+
+    best_distance = 10000
+    best_id = None
+    (pred_coords, pred_shape, pred_color ,
+     _) = process_targets_shapes(current_pred)
+
+    # Loop through all objects in the ground-truth image to check for hits.
+    for target_object_id in range(gt_image.shape[0]):
+      target_object = gt_image[target_object_id, :]
+      # Unpack the targets taking the argmax on the discrete attributes.
+      (target_coords, target_shape,
+       target_color, target_real_obj) = process_targets_shapes(target_object)
+      # Only consider real objects as matches.
+      if target_real_obj:
+        pred_attr = [pred_shape, pred_color]
+        target_attr = [target_shape, target_color]
+        match = pred_attr == target_attr
+        if match:
+          distance = np.linalg.norm((target_coords - pred_coords) * 6.)
+          # If this is the best match we've found so far we remember it.
+          if distance < best_distance:
+            best_distance = distance
+            best_id = target_object_id
+    if best_distance < distance_threshold or distance_threshold == -1:
+      if best_id is not None:
+        if (original_image_idx, best_id) not in detection_set:
+          true_positives[detection_id] = 1
+          detection_set.add((original_image_idx, best_id))
+        else:
+          false_positives[detection_id] = 1
+      else:
+        false_positives[detection_id] = 1
+    else:
+      false_positives[detection_id] = 1
+  accumulated_fp = np.cumsum(false_positives)
+  accumulated_tp = np.cumsum(true_positives)
+  recall_array = accumulated_tp / np.sum(attributes[:, :, -1])
+  precision_array = np.divide(accumulated_tp, (accumulated_fp + accumulated_tp))
+
+  return compute_average_precision(
+      np.array(precision_array, dtype=np.float32),
+      np.array(recall_array, dtype=np.float32))
+
+
 def assign_pixels_to_clusters(image, attention_masks, background_value=0):
-    assigned_clusters = []
-    for y in range(image.shape[0]):
-        for x in range(image.shape[1]):
-            # Skip background pixels
-            if all(image[y, x] == background_value):
-                assigned_clusters.append(-1)
-                continue
-            
-            pixel_value = image[y, x]
-            max_attention = 0
-            assigned_cluster = None
-            for cluster_id, attention_mask in enumerate(attention_masks):
-                attention_value = attention_mask[y, x]
-                if attention_value > max_attention:
-                    max_attention = attention_value
-                    assigned_cluster = cluster_id
-            assigned_clusters.append(assigned_cluster)
+    assigned_clusters = np.full(image.shape[:2], -1)
+
+    background_mask = np.all(image == background_value, axis=-1)
+
+    max_attention_mask = np.zeros(image.shape[:2], dtype=np.float32)
+    for cluster_id, attention_mask in enumerate(attention_masks):
+        cluster_update_mask = attention_mask > max_attention_mask
+        assigned_clusters[cluster_update_mask] = cluster_id
+        max_attention_mask = np.maximum(max_attention_mask, attention_mask)
+
+    assigned_clusters[background_mask] = -1
+
     return assigned_clusters

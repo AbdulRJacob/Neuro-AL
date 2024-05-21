@@ -1,10 +1,11 @@
 from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 from datasets.SHAPES_9.SHAPES import SHAPESDATASET
 from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
 import torch
 import os
 from PIL import Image
-import cv2
 from torch.utils.data import DataLoader
 from torchvision import transforms
 import numpy as np
@@ -102,7 +103,7 @@ def analyse_SHAPES():
 
 def calcuate_ari_resutls(visualise=False):
     
-    num_slots = 5
+    num_slots = 10
     dataset = SHAPESDATASET(cache=False)
     all_data = [item for sublist in dataset.get_SHAPES_dataset().values() for item in sublist]
 
@@ -118,12 +119,24 @@ def calcuate_ari_resutls(visualise=False):
         pred, mask, = nal.run_slot_attention_model(img_path,num_slots)
         mask = mask.squeeze(1).numpy()
 
+        fakes = []
+
+        for i,item in enumerate(pred):
+            if item[1]['real'] < 0.5:
+                fakes.append(i)
+
+        fakes.sort(reverse=True)
+
+        # Remove the specified indices
+        for i in fakes:
+            mask = np.delete(mask, i, axis=0)
+
         image = Image.open(img_path).resize((64, 64))
         image_array = np.array(image)
 
         ## Calcualating ARI
 
-        pixel_assignments = utils.assign_pixels_to_clusters(image_array,mask)
+        pixel_assignments = utils.assign_pixels_to_clusters(image_array,mask).flatten()
         true_pixel_assignments = dataset.get_ground_truth_map(label_path).flatten()
         
 
@@ -171,6 +184,67 @@ def calcualte_AP():
 
     return ap
 
+
+def nal_eval_metrics():
+    classes= [1,2]
+    dataset = SHAPESDATASET(cache=False).get_SHAPES_dataset()
+    
+    aba_path = "shapes_9_bk_SOLVED.aba"
+
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+
+    for (img_path, _) in dataset[classes[0]]:
+
+        if not os.path.isfile(img_path):
+            continue
+    
+        prediction = shapes.shapes_9_nal_inference(img_path,aba_path)
+
+        if prediction:
+            tp+=1
+        else:
+            fn+=1
+        
+
+    for (img_path, _) in dataset[classes[1]]:
+
+        if not os.path.isfile(img_path):
+            continue
+    
+        prediction = shapes.shapes_9_nal_inference(img_path,aba_path)
+
+        if prediction:
+            fp+=1
+        else:
+            tn+=1
+
+    print(tp,tn,fp,fn)
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+    accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+    f1_score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+
+    print(f"Precision: {precision:.2f}")
+    print(f"Recall: {recall:.2f}")
+    print(f"Accuracy: {accuracy:.2f}")
+    print(f"F1 Score: {f1_score:.2f}")
+
+    matrix = confusion_matrix([1, 0], [1, 0])  # Creating an empty matrix of size 2x2
+    matrix[0][0] = tp
+    matrix[1][1] = tn
+    matrix[0][1] = fp
+    matrix[1][0] = fn
+
+    # Create a heatmap for visualization
+    sns.heatmap(matrix, annot=True, fmt='d', cmap='Blues', xticklabels=['Predicted Positive', 'Predicted Negative'], yticklabels=['Actual Positive', 'Actual Negative'])
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.title('Confusion Matrix')
+    plt.show()
+
 ####### Helper Functions ##########
 
 
@@ -183,5 +257,4 @@ def renormalize(x):
 
 
 if __name__ == "__main__":  
-    print(calcuate_ari_resutls())
-
+    print(calcuate_ari_resutls(True))

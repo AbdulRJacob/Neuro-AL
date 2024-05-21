@@ -124,7 +124,10 @@ class SHAPES_4:
         if idx >= len(rule):
             return True
 
-        r, r_obj, obj_id , pos, negated = rule[idx]
+        r, r_obj, obj_id , pos, negated_rule = rule[idx]
+
+        negated = negated ^ negated_rule
+      
     
         cond_satisfied = False
         same_shape = lambda i,s: i["shape"] == s["shape"] and (i["colour"] == s["colour"] or s["colour"] == None ) and (i["size"] == s["size"] or s["size"] == None)
@@ -347,10 +350,7 @@ class SHAPES_4:
         ## Generates images by checking if image satisfies the rule 
         while not rule_satisified:
             image_map = self.generate_random_image()
-            if not negated:
-                rule_satisified = self.check_image(image_map,rule,negated)
-            else:
-                rule_satisified =  not self.check_image(image_map,rule,negated)
+            rule_satisified =  self.check_image(image_map,rule,negated)
 
         for i in range(0,len(image_map)):
             image = self.draw_shape(image_map[i],image)
@@ -536,7 +536,7 @@ class SHAPESDATASET(Dataset):
         all_labels = self._get_all_labels()
         feature_list = [l[2:] for  l in labels_arr]
 
-        loc_list = np.array([l[:2] for  l in labels_arr], dtype=float) / 300
+        loc_list = np.array([l[:2] for  l in labels_arr], dtype=float) / 200
 
         encoder = OneHotEncoder(categories=all_labels,sparse_output=False)
         one_hot_encoded = encoder.fit_transform(feature_list)
@@ -621,7 +621,7 @@ class SHAPESDATASET(Dataset):
             return set_result
         
     def get_ground_truth_map(self, label_path: str,):
-        labels = self.get_ground_truth(label_path)[:-1]
+        labels = self.get_ground_truth(label_path)
 
         generator = SHAPES_4(200,200,"")
 

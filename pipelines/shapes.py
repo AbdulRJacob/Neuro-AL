@@ -22,7 +22,7 @@ def get_shape_9_nal_model():
                    "colour": ["Red","Green","Blue"],
                    "size:":  ["Large","Small"]}
 
-    ckpt = torch.load(os.getcwd() + "/models/229512_ckpt.pt",map_location='cpu')
+    ckpt = torch.load(os.getcwd() + "/models/457452_ckpt.pt",map_location='cpu')
 
     model = SlotAutoencoder(
             in_shape=(3,64,64),
@@ -96,8 +96,6 @@ def shapes_4_nal_training(num_examples: int, class_ids: list):
 
     data = SHAPESDATASET_4(cache=False).get_SHAPES_dataset()
     total_items = len(data[class_ids[0]])
-    print(total_items)
-    return
 
     ## Populating ABA Framework with Examples
 
@@ -115,7 +113,7 @@ def shapes_4_nal_training(num_examples: int, class_ids: list):
                 history.append(choosen_exp)            
 
     
-    filename = "shapes_4_bk.aba"
+    filename = f"shapes_4_bk_r{get_rule(i)}.aba"
 
     if ground:
         add_shape_bk()
@@ -129,11 +127,11 @@ def shapes_9_nal_training(num_examples: int, class_ids: list):
 
     NUM_SLOTS = 10
     THRESHOLD = 0.9
-    total_items = len(data[class_ids[0]])
-
-
+    
     data = SHAPESDATASET_9(cache=False)
     data = data.get_SHAPES_dataset()
+
+    total_items = len(data[class_ids[0]])
     ## Populating ABA Framework with Examples
 
     for i in class_ids:
@@ -150,12 +148,12 @@ def shapes_9_nal_training(num_examples: int, class_ids: list):
                 history.append(choosen_exp)            
 
     
-    filename = "shapes_9_bk.aba"
+    filename = f"shapes_9_bk_r{get_rule(i)}.aba"
 
     if ground:
         add_shape_bk(nal)
 
-    nal.run_aba_framework(filename, ground=ground)
+    nal.run_aba_framework(filename, id= get_rule(i), ground=ground)
 
 def shapes_4_nal_inference(img_path: str, aba_path: str, include_pos = False):
 
@@ -198,17 +196,22 @@ def shapes_9_nal_inference(img_path: str, aba_path: str, include_pos = False):
     
     """
 
-    img = f":- c(img_{nal.img_id})."
+    # img = f":- c(img_{nal.img_id})."
     all_models = nal.run_learnt_framework(aba_path)
-    r_models = nal.run_learnt_framework(aba_path,img)
+    # r_models = nal.run_learnt_framework(aba_path,img)
 
-    print(r_models)
+    total_model = len(all_models)
+    present = 0
 
-    if len(all_models) == 0:
-        return 0
-    
-    if (len(r_models) / len(all_models) >= 0.5):
-        return 1
+
+    for model in all_models:
+        for symbol in model:
+            if f"c(img_"in str(symbol): 
+                present+=1
+
+        
+        absent = total_model - present
+        return present > absent
     
     return 0
 
@@ -217,12 +220,17 @@ if __name__ == "__main__":
 
     ## Example Training and Inference
     
-    shapes_4_nal_training(5,[1,2])
-    # test_img = "datasets/SHAPES_9/training_data/c1_s10/c1_10.png"
-    # aba_path = "shapes_9_bk_SOLVED.aba"
+    # shapes_4_nal_training(10,[1,2])
+    # test_img = "/mnt/d/fyp/SHAPES_9/training_data/c1_s10/c1_10.png"
+    # aba_path = "shapes_9_bk_r1_SOLVED.aba"
     # prediction = shapes_9_nal_inference(test_img,aba_path)
 
     # if prediction:
     #     print("positive")
     # else:
     #     print("negative")
+
+
+    classes = [[1,2],[3,4],[5,6],[7,8],[9,10],[11,12]]
+    for c in classes:
+        shapes_9_nal_training(10,c)
