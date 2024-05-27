@@ -198,8 +198,6 @@ class CLEVRHans(Dataset):
 
         final_labels = np.pad(result_with_real, ((0, pad_rows), (0, pad_cols)), mode='constant', constant_values=0)
 
-        print(final_labels)
-
         return final_labels
     
 
@@ -211,7 +209,7 @@ class CLEVRHans(Dataset):
         if self.transform is not None:
             img = self.transform(img)
 
-        return {"input": img, "class": cid, "target": label}
+        return {"input": img, "class": np.eye(1, 3, int(cid), dtype=int).flatten(), "target": label}
 
     def __getitem__(self, idx):
         if self.cache:
@@ -223,7 +221,7 @@ class CLEVRHans(Dataset):
             label = self.process_scene(label)
             if self.transform is not None:
                 img = self.transform(img)
-        return {"input": img, "class": cid, "target": label}
+        return {"input": img, "class": np.eye(1, 3, int(cid), dtype=int).flatten(), "target": label}
 
     def __len__(self):
         return len(self.labels)

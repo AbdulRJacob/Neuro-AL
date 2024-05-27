@@ -22,7 +22,7 @@ def get_shape_9_nal_model():
                    "colour": ["Red","Green","Blue"],
                    "size:":  ["Large","Small"]}
 
-    ckpt = torch.load(os.getcwd() + "/models/457452_ckpt.pt",map_location='cpu')
+    ckpt = torch.load(os.getcwd() + "/models/shapes_m1.pt",map_location='cpu')
 
     model = SlotAutoencoder(
             in_shape=(3,64,64),
@@ -44,7 +44,7 @@ def get_shape_4_nal_model():
                    "colour": ["Red","Green","Blue"]
                    }
     
-    ckpt = torch.load(os.getcwd() + "/models/168204_ckpt.pt",map_location='cpu')
+    ckpt = torch.load(os.getcwd() + "/models/shape_m1.pt",map_location='cpu')
 
     model = SlotAutoencoder(
             in_shape=(3,64,64),
@@ -64,8 +64,6 @@ def get_shape_4_nal_model():
 def add_shape_bk(nal):
 
     bk_rules = [("above","above(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), Y1 - Y2 > 0."),
-                ("below","below(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), Y2 - Y1 > 0."),
-                ("left","left(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), X2 - X1 > 0."),
                 ("right","right(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), X1 - X2 > 0.")]
     
     for pred, rule in bk_rules:
@@ -116,7 +114,7 @@ def shapes_4_nal_training(num_examples: int, class_ids: list):
     filename = f"shapes_4_bk_r{get_rule(i)}.aba"
 
     if ground:
-        add_shape_bk()
+        add_shape_bk(nal)
 
     nal.run_aba_framework(filename, ground=ground)
 
@@ -127,12 +125,14 @@ def shapes_9_nal_training(num_examples: int, class_ids: list):
 
     NUM_SLOTS = 10
     THRESHOLD = 0.9
-    
+
     data = SHAPESDATASET_9(cache=False)
     data = data.get_SHAPES_dataset()
 
     total_items = len(data[class_ids[0]])
     ## Populating ABA Framework with Examples
+
+    print("Finding Examples....")
 
     for i in class_ids:
         j = 0
@@ -152,6 +152,8 @@ def shapes_9_nal_training(num_examples: int, class_ids: list):
 
     if ground:
         add_shape_bk(nal)
+
+    print("Running Framework")
 
     nal.run_aba_framework(filename, id= get_rule(i), ground=ground)
 
@@ -231,6 +233,6 @@ if __name__ == "__main__":
     #     print("negative")
 
 
-    classes = [[1,2],[3,4],[5,6],[7,8],[9,10],[11,12]]
+    classes = [[7,8]]
     for c in classes:
-        shapes_9_nal_training(10,c)
+        shapes_4_nal_training(10,c)

@@ -599,7 +599,7 @@ class SHAPESDATASET(Dataset):
         if split == "test":
             start = 1000
             stop = 1500
-            # data_dir = data_dir + "testing_data"
+            data_dir = "/mnt/d/fyp/SHAPES_9/testing_data/"
         
         for i in range(1, num_classes + 1) :
             dataset[i] = []

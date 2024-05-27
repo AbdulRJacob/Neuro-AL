@@ -4,6 +4,8 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
+import pickle
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from PIL import Image
 from torch import Tensor
@@ -37,8 +39,26 @@ class NAL:
 
         input_batch = (input_batch - 127.5) / 127.5
         return input_batch
-
     
+
+    def run_slot_attention_kmean(self, image, k_model):
+        self.model.eval()
+        image = self.preprocess_image(image)
+
+        with torch.no_grad():
+            _, _, _, slots , _ = self.model(image)
+
+        with open("models/kmeans_model.pkl", "rb") as f:
+            kmeans = pickle.load(f)
+
+        flattened_slots = slots.view(-1, slots.size(-1))
+        flattened_slots_np = flattened_slots.detach().numpy()
+
+        labels = kmeans.predict(flattened_slots_np)
+
+        return labels
+
+
     def run_slot_attention_model(self, image, num_of_slots, num_coords = 2):
         self.model.eval()
         image = self.preprocess_image(image)
@@ -49,7 +69,7 @@ class NAL:
         masks = masks.squeeze(0)
         out = output.squeeze(0)
 
-        coords = (out[:, :num_coords] * 300).to(torch.int32)
+        coords = (out[:, :num_coords] * 200).to(torch.int32)
 
         real = out[:, -1]
         out = out[:, num_coords:]
@@ -88,6 +108,10 @@ class NAL:
 
         for slot in predictions:
             total_confidence = 1
+            
+            if slot[1]['real'] < 0.5:
+                continue
+
             slot = slot[2:]
 
             for item in slot:
@@ -128,7 +152,7 @@ class NAL:
             
             pos_info = slot["object_position"]
 
-            if (include_pos and pos_info[0] != -1 ):
+            if (include_pos):
                 slot_info = [img_label, obj_label] + [str(c) for c in list(pos_info)]
                 self.aba_framework.add_bk_fact(img_label,pred_name="position",arity=4,args=slot_info)
 
@@ -166,7 +190,7 @@ class NAL:
 
             if (include_pos):
                 slot_info = [img_label, obj_label] + [str(c) for c in list(pos_info)]
-                self.aba_framework.add_inference_bk_fact(img_label,pred_name="position",arity=4,args=slot_info)
+                self.aba_framework.add_inference_bk_fact(pred_name="position",arity=4,args=slot_info)
 
 
             self.obj_id += 1
@@ -183,8 +207,10 @@ class NAL:
         self.aba_framework.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
         self.aba_framework.run_aba_framework(id)
 
-    def run_learnt_framework(self, filepath, restrict=""):
+    def load_framework(self,filepath):
         self.aba_framework.load_solved_framework(filepath)
+
+    def run_learnt_framework(self, restrict=""):
         models = self.aba_framework.compute_stable_models(restrict)
 
         return models

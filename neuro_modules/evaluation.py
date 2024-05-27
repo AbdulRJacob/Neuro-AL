@@ -1,18 +1,33 @@
-from sklearn.metrics import adjusted_rand_score
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-from datasets.SHAPES_9.SHAPES import SHAPESDATASET
-from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
-import torch
-import os
-from PIL import Image
-from torch.utils.data import DataLoader
-from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from PIL import Image
+import os
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
+
+
+from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import confusion_matrix
+
+from datasets.SHAPES_9.SHAPES import SHAPESDATASET
+from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
+from datasets.CLEVR.CLEVR import CLEVRHans
 from neuro_modules.NAL import NAL
 import neuro_modules.utils as utils
 import pipelines.shapes as shapes
+import pipelines.clevr as clevr
+import neuro_modules.slots as slots
+import neuro_modules.NeuroAL as NeurAL
+
+
+transform = transforms.Compose(
+            [
+                transforms.Resize((64, 64), antialias=None),
+                transforms.PILToTensor(), 
+            ])
 
 
 @torch.no_grad()
@@ -42,10 +57,9 @@ def visualise_slots(model, img_path, num_slots, idx=0):
         ax[i].grid(False)
         ax[i].axis('off')
 
-    plt.savefig('slot_vis_shape.png')
+    plt.savefig('slot_vis_clevr.png')
 
 def visualise_clustering_maps(clustering_map,true_map):
-    
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
@@ -106,9 +120,8 @@ def calcuate_ari_resutls(visualise=False):
     num_slots = 10
     dataset = SHAPESDATASET(cache=False)
     all_data = [item for sublist in dataset.get_SHAPES_dataset().values() for item in sublist]
-
-    total_ari = 0.0
-    count = 0.0
+    all_data= all_data[:5]
+    total_ari = []
 
     for (img_path,label_path) in all_data:
         if not os.path.isfile(img_path):
@@ -141,8 +154,7 @@ def calcuate_ari_resutls(visualise=False):
         
 
         ari_score = adjusted_rand_score(true_pixel_assignments,pixel_assignments)
-        total_ari+= ari_score
-        count+=1
+        total_ari.append(ari_score)
 
     if visualise:
         clustering_map = np.array(pixel_assignments).reshape((64,64))
@@ -150,7 +162,7 @@ def calcuate_ari_resutls(visualise=False):
         visualise_clustering_maps(clustering_map,true_map)
 
 
-    return total_ari / count
+    return total_ari
 
 
 def get_ari_score(true_map, predicted_map):
@@ -161,6 +173,16 @@ def get_ari_score(true_map, predicted_map):
     ari_score = adjusted_rand_score(true_labels, predicted_labels)
 
     return ari_score
+
+def display_ari(results):
+    models = ["shapes_9","shapes_4"]
+    means = [np.mean(r) for r in results]
+    variances = [np.var(r) for r in results]
+
+    plt.bar(models, means, yerr=variances, capsize=5)
+    plt.ylabel('Mean ARI')
+    plt.title('Mean ARI and Variance for Three Models')
+    plt.savefig("ari.png")
 
 
 def calcualte_AP():
@@ -186,10 +208,10 @@ def calcualte_AP():
 
 
 def nal_eval_metrics():
-    classes= [1,2]
-    dataset = SHAPESDATASET(cache=False).get_SHAPES_dataset()
+    classes= [7,8]
+    dataset = SHAPESDATASET(cache=False).get_SHAPES_dataset(split="test")
     
-    aba_path = "shapes_9_bk_SOLVED.aba"
+    aba_path = "results/SHAPES_9/shapes_9_bk_r4_SOLVED.aba"
 
     tp = 0
     tn = 0
@@ -201,7 +223,7 @@ def nal_eval_metrics():
         if not os.path.isfile(img_path):
             continue
     
-        prediction = shapes.shapes_9_nal_inference(img_path,aba_path)
+        prediction = shapes.shapes_9_nal_inference(img_path,aba_path,include_pos=True)
 
         if prediction:
             tp+=1
@@ -214,7 +236,7 @@ def nal_eval_metrics():
         if not os.path.isfile(img_path):
             continue
     
-        prediction = shapes.shapes_9_nal_inference(img_path,aba_path)
+        prediction = shapes.shapes_9_nal_inference(img_path,aba_path,include_pos=True)
 
         if prediction:
             fp+=1
@@ -243,9 +265,33 @@ def nal_eval_metrics():
     plt.xlabel('Predicted Label')
     plt.ylabel('True Label')
     plt.title('Confusion Matrix')
-    plt.show()
+    plt.savefig('confused_matrix_r4.png')
 
-####### Helper Functions ##########
+def evaluate_classification(y_true, y_pred, class_names, img_name="confusion_matrix.png"):
+
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
+
+    cm = confusion_matrix(y_true, y_pred)
+    
+    precision = precision_score(y_true, y_pred, average='macro')
+    recall = recall_score(y_true, y_pred, average='macro')
+    f1 = f1_score(y_true, y_pred, average='macro')
+    accuracy = accuracy_score(y_true, y_pred)
+    
+    print("Accuracy:", accuracy)
+    print("Precision:", precision)
+    print("Recall:", recall)
+    print("F1 Score:", f1)
+    
+    # Plot confusion matrix
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, cmap='Blues', fmt='g', xticklabels=class_names, 
+                yticklabels=class_names)
+    plt.xlabel('Predicted labels')
+    plt.ylabel('True labels')
+    plt.title('Confusion Matrix')
+    plt.savefig(img_name)
 
 
 def to_numpy(x):
@@ -256,5 +302,49 @@ def renormalize(x):
 
 
 
-if __name__ == "__main__":  
-    print(calcuate_ari_resutls(True))
+###
+def test_clustering():
+    transform = transforms.Compose(
+            [
+                transforms.Resize((64, 64), antialias=None),
+                transforms.PILToTensor(), 
+            ])
+    dataset = SHAPESDATASET(transform=transform)
+    loader = DataLoader(dataset,32,num_workers=2)
+
+    nal = shapes.get_shape_9_nal_model()
+    model= nal.model
+
+
+    for t, (x, y) in enumerate(loader):
+        x = (x / 127.5 ) - 1
+        y = y.float()
+        _ , _ ,_ ,slot, _ = model(x)
+        # print(slot.shape)
+        c = slots.cluster_slots(slot)
+        break
+
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(c.permute(1, 0, 2).squeeze().cpu().numpy(), cmap="viridis", square=True)
+    plt.title("Cluster Assignments for All Batches")
+    plt.xlabel("Slot Dimensions")
+    plt.ylabel("Slots")
+    plt.show()
+        
+if __name__ == "__main__": 
+
+    dataset_test = CLEVRHans(transform=transform,split="test")
+    aba_path = "clevr_bk_1_SOLVED.aba"
+
+    y_pred = []
+    y_true = []
+    
+    for i in range(len(dataset_test)):
+        image = dataset_test[i]["input"]
+        target = dataset_test[i]["class"]
+
+        pred = clevr.clevr_nal_inference(image,aba_path)
+        y_pred.append(pred)
+        y_true.append(np.argmax(target))
+
+    

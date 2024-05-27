@@ -1,5 +1,8 @@
 import random
 from typing import Callable, Optional, Tuple
+from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans
+import pickle
 
 import numpy as np
 import torch
@@ -251,4 +254,39 @@ class SlotAutoencoder(nn.Module):
 
 
         return recon_combined, recons, masks, slots, output
+    
+
+def cluster_slots(slots):
+
+    # Reshape to [batch_size * slot_dim, num_slots]
+    flattened_slots = slots.view(-1, slots.size(-1))
+    num_clusters = 7  # Example number of clusters
+    flattened_slots_np = flattened_slots.detach().numpy()
+
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+    kmeans.fit(flattened_slots_np)
+
+    with open("kmeans_model.pkl", "wb") as f:
+        pickle.dump(kmeans, f)
+
+    # Get cluster assignments for each slot dimension
+    cluster_assignments = kmeans.labels_
+
+    cluster_assignments = torch.tensor(cluster_assignments).view(slots.size(0), slots.size(1), 1)
+
+    return cluster_assignments
+
+
+def elbow_method(slots, max_k=10):
+    wcss = []
+    for k in range(1, max_k + 1):
+        flattened_slots = slots.view(-1, slots.size(-1))
+        flattened_slots_np = flattened_slots.detach().numpy()
+
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        kmeans.fit(flattened_slots_np)
+        wcss.append(kmeans.inertia_)
+
+    return wcss
+
 
