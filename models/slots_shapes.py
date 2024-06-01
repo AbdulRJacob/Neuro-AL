@@ -15,6 +15,7 @@ from tqdm import tqdm
 from datasets.SHAPES_9.SHAPES import SHAPESDATASET
 import neuro_modules.utils as utils
 from neuro_modules.slots import SlotAutoencoder
+from neuro_modules.slots import cluster_slots
 import logging
 
 def init_params(p):
@@ -80,6 +81,27 @@ def run_epoch(
         )
     return total_loss / count
 
+def train_k_means(model: nn.Module, dataloader: DataLoader,):
+    loader = tqdm(
+        enumerate(dataloader),
+        total=len(dataloader),
+        mininterval=(0.1 if os.environ.get("IS_NOHUP") is None else 60),
+    )
+
+    slots_list = []
+
+    for _, (x, y) in loader:
+        x = (x / 127.5 ) - 1
+        y = y.float()
+        y = y.cuda()
+        x = x.cuda()
+        model.eval()
+
+        _ , _ ,_ ,slots, _ = model(x)
+
+        slots_list.append(slots)
+
+    cluster_slots(np.vstack(slots_list))
 
 if __name__ == "__main__":
     import argparse

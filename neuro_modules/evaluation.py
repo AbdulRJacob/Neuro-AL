@@ -15,13 +15,13 @@ from sklearn.metrics import confusion_matrix
 from datasets.SHAPES_9.SHAPES import SHAPESDATASET
 from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
 from datasets.CLEVR.CLEVR import CLEVRHans
+from datasets.CLEVR.CLEVR import dataset as ds
+
 from neuro_modules.NAL import NAL
 import neuro_modules.utils as utils
 import pipelines.shapes as shapes
 import pipelines.clevr as clevr
 import neuro_modules.slots as slots
-import neuro_modules.NeuroAL as NeurAL
-
 
 transform = transforms.Compose(
             [
@@ -65,20 +65,19 @@ def visualise_clustering_maps(clustering_map,true_map):
 
     im1 = axes[0].imshow(clustering_map, cmap='viridis')
     axes[0].imshow(clustering_map, cmap='viridis')
-    axes[0].set_title('Clustering Map')
     axes[0].set_xlabel('Width')  
     axes[0].set_ylabel('Height')  
-    plt.colorbar(im1, ax=axes[0])
 
     im2 = axes[1].imshow(true_map, cmap='viridis')
     axes[1].imshow(true_map, cmap='viridis')
-    axes[1].set_title('A Map')
     axes[1].set_xlabel('Width')  
     axes[1].set_ylabel('Height')
-    plt.colorbar(im2, ax=axes[1])
+
+    for ax in axes:
+        ax.axis('off')
 
     plt.tight_layout()
-    plt.savefig('clustering_map.png')
+    plt.savefig('clustering_map_clvr.png')
 
 
 def analyse_SHAPES():
@@ -115,12 +114,73 @@ def analyse_SHAPES():
     print(f"Total Blue Shapes: {blue_shapes}")
 
 
+
+def ari_clevr():
+    tf_records_path = ''
+    dataset = ds(tf_records_path)
+
+    clevr_nal = clevr.get_clevr_nal_model()
+    num_slots = 11
+    total_ari = []
+
+    for element in dataset.take(1000): 
+        image = Image.fromarray(element['image'].numpy())
+        true_mask = element['mask'].numpy().squeeze(-1)
+
+        _ , mask, = clevr_nal.run_slot_attention_model(image,num_slots, isPath=False)
+
+        mask = mask.squeeze(1).numpy()
+ 
+        resized_true_mask = np.zeros((11, 64, 64), dtype=np.uint8)
+
+        for i in range(true_mask.shape[0]):
+            pil_image = Image.fromarray(true_mask[i])
+            
+            pil_image_resized = pil_image.resize((64, 64), Image.BILINEAR)
+            
+            resized_true_mask[i] = np.array(pil_image_resized)
+
+
+        ## Calcualating ARI
+
+        resized_true_mask = np.expand_dims(resized_true_mask, axis=0)
+        mask = np.expand_dims(mask, axis=0)
+
+    
+        batch_size, num_entries, height, width = resized_true_mask.shape
+        masks_reshaped = (
+            torch.reshape(torch.tensor(resized_true_mask), [batch_size, num_entries, height * width])
+            .permute([0, 2, 1])
+            .to(torch.float)
+        )
+
+        batch_size, num_entries, height, width = mask.shape
+        pred_masks_reshaped = (
+            torch.reshape(torch.tensor(mask), [batch_size, num_entries, height * width])
+            .permute([0, 2, 1])
+            .to(torch.float)
+        )
+        ari_no_background = utils.adjusted_rand_index(
+            masks_reshaped[..., 1:], pred_masks_reshaped
+        )
+
+
+        total_ari.append(ari_no_background.item())
+
+    
+    file = open("ari_clevr.txt", "w+")
+ 
+    # Saving the array in a text file
+    content = str(total_ari)
+    file.write(content)
+    file.close()
+
+
 def calcuate_ari_resutls(visualise=False):
     
     num_slots = 10
     dataset = SHAPESDATASET(cache=False)
     all_data = [item for sublist in dataset.get_SHAPES_dataset().values() for item in sublist]
-    all_data= all_data[:5]
     total_ari = []
 
     for (img_path,label_path) in all_data:
@@ -162,6 +222,13 @@ def calcuate_ari_resutls(visualise=False):
         visualise_clustering_maps(clustering_map,true_map)
 
 
+    file = open("ari.txt", "w+")
+ 
+    content = str(total_ari)
+    file.write(content)
+    file.close()
+
+
     return total_ari
 
 
@@ -192,26 +259,28 @@ def calcualte_AP():
                 transforms.PILToTensor(), 
             ])
     dataset = SHAPESDATASET(transform=transform)
-    loader = DataLoader(dataset,len(dataset),num_workers=2)
+    loader = DataLoader(dataset,128,num_workers=2)
 
     nal = shapes.get_shape_9_nal_model()
     model= nal.model
-
+    print("calculating")
 
     for t, (x, y) in enumerate(loader):
         x = (x / 127.5 ) - 1
         y = y.float()
         _ , _ ,_ ,_, y_hat = model(x)
-        ap = utils.average_precision(y_hat,y,-1)
 
-    return ap
+        y_hat = y_hat.detach().numpy()
+
+        ap = utils.average_precision_3(y_hat,y.numpy(),-1)
+        break
 
 
 def nal_eval_metrics():
-    classes= [7,8]
+    classes= [11,12]
     dataset = SHAPESDATASET(cache=False).get_SHAPES_dataset(split="test")
     
-    aba_path = "results/SHAPES_9/shapes_9_bk_r4_SOLVED.aba"
+    aba_path = ""
 
     tp = 0
     tn = 0
@@ -301,8 +370,6 @@ def renormalize(x):
     return x / 2. + 0.5  # [-1, 1] to [0, 1]
 
 
-
-###
 def test_clustering():
     transform = transforms.Compose(
             [
@@ -320,7 +387,6 @@ def test_clustering():
         x = (x / 127.5 ) - 1
         y = y.float()
         _ , _ ,_ ,slot, _ = model(x)
-        # print(slot.shape)
         c = slots.cluster_slots(slot)
         break
 
@@ -330,6 +396,7 @@ def test_clustering():
     plt.xlabel("Slot Dimensions")
     plt.ylabel("Slots")
     plt.show()
+
         
 if __name__ == "__main__": 
 

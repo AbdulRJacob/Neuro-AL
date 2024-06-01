@@ -1,0 +1,7 @@
+% Background Knowledge 
+% Learnt Rules 
+c(A) :- alpha_3(B,A), circle(B), in(A,B).
+c_alpha_3(A,B) :- image(B), red(A).
+c_alpha_3(A,B) :- image(B), green(A).
+
+alpha_3(A,B) :- not c_alpha_3(A,B), circle(A), in(B,A).

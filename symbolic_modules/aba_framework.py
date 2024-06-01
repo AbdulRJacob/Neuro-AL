@@ -4,6 +4,7 @@ import re
 import clingo.control as cc
 
 from data_structures.aba_elements import Rule, Atom, Example
+import symbolic_modules.s_utils as utils
 
 
 class ABAFramework:
@@ -119,6 +120,16 @@ class ABAFramework:
 
             f.write('\n')
             f.write(self.get_command(filename))
+
+    def write_ordered_facts(self,pred_list):
+        
+        ordered_predicates, remaining_lines = utils.order_facts(pred_list, self.filename)
+
+        with open(self.filename, 'w') as file:
+            for predicate in ordered_predicates:
+                file.write(predicate + '\n')
+            for line in remaining_lines:
+                file.write(line + '\n')
     
         
     def get_content(self):

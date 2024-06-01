@@ -192,21 +192,43 @@ if __name__ == "__main__":
         )
 
     best_loss = 1e6
+
+    # Configure logging
+    log_file_path = "./logs/training_log_clevr.txt"
+    if not os.path.exists(log_file_path):
+        with open(log_file_path, 'w') as file:
+            file.write("Log file created\n")
+            print("Log file created at:", log_file_path)
+    else:
+        print("Log file already exists at:", log_file_path)
+    logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
     print("\nRunning sanity check...")
     _ = run_epoch(model, dataloaders["val"])
 
-    # Configure logging
-    log_file_path = "./logs/training_log.txt"
-    logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
     for epoch in range(1, args.epochs):
-        logging.info("\nEpoch {}:".format(epoch))
         print("\nEpoch {}:".format(epoch))
-        train_loss = run_epoch(model, dataloaders["train"], optimizer)
+        train_loss  = run_epoch(model, dataloaders["train"], optimizer)
 
         if epoch % 4 == 0:
             valid_loss = run_epoch(model, dataloaders["val"])
+
+            x, y = next(iter(dataloaders["val"]))
+
+            x = (x / 127.5 ) - 1
+            y = y.float()
+            y = y.cuda()
+            x = x.cuda()
+            _ , _ ,_ ,_, y_hat = model(x)
+            step = int(epoch * len(dataloaders["train"]))
+
+            ap = [utils.average_precision(y_hat.cpu().detach().numpy(), y.cpu().numpy(), d) for d in [-1., 1., 0.5, 0.25, 0.125]]
+            logging.info(
+                "Step {} | AP@inf: {:.2f}, AP@1: {:.2f}, AP@0.5: {:.2f}, AP@0.25: {:.2f}, AP@0.125: {:.2f}".format(step, ap[0], ap[1], ap[2], ap[3], ap[4])
+            )
+            logging.getLogger().handlers[0].flush()
+    
 
             if valid_loss < best_loss:
                 best_loss = valid_loss

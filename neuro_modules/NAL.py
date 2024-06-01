@@ -7,6 +7,8 @@ import torch.nn as nn
 import pickle
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from collections import Counter
+import heapq
 from PIL import Image
 from torch import Tensor
 from torch.optim import AdamW, Optimizer
@@ -27,12 +29,15 @@ class NAL:
         self.img_id = 1
 
 
-    def preprocess_image(self,image_path):
+    def preprocess_image(self, image , isPath=True):
         transform = transforms.Compose([
             transforms.Resize((64, 64)),
             transforms.PILToTensor(),
         ])
-        image = Image.open(image_path).convert('RGB')
+
+        if isPath:
+            image = Image.open(image).convert('RGB')
+
         input_tensor = transform(image)
         
         input_batch = input_tensor.unsqueeze(0)
@@ -41,7 +46,7 @@ class NAL:
         return input_batch
     
 
-    def run_slot_attention_kmean(self, image, k_model):
+    def run_slot_attention_kmean(self, image):
         self.model.eval()
         image = self.preprocess_image(image)
 
@@ -59,9 +64,9 @@ class NAL:
         return labels
 
 
-    def run_slot_attention_model(self, image, num_of_slots, num_coords = 2):
+    def run_slot_attention_model(self, image, num_of_slots, num_coords = 2, isPath = True):
         self.model.eval()
-        image = self.preprocess_image(image)
+        image = self.preprocess_image(image, isPath)
 
         with torch.no_grad():
             _, _, masks, _ , output = self.model(image)
@@ -125,6 +130,25 @@ class NAL:
     
     def add_background_knowledge(self, rule : str, pred_name: str):
             self.aba_framework.add_bk_rule(rule,pred_name=pred_name)
+
+
+    def populate_aba_framework_general(self, properties, isPositive, concept="c"):
+        img_label = f"img_{self.img_id}"
+
+        frequency = Counter(properties)
+
+        # Get the k most frequent numbers
+        important_properties = heapq.nlargest(3, frequency.keys(), key=frequency.get)
+
+        for prop in important_properties:
+            self.aba_framework.add_bk_fact(img_label,pred_name=f"attr_{prop}",arity=1, args=[img_label])
+
+        
+        self.aba_framework.add_bk_fact(img_label,pred_name="image",arity=1, args=[img_label])
+
+        self.aba_framework.add_example(pred=concept, args=[img_label], isPositive=isPositive)
+        self.img_id += 1
+
     
     def populate_aba_framework(self, slots: list[dict], isPositive: bool, include_pos = False, concept="c"):
     
@@ -199,11 +223,18 @@ class NAL:
         self.img_id += 1
         
 
-    def run_aba_framework(self, filename="aba_framework.aba", id=0, ground=False):
+    def run_aba_framework(self, filename="aba_framework.aba", id=0, ground=False ,order=[]):
         self.aba_framework.write_aba_framework(filename)
 
         if ground:
             self.aba_framework.ground_aba_framework(filename)
+
+        if order != []:
+            order.insert(0,"image")
+            order.append("in")
+
+            self.aba_framework.write_ordered_facts(order)
+        
         self.aba_framework.set_aba_sovler_path("symbolic_modules/aba_asp/aba_asp.pl")
         self.aba_framework.run_aba_framework(id)
 

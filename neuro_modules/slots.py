@@ -2,6 +2,8 @@ import random
 from typing import Callable, Optional, Tuple
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+
 import pickle
 
 import numpy as np
@@ -274,6 +276,34 @@ def cluster_slots(slots):
 
     cluster_assignments = torch.tensor(cluster_assignments).view(slots.size(0), slots.size(1), 1)
 
+    return cluster_assignments
+
+
+def cluster_slot_dimensions(slots, num_clusters=7):
+    batch_size, num_slots, slot_dim = slots.size()
+    
+    # Initialize a tensor to store the cluster assignments
+    cluster_assignments = torch.zeros(batch_size, num_slots, slot_dim, dtype=torch.long)
+
+    # Loop through each dimension within the slot
+    for dim in range(slot_dim):
+        # Extract the dimension data for clustering
+        dim_data = slots[:, :, dim].view(-1, 1).detach().numpy()  # shape (batch_size * num_slots, 1)
+        
+        # Apply KMeans clustering
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        kmeans.fit(dim_data)
+        
+        # Get cluster assignments
+        dim_cluster_assignments = torch.tensor(kmeans.labels_).view(batch_size, num_slots)
+        
+        # Store cluster assignments
+        cluster_assignments[:, :, dim] = dim_cluster_assignments
+    
+    # Save the last KMeans model for reference (optional)
+    with open("kmeans_model.pkl", "wb") as f:
+        pickle.dump(kmeans, f)
+    
     return cluster_assignments
 
 

@@ -144,12 +144,12 @@ def average_precision(pred, attributes, distance_threshold):
   def process_targets(target):
     """Unpacks the target into the CLEVR properties."""
     coords = target[:3]
-    object_size = torch.argmax(target[3:5])
-    material = torch.argmax(target[5:7])
-    shape = torch.argmax(target[7:10])
-    color = torch.argmax(target[10:18])
+    shape = np.argmax(target[3:6])
+    color = np.argmax(target[6:14])
+    object_size = np.argmax(target[14:16])
+    material = np.argmax(target[16:18])
     real_obj = target[18]
-    return coords, object_size, material, shape, color, real_obj
+    return coords, shape, color, object_size, material, real_obj
   
   def process_targets_shapes(target):
     """Unpacks the target into the SHAPES properties."""
@@ -181,26 +181,32 @@ def average_precision(pred, attributes, distance_threshold):
     best_distance = 10000
     best_id = None
 
-    # Unpack the prediction by taking the argmax on the discrete attributes.
-    # (pred_coords, pred_object_size, pred_material, pred_shape, pred_color,
-    #  _) = process_targets(current_pred)
+        # Unpack the prediction by taking the argmax on the discrete attributes.
+    (pred_coords, pred_shape, pred_color, pred_object_size, pred_material,
+     _) = process_targets(current_pred)
     
-    (pred_coords, pred_shape, pred_color,pred_object_size ,
-     _) = process_targets_shapes(current_pred)
+    # (pred_coords, pred_shape, pred_color,pred_object_size ,
+    #  _) = process_targets_shapes(current_pred)
 
     # Loop through all objects in the ground-truth image to check for hits.
     for target_object_id in range(gt_image.shape[0]):
       target_object = gt_image[target_object_id, :]
       # Unpack the targets taking the argmax on the discrete attributes.
-      (target_coords, target_shape, target_object_size,
-       target_color, target_real_obj) = process_targets_shapes(target_object)
+      # (target_coords, target_shape, target_object_size,
+      #  target_color, target_real_obj) = process_targets_shapes(target_object)
+
+      (target_coords, target_shape, target_color, target_object_size, 
+       target_material, target_real_obj) = process_targets(target_object)
       # Only consider real objects as matches.
       if target_real_obj:
         # For the match to be valid all attributes need to be correctly
         # predicted.
-        pred_attr = [pred_object_size, pred_shape, pred_color]
+        # pred_attr = [pred_object_size, pred_shape, pred_color]
+        pred_attr =  [pred_object_size, pred_material, pred_shape, pred_color]
+        # target_attr = [
+        #     target_object_size, target_shape, target_color]
         target_attr = [
-            target_object_size, target_shape, target_color]
+          target_object_size, target_material, target_shape, target_color]
         match = pred_attr == target_attr
         if match:
           # If a match was found, we check if the distance is below the
@@ -257,98 +263,6 @@ def compute_average_precision(precision, recall):
   return average_precision
 
 
-## TODO: Remove 
-def average_precision_2(pred, attributes, distance_threshold):
-
-  [batch_size, _, element_size] = attributes.shape
-  [_, predicted_elements, _] = pred.shape
-
-  def unsorted_id_to_image(detection_id, predicted_elements):
-    """Find the index of the image from the unsorted detection index."""
-    return int(detection_id // predicted_elements)
-
-  flat_size = batch_size * predicted_elements
-  flat_pred = np.reshape(pred, [flat_size, element_size])
-  sort_idx = np.argsort(flat_pred[:, -1], axis=0)[::-1]  # Reverse order.
-
-  sorted_predictions = np.take_along_axis(
-      flat_pred, np.expand_dims(sort_idx, axis=1), axis=0)
-  idx_sorted_to_unsorted = np.take_along_axis(
-      np.arange(flat_size), sort_idx, axis=0)
-
-  def process_targets(target):
-    """Unpacks the target into the CLEVR properties."""
-    coords = target[:3]
-    object_size = torch.argmax(target[3:5])
-    material = torch.argmax(target[5:7])
-    shape = torch.argmax(target[7:10])
-    color = torch.argmax(target[10:18])
-    real_obj = target[18]
-    return coords, object_size, material, shape, color, real_obj
-  
-  def process_targets_shapes(target):
-    """Unpacks the target into the SHAPES properties."""
-    coords = target[:2]
-    shape =np.argmax(target[2:5])
-    colour = np.argmax(target[5:8])
-    real_obj = target[8]
-    return coords, shape, colour, real_obj
-
-  true_positives = np.zeros(sorted_predictions.shape[0])
-  false_positives = np.zeros(sorted_predictions.shape[0])
-
-  detection_set = set()
-
-  for detection_id in range(sorted_predictions.shape[0]):
-    current_pred = sorted_predictions[detection_id, :]
-
-    original_image_idx = unsorted_id_to_image(
-        idx_sorted_to_unsorted[detection_id], predicted_elements)
-    gt_image = attributes[original_image_idx, :, :]
-
-    best_distance = 10000
-    best_id = None
-    (pred_coords, pred_shape, pred_color ,
-     _) = process_targets_shapes(current_pred)
-
-    # Loop through all objects in the ground-truth image to check for hits.
-    for target_object_id in range(gt_image.shape[0]):
-      target_object = gt_image[target_object_id, :]
-      # Unpack the targets taking the argmax on the discrete attributes.
-      (target_coords, target_shape,
-       target_color, target_real_obj) = process_targets_shapes(target_object)
-      # Only consider real objects as matches.
-      if target_real_obj:
-        pred_attr = [pred_shape, pred_color]
-        target_attr = [target_shape, target_color]
-        match = pred_attr == target_attr
-        if match:
-          distance = np.linalg.norm((target_coords - pred_coords) * 6.)
-          # If this is the best match we've found so far we remember it.
-          if distance < best_distance:
-            best_distance = distance
-            best_id = target_object_id
-    if best_distance < distance_threshold or distance_threshold == -1:
-      if best_id is not None:
-        if (original_image_idx, best_id) not in detection_set:
-          true_positives[detection_id] = 1
-          detection_set.add((original_image_idx, best_id))
-        else:
-          false_positives[detection_id] = 1
-      else:
-        false_positives[detection_id] = 1
-    else:
-      false_positives[detection_id] = 1
-  accumulated_fp = np.cumsum(false_positives)
-  accumulated_tp = np.cumsum(true_positives)
-  recall_array = accumulated_tp / np.sum(attributes[:, :, -1])
-  precision_array = np.divide(accumulated_tp, (accumulated_fp + accumulated_tp))
-
-  return compute_average_precision(
-      np.array(precision_array, dtype=np.float32),
-      np.array(recall_array, dtype=np.float32))
-
-
 def assign_pixels_to_clusters(image, attention_masks, background_value=0):
     assigned_clusters = np.full(image.shape[:2], -1)
 
@@ -363,3 +277,84 @@ def assign_pixels_to_clusters(image, attention_masks, background_value=0):
     assigned_clusters[background_mask] = -1
 
     return assigned_clusters
+
+
+def adjusted_rand_index(true_mask, pred_mask, name="ari_score"):
+    r"""Computes the adjusted Rand index (ARI), a clustering similarity score.
+    This implementation ignores points with no cluster label in `true_mask` (i.e.
+    those points for which `true_mask` is a zero vector). In the context of
+    segmentation, that means this function can ignore points in an image
+    corresponding to the background (i.e. not to an object).
+    Args:
+        true_mask: `Tensor` of shape [batch_size, n_points, n_true_groups].
+            The true cluster assignment encoded as one-hot.
+        pred_mask: `Tensor` of shape [batch_size, n_points, n_pred_groups].
+            The predicted cluster assignment encoded as categorical probabilities.
+            This function works on the argmax over axis 2.
+            name: str. Name of this operation (defaults to "ari_score").
+    Returns:
+        ARI scores as a tf.float32 `Tensor` of shape [batch_size].
+    Raises:
+        ValueError: if n_points <= n_true_groups and n_points <= n_pred_groups.
+            We've chosen not to handle the special cases that can occur when you have
+            one cluster per datapoint (which would be unusual).
+    References:
+        Lawrence Hubert, Phipps Arabie. 1985. "Comparing partitions"
+            https://link.springer.com/article/10.1007/BF01908075
+        Wikipedia
+            https://en.wikipedia.org/wiki/Rand_index
+        Scikit Learn
+            http://scikit-learn.org/stable/modules/generated/\
+            sklearn.metrics.adjusted_rand_score.html
+    """
+    _, n_points, n_true_groups = true_mask.shape
+    n_pred_groups = pred_mask.shape[-1]
+    if n_points <= n_true_groups and n_points <= n_pred_groups:
+        # This rules out the n_true_groups == n_pred_groups == n_points
+        # corner case, and also n_true_groups == n_pred_groups == 0, since
+        # that would imply n_points == 0 too.
+        # The sklearn implementation has a corner-case branch which does
+        # handle this. We chose not to support these cases to avoid counting
+        # distinct clusters just to check if we have one cluster per datapoint.
+        raise ValueError(
+            "adjusted_rand_index requires n_groups < n_points. We don't handle "
+            "the special cases that can occur when you have one cluster "
+            "per datapoint."
+        )
+
+    true_group_ids = torch.argmax(true_mask, -1)
+    pred_group_ids = torch.argmax(pred_mask, -1)
+    # We convert true and predicted clusters to one-hot ('oh') representations.
+    true_mask_oh = true_mask.type(torch.float32)  # already one-hot
+    pred_mask_oh = F.one_hot(pred_group_ids, n_pred_groups).type(torch.float32)
+
+    n_points = torch.sum(true_mask_oh, axis=[1, 2]).type(torch.float32)
+
+    nij = torch.einsum("bji,bjk->bki", pred_mask_oh, true_mask_oh)
+    a = torch.sum(nij, axis=1)
+    b = torch.sum(nij, axis=2)
+
+    rindex = torch.sum(nij * (nij - 1), axis=[1, 2])
+    aindex = torch.sum(a * (a - 1), axis=1)
+    bindex = torch.sum(b * (b - 1), axis=1)
+    expected_rindex = aindex * bindex / (n_points * (n_points - 1))
+    max_rindex = (aindex + bindex) / 2
+
+    denominator = max_rindex - expected_rindex
+    ari = (rindex - expected_rindex) / denominator
+    # If a divide by 0 occurs, set the ARI value to 1.
+    zeros_in_denominator = torch.argwhere(denominator == 0).flatten()
+    if zeros_in_denominator.nelement() > 0:
+        ari[zeros_in_denominator] = 1
+
+    # The case where n_true_groups == n_pred_groups == 1 needs to be
+    # special-cased (to return 1) as the above formula gives a divide-by-zero.
+    # This might not work when true_mask has values that do not sum to one:
+    both_single_cluster = torch.logical_and(
+        _all_equal(true_group_ids), _all_equal(pred_group_ids)
+    )
+    return torch.where(both_single_cluster, torch.ones_like(ari), ari)
+
+def _all_equal(values):
+    """Whether values are all equal along the final axis."""
+    return torch.all(torch.eq(values, values[..., :1]), axis=-1)
