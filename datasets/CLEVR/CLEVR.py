@@ -130,8 +130,6 @@ class CLEVR(Dataset):
 
         final_labels = np.pad(result_with_real, ((0, pad_rows), (0, pad_cols)), mode='constant', constant_values=0)
 
-        print(final_labels)
-
         return final_labels
     
 
@@ -259,7 +257,24 @@ class CLEVRHans(Dataset):
             if self.transform is not None:
                 img = self.transform(img)
         return {"input": img, "class": np.eye(1, 3, int(cid), dtype=int).flatten(), "target": label}
+    
+    def get_all_data(self):
+        all_data_list = []
+        for idx in range(len(self.labels)):
+            data = self.__getitem__(idx)
+            all_data_list.append((idx, data))
+        return all_data_list
 
     def __len__(self):
         return len(self.labels)
+    
+    def get_transform():
+        transform = transforms.Compose(
+            [
+                transforms.Resize((64, 64), antialias=None),
+                transforms.PILToTensor(), 
+            ])
+    
+        return transform
+
 

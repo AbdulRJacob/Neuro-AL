@@ -1,0 +1,12 @@
+Dataset: SHAPES 
+
+SHAPE - Precision: 0.8353, Recall: 0.8710, Accuracy: 0.7734, F1 Score: 0.8499
+COLOUR - Precision: 0.8313, Recall: 0.8646, Accuracy: 0.7658, F1 Score: 0.8447
+SIZE - Precision: 0.8310, Recall: 0.8559, Accuracy: 0.7624, F1 Score: 0.8397
+
+Dataset: CLEVR 
+
+SHAPE - Precision: 0.6523, Recall: 0.6785, Accuracy: 0.6612, F1 Score: 0.7598
+COLOUR - Precision: 0.8245, Recall: 0.8621, Accuracy: 0.7715, F1 Score: 0.8423
+SIZE - Precision: 0.8298, Recall: 0.8590, Accuracy: 0.7662, F1 Score: 0.8431
+MATERIAL - Precision: 0.6591, Recall: 0.6813, Accuracy: 0.6652, F1 Score: 0.7550

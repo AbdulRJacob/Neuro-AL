@@ -1,26 +1,17 @@
-from typing import Callable, Optional, Tuple
-import os
-import random
 import numpy as np
 import torch
-import torch.nn as nn
 import pickle
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 from collections import Counter
 import heapq
 from PIL import Image
-from torch import Tensor
-from torch.optim import AdamW, Optimizer
-from torch.utils.data import DataLoader
 from torchvision import transforms
 from symbolic_modules.aba_framework import ABAFramework
 import neuro_modules.utils as utils
 
 class NAL:
-    def __init__(self, model, object_info) -> None:
+    def __init__(self, model, dataset, object_info) -> None:
 
-        self.data_dir = "datasets/MOCK/training_data/"
+        self.dataset= dataset
         self.object_info = object_info
         self.model = model
 
@@ -64,7 +55,7 @@ class NAL:
         return labels
 
 
-    def run_slot_attention_model(self, image, num_of_slots, num_coords = 2, isPath = True):
+    def run_slot_attention_model(self, image, num_of_slots, num_coords = 2, isPath=True):
         self.model.eval()
         image = self.preprocess_image(image, isPath)
 
@@ -127,6 +118,26 @@ class NAL:
             
         return min_confidence > threshold
     
+
+    def choose_example(self, p_eg: list[int], n_eg: list[int], num_examples):
+        data = self.dataset.get_all_data()
+        rep_postive = []
+        rep_negative = []
+        for (idx, info) in data:
+            _, _, _, slots, _ = self.model(info["input"].unsqueeze(0).float())
+            combined_slots = utils.aggregate_slots(slots.detach().numpy())
+
+            if np.argmax(info["class"]) in p_eg:
+                rep_postive.append((idx, combined_slots))
+            if np.argmax(info["class"]) in n_eg:
+                rep_negative.append((idx, combined_slots))
+
+        print("Finding Samples...")
+        diverse_samples_pos = utils.get_diverse_slots(rep_postive,num_examples)
+        diverse_samples_neg = utils.get_diverse_slots(rep_negative,num_examples)
+
+        return diverse_samples_pos, diverse_samples_neg
+
     
     def add_background_knowledge(self, rule : str, pred_name: str):
             self.aba_framework.add_bk_rule(rule,pred_name=pred_name)

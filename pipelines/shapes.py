@@ -1,10 +1,7 @@
 import os
-import random
 import torch
 
-from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
 from datasets.SHAPES_9.SHAPES import SHAPESDATASET as SHAPESDATASET_9
-
 from neuro_modules.slots import SlotAutoencoder
 from neuro_modules.NAL import NAL
 
@@ -35,7 +32,7 @@ def get_shape_9_nal_model():
 
     model.load_state_dict(ckpt['model_state_dict'],)
 
-    nal = NAL(model,object_info)
+    nal = NAL(model,None,object_info)
 
     return nal
 
@@ -64,97 +61,65 @@ def get_rule(num_class: int):
     if num_class <= 12:
         return 6
 
-def shapes_9_nal_training(num_examples: int, class_ids: list):
+def shapes_9_nal_training(num_examples: int, class_ids: list, order = False):
     
-    nal = get_shape_9_nal_model()
-
     NUM_SLOTS = 10
-    THRESHOLD = 0.9
+    THRESHOLD = 0.7
 
-    data = SHAPESDATASET_9(cache=False)
-    data = data.get_SHAPES_dataset()
+    data = SHAPESDATASET_9(cache=True,transform=SHAPESDATASET_9.get_transform())
 
-    total_items = len(data[class_ids[0]])
-    ## Populating ABA Framework with Examples
-
-    print("Finding Examples....")
-
-    for i in class_ids:
-        j = 0
-        history = []
-        while j < num_examples:
-            choosen_exp = random.randint(0, total_items - 2)
-            img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
-            prediction, _ = nal.run_slot_attention_model(img_path[0],NUM_SLOTS)
-            ground = get_rule(i) in [4,5]  
-            if nal.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
-                nal.populate_aba_framework(prediction, i == class_ids[0],include_pos=ground)
-                j = j + 1
-                history.append(choosen_exp)            
-
+    shapes_NAL = get_shape_9_nal_model()
+    shapes_NAL.dataset = data
+    postive_class = class_ids[0]
+    negative_class = class_ids[1]
+    ground = get_rule(postive_class) in [4,5]
     
-    filename = f"shapes_9_bk_r{get_rule(i)}.aba"
+
+    print("Choosing Examples...")
+
+    p_examples , n_examples = shapes_NAL.choose_example([postive_class], [negative_class], num_examples)
+
+
+    for eg in p_examples:
+        data_point = data[eg]
+        prediction, _ = shapes_NAL.run_slot_attention_model(data_point["input"],NUM_SLOTS,num_coords=2,isPath=False)
+        if shapes_NAL.check_prediction_quailty(prediction,THRESHOLD):
+            shapes_NAL.populate_aba_framework(prediction,True,include_pos=ground)
+
+    for eg in n_examples:
+        data_point = data[eg]
+        prediction, _ = shapes_NAL.run_slot_attention_model(data_point["input"],NUM_SLOTS,num_coords=2,isPath=False)
+        if shapes_NAL.check_prediction_quailty(prediction,THRESHOLD):
+            shapes_NAL.populate_aba_framework(prediction,False,include_pos=ground)
+    
+    filename = f"shapes_9_bk_r{get_rule(postive_class)}.aba"
 
     if ground:
-        add_shape_bk(nal)
+        add_shape_bk(shapes_NAL)
 
     print("Running Framework")
 
-    pred_order = ["square", "circle", "triangle", "red", "green", "blue", "small", "large", "above", "left"]
+    if order:
+        pred_order = ["square", "circle", "triangle", "red", "green", "blue", "small", "large", "above", "left"]
+        shapes_NAL.run_aba_framework(filename, id=get_rule(postive_class), ground= ground, order=pred_order)
+    else:
+        shapes_NAL.run_aba_framework(filename, id=get_rule(postive_class), ground= ground)
 
-    nal.run_aba_framework(filename, id= get_rule(i), ground= ground, order= pred_order)
-
-
-def shapes_9_nal_training_general(num_examples: int, class_ids: list):
-    
-    nal = get_shape_9_nal_model()
-
-    NUM_SLOTS = 10
-    THRESHOLD = 0.9
-
-    data = SHAPESDATASET_9(cache=False)
-    data = data.get_SHAPES_dataset()
-
-    total_items = len(data[class_ids[0]])
-    ## Populating ABA Framework with Examples
-
-    print("Finding Examples....")
-
-    for i in class_ids:
-        j = 0
-        history = []
-        while j < num_examples:
-            choosen_exp = random.randint(0, total_items - 2)
-            img_path = data[i][choosen_exp]  ## Tuple of (img_path, label_path)
-            labels = nal.run_slot_attention_kmean(img_path[0])
-            nal.populate_aba_framework_general(labels, i == class_ids[0])
-            j = j + 1
-            history.append(choosen_exp)            
-
-    
-    filename = f"shapes_9_bk_r{get_rule(i)}.aba"
-
-    print("Running Framework....")
-
-    nal.run_aba_framework(filename, id= get_rule(i))
 
 def shapes_9_nal_inference(img_path: str, aba_path: str, include_pos = False):
-    nal = get_shape_9_nal_model()
 
+    """
+        Inference for Classification Task
+        if predicate c(...) is in majority stable models we classify image as positve  
+    """
+    nal = get_shape_9_nal_model()
     NUM_SLOTS = 10
 
     prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS)
     nal.populate_aba_framework_inference(prediction,include_pos)
 
-    """
-        Classification Task
-        if predicate c(...) is in majority stable model we classify image as positve 
-    
-    """
 
-    # img = f":- c(img_{nal.img_id})."
     all_models = nal.run_learnt_framework(aba_path)
-    # r_models = nal.run_learnt_framework(aba_path,img)
 
     total_model = len(all_models)
     present = 0
@@ -189,7 +154,7 @@ if __name__ == "__main__":
 
     classes = [[7,8]]
     for c in classes:
-        shapes_9_nal_training(10,c)
+        shapes_9_nal_training(15,c, order=True)
 
     # test_img = "/mnt/d/fyp/SHAPES_9/training_data/c1_s10/c1_10.png"
     # test_img2 = "/mnt/d/fyp/SHAPES_9/training_data/c2_s10/c2_10.png"

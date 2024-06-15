@@ -10,6 +10,7 @@ import torch.nn as nn
 from PIL import Image
 from torch.utils.data import Dataset
 from tqdm import tqdm
+from torchvision import transforms
 from torchvision.datasets import DatasetFolder
 from torchvision.transforms import ToTensor
 from sklearn.preprocessing import OneHotEncoder
@@ -483,6 +484,7 @@ class Colour(Enum):
     Red = 1
     Green = 2
     Blue = 3
+
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
@@ -556,7 +558,9 @@ class SHAPESDATASET(Dataset):
 
         final_labels = np.pad(result_with_real, ((0, pad_rows), (0, pad_cols)), mode='constant', constant_values=0)
 
-        return image_path, final_labels
+        class_label = self.extract_class_number(image_path)
+
+        return {"input": image_path, "class": class_label, "target": final_labels}
     
     def __len__(self):
         return len(self.dataset)
@@ -570,11 +574,29 @@ class SHAPESDATASET(Dataset):
     
         return all_labels
 
+    def extract_class_number(self,path):
+        class_label = np.zeros(13)
+        parts = path.split('/')
+
+        class_directory = parts[-2]
+
+        class_number = int(class_directory.split('_')[0][1:])
+
+        class_label[class_number] = 1
+
+        return class_label
+
     def __getitem__(self, idx: int):
         if self.cache:
-            image_path, label = self._images[idx]
+            info = self._images[idx]
+            image_path = info["input"]
+            class_label = info["class"]
+            label = info["target"]
         else:
-            image_path, label = self.dataset.samples[idx]
+            info = self._load_image(self.dataset.samples[idx])
+            image_path = info["input"]
+            class_label = info["class"]
+            label = info["target"]
 
         image = Image.open(image_path).convert("RGB")
 
@@ -584,7 +606,7 @@ class SHAPESDATASET(Dataset):
         if self.target_transform:
             label = self.target_transform(label)
 
-        return image, label
+        return {"input": image, "class": class_label, "target": label}
     
     def get_SHAPES_dataset(self,split="train"):
         num_classes = 12
@@ -622,7 +644,6 @@ class SHAPESDATASET(Dataset):
                     info = info + item[2:]
                     set_result.append((tuple(info)))
                 
-             
             return set_result
         
     def get_ground_truth_map(self, label_path: str,):
@@ -635,3 +656,19 @@ class SHAPESDATASET(Dataset):
         map = cv2.resize(map, (64,64),interpolation=cv2.INTER_NEAREST)
 
         return map
+    
+    def get_all_data(self):
+        all_data_list = []
+        for idx in range(self.__len__()):
+            data = self.__getitem__(idx)
+            all_data_list.append((idx, data))
+        return all_data_list
+    
+    def get_transform():
+        transform = transforms.Compose(
+            [
+                transforms.Resize((64, 64), antialias=None),
+                transforms.PILToTensor(), 
+            ])
+    
+        return transform

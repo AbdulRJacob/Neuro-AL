@@ -2,7 +2,6 @@ import os
 import numpy as np
 
 from datasets.SHAPES_9.SHAPES import SHAPES
-from datasets.SHAPES_4.SHAPES4 import SHAPES_4
 from datasets.SHAPES_9.SHAPES import SHAPESDATASET
 
 
@@ -69,31 +68,6 @@ if __name__ == "__main__":
 
         generate_dataset_SHAPES9(rule,l1,train_test_split,pos1)
         generate_dataset_SHAPES9(rule,l2,train_test_split,pos2)
-
-
-   print("--------- Generating SHAPES 4 ---------")
-
-
-   train_test_split = (1000,500)
-   labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"],["c11","c12"]]
-   rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
-            ["c(A) :- red(O1), circle(O1), in(A,O1), image(A)"],
-            ["c(A) :- blue(O1), triangle(O1), in(A,O1), green(O2), circle(O2), in(A,O2), image(A)"],
-            ["c(A) :- blue(O1), square(O1), in(A,O1), red(O2), circle(O2), in(A,O2), above(O1,O2), image(A)"],
-            ["c(A) :- red(O1), triangle(O1), in(A,O1), green(O2), circle(O2), in(A,O2), left(O1,O2), image(A)"],
-            ["c(A) :- not exception1(A), image(A).", "exception1(A) :- blue(O2), circle(O2),in(A,O2), image(A)."]]
-   
-   for i in range(0,len(labels)):
-        rule = rules[i] 
-        label = labels[i]
-        l1 = label[0]
-        l2 = label[1]
-
-        pos1 = int(l1.replace("c","")) % 2 == 0
-        pos2 = int(l2.replace("c","")) % 2 == 0
-
-        generate_dataset_SHAPES4(rule,l1,train_test_split,pos1)
-        generate_dataset_SHAPES4(rule,l2,train_test_split,pos2)
 
 
 

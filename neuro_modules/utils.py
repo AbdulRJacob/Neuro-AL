@@ -1,8 +1,14 @@
-from typing import Literal, Optional, Sequence, Tuple, Union
+from typing import Tuple
 
 import numpy as np
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from sklearn.metrics import pairwise_distances_argmin_min
 from scipy.spatial.distance import cosine
+from sklearn.metrics import pairwise_distances
+
 import scipy
 import torch
 from torch import nn
@@ -67,60 +73,23 @@ def calculate_distances(labels, data, size):
     return cost_matrix
 
 def get_attended_bounding_box(mask):
-    # Threshold the mask to identify the attended region
     threshold_value = 0.80
     
     attended_region = (mask > threshold_value).astype(int)
 
-    # Find the indices of non-zero elements in the attended region
     non_zero_indices = np.nonzero(attended_region)
     
     if non_zero_indices[0].size == 0:
         return (-1,-1,-1,-1)
 
-    # Calculate the bounding box coordinates
     x_min = np.min(non_zero_indices[1])
     y_min = np.min(non_zero_indices[0])
     x_max = np.max(non_zero_indices[1])
     y_max = np.max(non_zero_indices[0])
 
-    # Represent the bounding box coordinates
     bounding_box = (x_min, y_min, x_max, y_max)
 
     return bounding_box
-
-
-def get_dissimilar_ranking(imgs, model ,num_slots):
-    num_img = len(imgs)
-
-    model.eval()
-    inputs = (imgs / 127.5 ) - 1
-    _, _, _, slots , _ = model(inputs)
-    slots = slots.detach().numpy()
-
-
-    pca_models = []
-    reduced_slots = []
-    for img_idx in range(num_img):
-        pca = PCA(n_components=2)
-        reduced_slot = pca.fit_transform(slots[img_idx])
-        pca_models.append(pca)
-        reduced_slots.append(reduced_slot)
-
-    dissimilarity_scores = np.zeros((num_img, num_img))
-    for i in range(num_img):
-        for j in range(num_img):
-            if i != j:
-                distance_sum = 0
-                for k in range(num_slots):
-                    distance_sum += cosine(reduced_slots[i][k], reduced_slots[j][k])
-                dissimilarity_scores[i, j] = distance_sum
-
-
-    total_dissimilarity = np.sum(dissimilarity_scores, axis=1)
-    ranking = np.argsort(total_dissimilarity)
-
-    return ranking
 
 
 def average_precision(pred, attributes, distance_threshold):
@@ -358,3 +327,63 @@ def adjusted_rand_index(true_mask, pred_mask, name="ari_score"):
 def _all_equal(values):
     """Whether values are all equal along the final axis."""
     return torch.all(torch.eq(values, values[..., :1]), axis=-1)
+
+
+def aggregate_slots(slots, method='average'):
+    if method == 'average':
+        return np.mean(slots, axis=0)
+    elif method == 'max':
+        return np.max(slots, axis=0)
+    elif method == 'concat':
+        return np.concatenate(slots, axis=0)
+    else:
+        raise ValueError("Unsupported aggregation method.")
+    
+
+def get_diverse_slots(data, num_clusters):
+  representations = np.array([agg_rep for _, agg_rep in data])
+
+  num_samples, num_rows, num_columns = representations.shape
+  flattened_slots = representations.reshape(num_samples, -1)
+  print(flattened_slots.shape)
+  
+  kmeans = KMeans(n_clusters=num_clusters)
+  kmeans.fit(flattened_slots)
+  cluster_centers = kmeans.cluster_centers_
+  closest, _ = pairwise_distances_argmin_min(cluster_centers, flattened_slots)
+  diverse_sample_indices = [data[idx][0] for idx in closest]
+  return diverse_sample_indices
+
+def visualize_tsne(data, num_clusters):
+    # Prepare the data
+    representations = np.array([agg_rep for _, _ ,agg_rep in data])
+    num_samples, num_rows, num_columns = representations.shape
+    flattened_slots = representations.reshape(num_samples, -1)
+    
+    # Perform KMeans clustering
+    kmeans = KMeans(n_clusters=num_clusters)
+    kmeans.fit(flattened_slots)
+    cluster_centers = kmeans.cluster_centers_
+    closest, _ = pairwise_distances_argmin_min(cluster_centers, flattened_slots)
+    diverse_sample_indices = [data[idx][0] for idx in closest]
+    
+    # Perform t-SNE
+    tsne = TSNE(n_components=2, random_state=42)
+    tsne_results = tsne.fit_transform(flattened_slots)
+    
+    # Visualize the results
+    plt.figure(figsize=(12, 8))
+    
+    # Extract the classes from the data
+    classes = [data[idx][1] for idx in range(len(data))]
+    
+    for class_label in set(classes):
+        indices = [i for i, x in enumerate(classes) if x == class_label]
+        plt.scatter(tsne_results[indices, 0], tsne_results[indices, 1], label=f'Class {class_label}')
+    
+    plt.scatter(tsne_results[closest, 0], tsne_results[closest, 1], c='black', marker='x', label='Cluster Centers')
+    plt.legend()
+    plt.title('t-SNE visualization of slots')
+    plt.show()
+    
+    return diverse_sample_indices

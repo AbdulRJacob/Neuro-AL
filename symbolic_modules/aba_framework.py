@@ -207,6 +207,7 @@ class ABAFramework:
 
     def load_solved_framework(self, filepath: str):
         rule_type = 0     # 0 == BK | 1 == Learnt Rule
+        self.learnt_rules = []
 
         with open(filepath, "r") as f:
             for line in f:

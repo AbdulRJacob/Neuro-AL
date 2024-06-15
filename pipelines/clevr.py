@@ -1,49 +1,11 @@
 import os
-import random
-import numpy as np
 import torch
-import torch.nn as nn
 import matplotlib.pyplot as plt
-from PIL import Image
-from torch import Tensor
-from torch.optim import AdamW, Optimizer
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from symbolic_modules.aba_framework import ABAFramework
 
 from datasets.CLEVR.CLEVR import CLEVRHans
-import neuro_modules.utils as utils
 from neuro_modules.NAL import NAL
 from neuro_modules.slots import SlotAutoencoder
-import neuro_modules.evaluation as e
 
-categories = {
-    "object": ["cube", "sphere", "cylinder"],
-    "colour": ["gray", "red", "blue", "green", "brown", "purple", "cyan", "yellow"],
-    "size": ["large", "small"],
-    "material": ["rubber", "metal"]
-}
-
-def one_hot_encode_dict(data_dict):
-    print(data_dict)
-    one_hot_encoded = []
-    for feature, values in categories.items():
-        value = data_dict.get(feature)
-        # One-hot encode the value
-        if value in values:
-            one_hot = [0] * len(values)
-            one_hot[values.index(value)] = 1
-            one_hot_encoded.extend(one_hot)
-        else:
-            one_hot_encoded.extend([0] * len(values))
-    return one_hot_encoded
-
-# Define a function to one-hot encode a list of dictionaries
-def one_hot_encode_list(data_list):
-    encoded_list = []
-    for data_dict in data_list:
-        encoded_list.append(one_hot_encode_dict(data_dict))
-    return np.array(encoded_list)
 
 def get_class_dict(object_dict : dict):
     length_dict = {}
@@ -75,93 +37,110 @@ def get_clevr_nal_model():
 
     model.load_state_dict(ckpt['model_state_dict'],)
 
-    nal = NAL(model,object_info)
+    nal = NAL(model,None,object_info)
 
     return nal
 
+def check_predicate_presence(s_models, total_model, pred_name="c"):
+    present = 0
 
-def clevr(num_examples: int):
+    for model in s_models:
+        for symbol in model:
+            if f"{pred_name}(img_"in str(symbol): 
+                present+=1
+                break
 
-    NUM_SLOTS = 11
-    THRESHOLD = 0.9
-   
+        
+    absent = total_model - present
+    
+    return present > absent
 
-    data = CLEVRHans()
+
+def train_nal_clevr(num_examples: int):
+
+    NUM_SLOTS = 11  # Number of slots in the slot model 
+    THRESHOLD = 0.7 # Theshold for confidence of predicitons 
+
+    data = CLEVRHans(transform=CLEVRHans.get_transform())
 
     clevr_NAL = get_clevr_nal_model()
+    clevr_NAL.dataset = data
     postive_class = [0]
-    negative_class = [1,2]
-    print("choosing examples...")
+    negative_class = [1]
+
+    print("Choosing Examples...")
+
     
-    j=0
-    history = []
-    while j < num_examples:
-        choosen_exp = random.randint(0, 3000 - 2)
-        example = data[choosen_exp] 
-        # print(example)
-
-        if example["class"] in postive_class:
-            prediction, _ = clevr_NAL.run_slot_attention_model(example["input"],NUM_SLOTS,num_coords=3)
-            if clevr_NAL.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
-                clevr_NAL.populate_aba_framework(prediction,True)
-                j = j + 1
-                history.append(choosen_exp)
+    p_examples , n_examples = clevr_NAL.choose_example(postive_class, negative_class, num_examples)
 
 
-    j=0
-    history = []
-    while j < num_examples:
-        choosen_exp = random.randint(0, 3000 - 2)
-        example = data[choosen_exp] 
-
-        if example["class"] in negative_class:
-            prediction, _ = clevr_NAL.run_slot_attention_model(example["input"],NUM_SLOTS,num_coords=3)
-            if clevr_NAL.check_prediction_quailty(prediction,THRESHOLD) and choosen_exp not in history:
-                clevr_NAL.populate_aba_framework(prediction,False)
-                j = j + 1
-                history.append(choosen_exp)
+    for eg in p_examples:
+        data_point = data[eg]
+        prediction, _ = clevr_NAL.run_slot_attention_model(data_point["input"],NUM_SLOTS,num_coords=3,isPath=False)
+        if clevr_NAL.check_prediction_quailty(prediction,THRESHOLD):
+            clevr_NAL.populate_aba_framework(prediction,True)
 
 
-    filename = f"clevr_bk_c1.aba"
-    print("running framework...")
+    for eg in n_examples:
+        data_point = data[eg]
+        prediction, _ = clevr_NAL.run_slot_attention_model(data_point["input"],NUM_SLOTS,num_coords=3,isPath=False)
+        if clevr_NAL.check_prediction_quailty(prediction,THRESHOLD):
+            clevr_NAL.populate_aba_framework(prediction,False)
+
+    
+    filename = f"clevr_bk_c6.aba"
+
+    print("Running ABA Learning Algorithm...")
+
     clevr_NAL.run_aba_framework(filename)
 
 
-def clevr_nal_inference(img_path: str, aba_path: str, include_pos = False):
+def clevr_nal_inference(img_path: str, aba_path: list[str], include_pos = False):
+
+    """
+        CLEVR Hans Classification Task
+
+        img_path: images to perform inference on
+        aba_path: list of lenght 2. Inference for CLEVR-hans is perfomed in two passes using both learnt rules
+        include_pos: Boolean denoting whether to add co-oodrinates to the framework 
+
+        Task:
+            Idenfication of concept predicate c(...) denotes positive instance of class 
+
+    
+    """
 
     nal = get_clevr_nal_model()
-
     NUM_SLOTS = 11
 
-    prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS,num_coords=3)
+    prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS,num_coords=3,isPath=False)
     nal.populate_aba_framework_inference(prediction,include_pos)
 
-    """
-        Classification Task
-        if predicate c(...) is in majority stable model we classify image as positve 
+    # First Pass: Class 3 
+    nal.load_framework(aba_path[0])
+    all_models = nal.run_learnt_framework()
+    total_model = len(all_models)
+
+    has_predicate = check_predicate_presence(all_models,total_model)
     
-    """
-
-    img_c0 = f":- not c(img_{nal.img_id - 1})."
-    img_c1 = f":- not c2(img_{nal.img_id - 1})."
-    img_c2 = f":- not c3(img_{nal.img_id - 1})."
-
-    nal.load_framework(aba_path)
+    if has_predicate:
+        return 2
     
-    c_models = nal.run_learnt_framework(img_c0)
-    c2_models = nal.run_learnt_framework(img_c1)
-    c3_models = nal.run_learnt_framework(img_c2)
+    # Second Pass: Class 2
+    nal.load_framework(aba_path[1])
+    all_models = nal.run_learnt_framework()
+    total_model = len(all_models)
+   
+    has_predicate = check_predicate_presence(all_models,total_model)
 
-    
-    models = [len(c_models),len(c2_models),len(c3_models)]
-    print(models)
-
-    return np.argmax(np.array(models))
-
+    if has_predicate:
+        return 0
+    else:
+        return 1
         
 
 if __name__ == "__main__":  
-    clevr(15)
+    train_nal_clevr(num_examples=20)
     
 
 

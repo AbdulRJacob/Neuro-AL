@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from PIL import Image
@@ -8,13 +9,10 @@ import os
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
 
-
 from sklearn.metrics import adjusted_rand_score
-from sklearn.metrics import confusion_matrix
 
 from datasets.SHAPES_9.SHAPES import SHAPESDATASET
-from datasets.SHAPES_4.SHAPES4 import SHAPESDATASET as SHAPESDATASET_4
-from datasets.CLEVR.CLEVR import CLEVRHans
+from datasets.CLEVR.CLEVR import CLEVRHans, CLEVR
 from datasets.CLEVR.CLEVR import dataset as ds
 
 from neuro_modules.NAL import NAL
@@ -32,8 +30,8 @@ transform = transforms.Compose(
 
 @torch.no_grad()
 def visualise_slots(model, img_path, num_slots, idx=0):
-    img_path = NAL.preprocess_image(None,img_path)
-    recon_combined, recons, masks, slots, _  = model(img_path)
+    img_path = NAL.preprocess_image(None,img_path,True)
+    recon_combined, recons, masks, slots  = model(img_path)
     image = renormalize(img_path)[idx]
     recon_combined = renormalize(recon_combined)[idx]
     recons = renormalize(recons)[idx]
@@ -57,7 +55,7 @@ def visualise_slots(model, img_path, num_slots, idx=0):
         ax[i].grid(False)
         ax[i].axis('off')
 
-    plt.savefig('slot_vis_clevr.png')
+    plt.savefig('slot_vis_test.png')
 
 def visualise_clustering_maps(clustering_map,true_map):
 
@@ -80,23 +78,36 @@ def visualise_clustering_maps(clustering_map,true_map):
     plt.savefig('clustering_map_clvr.png')
 
 
+def visualise_slots(self, p_eg: list[int], n_eg: list[int], num_examples):
+    data = self.dataset.get_all_data()
+    data_s = []
+    rep_negative = []
+    for (idx, info) in data:
+        _, _, _, slots, _ = self.model(info["input"].unsqueeze(0).float())
+        combined_slots = utils.aggregate_slots(slots.detach().numpy(),method="average")
+        if np.argmax(info["class"]) == 2:
+            data_s.append((idx, str(np.argmax(info["class"])), combined_slots))
+
+    utils.visualize_tsne(data_s,num_examples)
+
+
 def analyse_SHAPES():
-    DATA_DIR_TRAIN = "datasets/SHAPES_9/training_data/"
-    NUM_CLASSESS = 10
-    SAMPLES = 200
-
-
-    data_train = shapes.get_SHAPES_dataset(DATA_DIR_TRAIN,SAMPLES,NUM_CLASSESS)
+    dataset = SHAPESDATASET(cache=False)
+    data_train = dataset.get_SHAPES_dataset()
 
     stats = {"Triangle" : {"Red" : 0, "Green": 0, "Blue": 0},
              "Square" : {"Red" : 0, "Green": 0, "Blue": 0},
              "Circle" : {"Red" : 0, "Green": 0, "Blue": 0},
              "" : {"" : 0}}
     
+    size_stat = {"S": 0, "L":0}
+    
     for i in range (1,11):
         for _,img_path in data_train[i]:
-            for label in shapes.get_ground_truth(img_path):
-                stats[label[1]][label[2]] += 1
+            for label in dataset.get_ground_truth(img_path):
+                x, y, shape, color, size = label
+                stats[shape][color] += 1
+                size_stat[size] += 1
 
 
     print("---------Shape-----------")
@@ -113,7 +124,10 @@ def analyse_SHAPES():
     print(f"Total Red Shapes: {red_shapes}")
     print(f"Total Blue Shapes: {blue_shapes}")
 
-
+    print("---------Size-----------")
+    print(f"Total Large Shapes: {size_stat['L']}")
+    print(f"Total Small Shapes: {size_stat['S']}")
+    
 
 def ari_clevr():
     tf_records_path = ''
@@ -253,11 +267,6 @@ def display_ari(results):
 
 
 def calcualte_AP():
-    transform = transforms.Compose(
-            [
-                transforms.Resize((64, 64), antialias=None),
-                transforms.PILToTensor(), 
-            ])
     dataset = SHAPESDATASET(transform=transform)
     loader = DataLoader(dataset,128,num_workers=2)
 
@@ -336,12 +345,112 @@ def nal_eval_metrics():
     plt.title('Confusion Matrix')
     plt.savefig('confused_matrix_r4.png')
 
-def evaluate_classification(y_true, y_pred, class_names, img_name="confusion_matrix.png"):
 
+def eval_clevr_peception():
+    dataset = CLEVR(transform=transform, split="val")
+    loader = DataLoader(dataset,1,num_workers=2)
+ 
+    model = clevr.get_clevr_nal_model().model
+ 
+    # Initialize counters for each attribute
+    counters = {
+        'shape': {'TP': 0, 'FP': 0, 'FN': 0},
+        'color': {'TP': 0, 'FP': 0, 'FN': 0},
+        'object_size': {'TP': 0, 'FP': 0, 'FN': 0},
+        'material': {'TP': 0, 'FP': 0, 'FN': 0},
+        'total': 0
+    }
+ 
+ 
+    for _, (x, y) in enumerate(loader):
+        x = (x / 127.5 ) - 1
+        y = y.float()
+        _ , _ ,_ , _ , output = model(x)
+ 
+        cost_matrix = utils.calculate_distances(y,output,11)
+        h_match = utils.hungarian_algorithm(cost_matrix)[1]
+ 
+        actual_indices = h_match[0, 0].tolist()
+        predicted_indices = h_match[0, 1].tolist()
+ 
+        y = y.squeeze(0)
+        output = output.squeeze(0)
+ 
+        matched_actual_labels = [y[i] for i in actual_indices]
+        matched_predicted_labels = [output[i] for i in predicted_indices]
+ 
+ 
+        for actual, predicted in zip(matched_actual_labels, matched_predicted_labels):
+            (pred_coords, pred_shape, pred_color, pred_object_size, pred_material,
+                _) = process_targets_clevr(predicted.detach().numpy())
+           
+            (target_coords, target_shape, target_color, target_object_size,
+                target_material, target_real_obj) = process_targets_clevr(actual.detach().numpy())
+           
+            if target_real_obj < 0.5:
+                continue
+ 
+            counters['total'] += 1
+ 
+            # Update counters for shape
+            if pred_shape == target_shape:
+                counters['shape']['TP'] += 1
+            else:
+                counters['shape']['FP'] += 1
+                counters['shape']['FN'] += 1
+ 
+            # Update counters for color
+            if pred_color == target_color:
+                counters['color']['TP'] += 1
+            else:
+                counters['color']['FP'] += 1
+                counters['color']['FN'] += 1
+ 
+            # Update counters for object_size
+            if pred_object_size == target_object_size:
+                counters['object_size']['TP'] += 1
+            else:
+                counters['object_size']['FP'] += 1
+                counters['object_size']['FN'] += 1
+ 
+            # Update counters for material
+            if pred_material == target_material:
+                counters['material']['TP'] += 1
+            else:
+                counters['material']['FP'] += 1
+                counters['material']['FN'] += 1      
+ 
+    def calculate_metrics(attribute_counters):
+        TP = attribute_counters['TP']
+        FP = attribute_counters['FP']
+        FN = attribute_counters['FN']
+       
+        precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+        recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+        accuracy = TP / counters['total'] if counters['total'] > 0 else 0
+        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+       
+        return precision, recall, accuracy, f1
+   
+ 
+    for attribute in ['shape', 'color', 'object_size', 'material']:
+         precision, recall, accuracy, f1 = calculate_metrics(counters[attribute])
+         print(f'{attribute.capitalize()} - Precision: {precision}, Recall: {recall}, Accuracy: {accuracy}, F1 Score: {f1}')
+
+
+def evaluate_classification(y_true, y_pred, class_names, img_name="confusion_matrix.png", normalize=False, cmap=plt.cm.Blues):
     y_pred = np.array(y_pred)
     y_true = np.array(y_true)
 
     cm = confusion_matrix(y_true, y_pred)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+    
+    print(cm)
     
     precision = precision_score(y_true, y_pred, average='macro')
     recall = recall_score(y_true, y_pred, average='macro')
@@ -354,13 +463,34 @@ def evaluate_classification(y_true, y_pred, class_names, img_name="confusion_mat
     print("F1 Score:", f1)
     
     # Plot confusion matrix
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, cmap='Blues', fmt='g', xticklabels=class_names, 
-                yticklabels=class_names)
-    plt.xlabel('Predicted labels')
-    plt.ylabel('True labels')
-    plt.title('Confusion Matrix')
+    fig, ax = plt.subplots(figsize=(8, 6))
+    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+    ax.figure.colorbar(im, ax=ax)
+    
+    # We want to show all ticks...
+    ax.set(xticks=np.arange(cm.shape[1]),
+           yticks=np.arange(cm.shape[0]),
+           # ... and label them with the respective list entries
+           xticklabels=class_names, yticklabels=class_names,
+           title='Normalized confusion matrix' if normalize else 'Confusion Matrix',
+           ylabel='True label',
+           xlabel='Predicted label')
+    
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), ha="right", rotation_mode="anchor")
+    
+    # Loop over data dimensions and create text annotations.
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(j, i, format(cm[i, j], fmt),
+                    ha="center", va="center",
+                    color="white" if cm[i, j] > thresh else "black")
+    
+    fig.tight_layout()
     plt.savefig(img_name)
+    plt.show()
 
 
 def to_numpy(x):
@@ -368,6 +498,16 @@ def to_numpy(x):
 
 def renormalize(x):
     return x / 2. + 0.5  # [-1, 1] to [0, 1]
+
+def process_targets_clevr(target):
+    """Unpacks the target into the CLEVR properties."""
+    coords = target[:3]
+    shape = np.argmax(target[3:6])
+    color = np.argmax(target[6:14])
+    object_size = np.argmax(target[14:16])
+    material = np.argmax(target[16:18])
+    real_obj = target[18]
+    return coords, shape, color, object_size, material, real_obj
 
 
 def test_clustering():
@@ -396,12 +536,11 @@ def test_clustering():
     plt.xlabel("Slot Dimensions")
     plt.ylabel("Slots")
     plt.show()
-
-        
+     
 if __name__ == "__main__": 
 
-    dataset_test = CLEVRHans(transform=transform,split="test")
-    aba_path = "clevr_bk_1_SOLVED.aba"
+    dataset_test = CLEVRHans(split="test")
+    aba_path = ["clevr_bk_c3_SOLVED.aba","clevr_bk_c4_SOLVED.aba"]
 
     y_pred = []
     y_true = []
@@ -415,3 +554,5 @@ if __name__ == "__main__":
         y_true.append(np.argmax(target))
 
     
+
+    evaluate_classification(y_true,y_pred,["Class 1", "Class 2", "Class 3"], "cm_best.png")
