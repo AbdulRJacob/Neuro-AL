@@ -1,0 +1,1011 @@
+Log file created
+2024-06-14 20:08:06,756 - INFO - Epoch 1: Train loss: 0.006425
+2024-06-14 20:10:43,368 - INFO - Epoch 2: Train loss: 0.000121
+2024-06-14 20:13:19,904 - INFO - Epoch 3: Train loss: 0.000037
+2024-06-14 20:16:53,771 - INFO - Epoch 4: Train loss: 0.000025, Valid loss: 0.000022
+2024-06-18 15:33:23,769 - INFO - Epoch 1: Train loss: 0.231269
+2024-06-18 15:34:27,522 - INFO - Epoch 2: Train loss: 0.185098
+2024-06-18 15:35:30,905 - INFO - Epoch 3: Train loss: 0.168180
+2024-06-18 15:37:01,210 - INFO - Epoch 4: Train loss: 0.157949, Valid loss: 0.153230
+2024-06-18 15:38:04,781 - INFO - Epoch 5: Train loss: 0.149029
+2024-06-18 15:39:08,207 - INFO - Epoch 6: Train loss: 0.137718
+2024-06-18 15:40:11,658 - INFO - Epoch 7: Train loss: 0.131253
+2024-06-18 15:41:41,964 - INFO - Epoch 8: Train loss: 0.126104, Valid loss: 0.123378
+2024-06-18 15:42:45,103 - INFO - Epoch 9: Train loss: 0.121319
+2024-06-18 15:43:48,479 - INFO - Epoch 10: Train loss: 0.117928
+2024-06-18 15:44:52,085 - INFO - Epoch 11: Train loss: 0.113146
+2024-06-18 15:46:21,914 - INFO - Epoch 12: Train loss: 0.106357, Valid loss: 0.103610
+2024-06-18 15:47:25,277 - INFO - Epoch 13: Train loss: 0.103632
+2024-06-18 15:48:28,990 - INFO - Epoch 14: Train loss: 0.100798
+2024-06-18 15:49:32,705 - INFO - Epoch 15: Train loss: 0.098855
+2024-06-18 15:51:03,008 - INFO - Epoch 16: Train loss: 0.097141, Valid loss: 0.096992
+2024-06-18 15:52:06,862 - INFO - Epoch 17: Train loss: 0.095743
+2024-06-18 15:53:10,424 - INFO - Epoch 18: Train loss: 0.094977
+2024-06-18 15:54:13,954 - INFO - Epoch 19: Train loss: 0.093316
+2024-06-18 15:55:43,414 - INFO - Epoch 20: Train loss: 0.092224, Valid loss: 0.093069
+2024-06-18 15:56:47,103 - INFO - Epoch 21: Train loss: 0.091326
+2024-06-18 15:57:50,785 - INFO - Epoch 22: Train loss: 0.090139
+2024-06-18 15:58:54,209 - INFO - Epoch 23: Train loss: 0.089471
+2024-06-18 16:00:24,216 - INFO - Epoch 24: Train loss: 0.088265, Valid loss: 0.088882
+2024-06-18 16:01:28,144 - INFO - Epoch 25: Train loss: 0.088262
+2024-06-18 16:02:32,360 - INFO - Epoch 26: Train loss: 0.087930
+2024-06-18 16:03:36,212 - INFO - Epoch 27: Train loss: 0.086499
+2024-06-18 16:05:06,369 - INFO - Epoch 28: Train loss: 0.085707, Valid loss: 0.085265
+2024-06-18 16:06:09,880 - INFO - Epoch 29: Train loss: 0.085130
+2024-06-18 16:07:13,550 - INFO - Epoch 30: Train loss: 0.084380
+2024-06-18 16:08:17,476 - INFO - Epoch 31: Train loss: 0.084216
+2024-06-18 16:09:47,854 - INFO - Epoch 32: Train loss: 0.083720, Valid loss: 0.083422
+2024-06-18 16:10:51,471 - INFO - Epoch 33: Train loss: 0.082727
+2024-06-18 16:11:55,406 - INFO - Epoch 34: Train loss: 0.082860
+2024-06-18 16:12:58,694 - INFO - Epoch 35: Train loss: 0.082130
+2024-06-18 16:14:28,566 - INFO - Epoch 36: Train loss: 0.081861, Valid loss: 0.081073
+2024-06-18 16:15:32,013 - INFO - Epoch 37: Train loss: 0.081540
+2024-06-18 16:16:35,835 - INFO - Epoch 38: Train loss: 0.081530
+2024-06-18 16:17:39,635 - INFO - Epoch 39: Train loss: 0.080903
+2024-06-18 16:19:09,868 - INFO - Epoch 40: Train loss: 0.080768, Valid loss: 0.079934
+2024-06-18 16:20:13,457 - INFO - Epoch 41: Train loss: 0.080001
+2024-06-18 16:21:16,723 - INFO - Epoch 42: Train loss: 0.079951
+2024-06-18 16:22:20,022 - INFO - Epoch 43: Train loss: 0.079502
+2024-06-18 16:23:50,519 - INFO - Epoch 44: Train loss: 0.079787, Valid loss: 0.081547
+2024-06-18 16:24:53,870 - INFO - Epoch 45: Train loss: 0.079710
+2024-06-18 16:25:57,009 - INFO - Epoch 46: Train loss: 0.079190
+2024-06-18 16:27:00,516 - INFO - Epoch 47: Train loss: 0.078281
+2024-06-18 16:28:31,241 - INFO - Epoch 48: Train loss: 0.078306, Valid loss: 0.077618
+2024-06-18 16:29:35,234 - INFO - Epoch 49: Train loss: 0.077393
+2024-06-18 16:30:39,145 - INFO - Epoch 50: Train loss: 0.077696
+2024-06-18 16:31:42,583 - INFO - Epoch 51: Train loss: 0.076830
+2024-06-18 16:33:12,584 - INFO - Epoch 52: Train loss: 0.076622, Valid loss: 0.075585
+2024-06-18 16:34:16,029 - INFO - Epoch 53: Train loss: 0.076278
+2024-06-18 16:35:19,813 - INFO - Epoch 54: Train loss: 0.075938
+2024-06-18 16:36:23,151 - INFO - Epoch 55: Train loss: 0.076104
+2024-06-18 16:37:53,690 - INFO - Epoch 56: Train loss: 0.075514, Valid loss: 0.075706
+2024-06-18 16:38:57,427 - INFO - Epoch 57: Train loss: 0.074884
+2024-06-18 16:40:01,153 - INFO - Epoch 58: Train loss: 0.074501
+2024-06-18 16:41:04,674 - INFO - Epoch 59: Train loss: 0.074196
+2024-06-18 16:42:34,631 - INFO - Epoch 60: Train loss: 0.074189, Valid loss: 0.073087
+2024-06-18 16:43:37,931 - INFO - Epoch 61: Train loss: 0.074114
+2024-06-18 16:44:41,397 - INFO - Epoch 62: Train loss: 0.073088
+2024-06-18 16:45:45,037 - INFO - Epoch 63: Train loss: 0.073021
+2024-06-18 16:47:14,883 - INFO - Epoch 64: Train loss: 0.073268, Valid loss: 0.072636
+2024-06-18 16:48:18,525 - INFO - Epoch 65: Train loss: 0.072525
+2024-06-18 16:49:22,221 - INFO - Epoch 66: Train loss: 0.072338
+2024-06-18 16:50:25,742 - INFO - Epoch 67: Train loss: 0.072331
+2024-06-18 16:51:56,134 - INFO - Epoch 68: Train loss: 0.071898, Valid loss: 0.071982
+2024-06-18 16:52:59,278 - INFO - Epoch 69: Train loss: 0.071458
+2024-06-18 16:54:02,473 - INFO - Epoch 70: Train loss: 0.071314
+2024-06-18 16:55:06,259 - INFO - Epoch 71: Train loss: 0.071662
+2024-06-18 16:56:36,250 - INFO - Epoch 72: Train loss: 0.071302, Valid loss: 0.070833
+2024-06-18 16:57:39,849 - INFO - Epoch 73: Train loss: 0.070706
+2024-06-18 16:58:43,373 - INFO - Epoch 74: Train loss: 0.070728
+2024-06-18 16:59:46,600 - INFO - Epoch 75: Train loss: 0.070414
+2024-06-18 17:01:16,808 - INFO - Epoch 76: Train loss: 0.070025, Valid loss: 0.069273
+2024-06-18 17:02:20,459 - INFO - Epoch 77: Train loss: 0.070179
+2024-06-18 17:03:24,412 - INFO - Epoch 78: Train loss: 0.070009
+2024-06-18 17:04:28,098 - INFO - Epoch 79: Train loss: 0.069630
+2024-06-18 17:05:58,346 - INFO - Epoch 80: Train loss: 0.069412, Valid loss: 0.068676
+2024-06-18 17:07:02,014 - INFO - Epoch 81: Train loss: 0.069311
+2024-06-18 17:08:05,548 - INFO - Epoch 82: Train loss: 0.069094
+2024-06-18 17:09:09,297 - INFO - Epoch 83: Train loss: 0.069096
+2024-06-18 17:10:39,505 - INFO - Epoch 84: Train loss: 0.068960, Valid loss: 0.068460
+2024-06-18 17:11:43,002 - INFO - Epoch 85: Train loss: 0.068389
+2024-06-18 17:12:46,344 - INFO - Epoch 86: Train loss: 0.068109
+2024-06-18 17:13:49,564 - INFO - Epoch 87: Train loss: 0.068095
+2024-06-18 17:15:19,761 - INFO - Epoch 88: Train loss: 0.067954, Valid loss: 0.067572
+2024-06-18 17:16:23,273 - INFO - Epoch 89: Train loss: 0.067602
+2024-06-18 17:17:27,227 - INFO - Epoch 90: Train loss: 0.067974
+2024-06-18 17:18:30,750 - INFO - Epoch 91: Train loss: 0.067371
+2024-06-18 17:20:00,815 - INFO - Epoch 92: Train loss: 0.067616, Valid loss: 0.066546
+2024-06-18 17:21:04,293 - INFO - Epoch 93: Train loss: 0.067364
+2024-06-18 17:22:07,712 - INFO - Epoch 94: Train loss: 0.067060
+2024-06-18 17:23:11,630 - INFO - Epoch 95: Train loss: 0.067139
+2024-06-18 17:24:41,541 - INFO - Epoch 96: Train loss: 0.066808, Valid loss: 0.065716
+2024-06-18 17:25:44,766 - INFO - Epoch 97: Train loss: 0.066525
+2024-06-18 17:26:48,698 - INFO - Epoch 98: Train loss: 0.066313
+2024-06-18 17:27:51,959 - INFO - Epoch 99: Train loss: 0.066120
+2024-06-18 17:29:22,403 - INFO - Epoch 100: Train loss: 0.065911, Valid loss: 0.065788
+2024-06-18 17:30:25,824 - INFO - Epoch 101: Train loss: 0.065607
+2024-06-18 17:31:29,528 - INFO - Epoch 102: Train loss: 0.065407
+2024-06-18 17:32:33,138 - INFO - Epoch 103: Train loss: 0.065540
+2024-06-18 17:34:03,637 - INFO - Epoch 104: Train loss: 0.065075, Valid loss: 0.064369
+2024-06-18 17:35:07,138 - INFO - Epoch 105: Train loss: 0.064996
+2024-06-18 17:36:11,024 - INFO - Epoch 106: Train loss: 0.065074
+2024-06-18 17:37:14,434 - INFO - Epoch 107: Train loss: 0.064612
+2024-06-18 17:38:44,591 - INFO - Epoch 108: Train loss: 0.064250, Valid loss: 0.063491
+2024-06-18 17:39:48,483 - INFO - Epoch 109: Train loss: 0.064085
+2024-06-18 17:40:52,274 - INFO - Epoch 110: Train loss: 0.063984
+2024-06-18 17:41:55,963 - INFO - Epoch 111: Train loss: 0.063933
+2024-06-18 17:43:25,886 - INFO - Epoch 112: Train loss: 0.063670, Valid loss: 0.064771
+2024-06-18 17:44:29,878 - INFO - Epoch 113: Train loss: 0.063542
+2024-06-18 17:45:33,658 - INFO - Epoch 114: Train loss: 0.063423
+2024-06-18 17:46:37,412 - INFO - Epoch 115: Train loss: 0.063216
+2024-06-18 17:48:07,755 - INFO - Epoch 116: Train loss: 0.062990, Valid loss: 0.062065
+2024-06-18 17:49:11,314 - INFO - Epoch 117: Train loss: 0.062842
+2024-06-18 17:50:14,735 - INFO - Epoch 118: Train loss: 0.062799
+2024-06-18 17:51:19,170 - INFO - Epoch 119: Train loss: 0.062345
+2024-06-18 17:52:49,120 - INFO - Epoch 120: Train loss: 0.062495, Valid loss: 0.061720
+2024-06-18 17:53:52,603 - INFO - Epoch 121: Train loss: 0.062140
+2024-06-18 17:54:56,646 - INFO - Epoch 122: Train loss: 0.061860
+2024-06-18 17:56:00,306 - INFO - Epoch 123: Train loss: 0.061904
+2024-06-18 17:57:30,746 - INFO - Epoch 124: Train loss: 0.061845, Valid loss: 0.062081
+2024-06-18 17:58:34,199 - INFO - Epoch 125: Train loss: 0.061599
+2024-06-18 17:59:38,202 - INFO - Epoch 126: Train loss: 0.061323
+2024-06-18 18:00:41,841 - INFO - Epoch 127: Train loss: 0.061422
+2024-06-18 18:02:11,443 - INFO - Epoch 128: Train loss: 0.060983, Valid loss: 0.060746
+2024-06-18 18:03:15,366 - INFO - Epoch 129: Train loss: 0.061096
+2024-06-18 18:04:19,527 - INFO - Epoch 130: Train loss: 0.060842
+2024-06-18 18:05:23,141 - INFO - Epoch 131: Train loss: 0.060793
+2024-06-18 18:06:53,104 - INFO - Epoch 132: Train loss: 0.060745, Valid loss: 0.059917
+2024-06-18 18:07:56,625 - INFO - Epoch 133: Train loss: 0.060427
+2024-06-18 18:09:00,337 - INFO - Epoch 134: Train loss: 0.060421
+2024-06-18 18:10:03,882 - INFO - Epoch 135: Train loss: 0.060191
+2024-06-18 18:11:33,483 - INFO - Epoch 136: Train loss: 0.059791, Valid loss: 0.060134
+2024-06-18 18:12:37,128 - INFO - Epoch 137: Train loss: 0.059968
+2024-06-18 18:13:40,845 - INFO - Epoch 138: Train loss: 0.060562
+2024-06-18 18:14:44,618 - INFO - Epoch 139: Train loss: 0.059804
+2024-06-18 18:16:14,883 - INFO - Epoch 140: Train loss: 0.059349, Valid loss: 0.060406
+2024-06-18 18:17:18,399 - INFO - Epoch 141: Train loss: 0.059900
+2024-06-18 18:18:22,043 - INFO - Epoch 142: Train loss: 0.059184
+2024-06-18 18:19:25,512 - INFO - Epoch 143: Train loss: 0.059447
+2024-06-18 18:20:55,482 - INFO - Epoch 144: Train loss: 0.058966, Valid loss: 0.058808
+2024-06-18 18:21:59,113 - INFO - Epoch 145: Train loss: 0.058750
+2024-06-18 18:23:02,398 - INFO - Epoch 146: Train loss: 0.058789
+2024-06-18 18:24:05,953 - INFO - Epoch 147: Train loss: 0.058962
+2024-06-18 18:25:35,865 - INFO - Epoch 148: Train loss: 0.058864, Valid loss: 0.058559
+2024-06-18 18:26:39,605 - INFO - Epoch 149: Train loss: 0.058694
+2024-06-18 18:27:43,312 - INFO - Epoch 150: Train loss: 0.058465
+2024-06-18 18:28:47,008 - INFO - Epoch 151: Train loss: 0.058770
+2024-06-18 18:30:17,643 - INFO - Epoch 152: Train loss: 0.058418, Valid loss: 0.058617
+2024-06-18 18:31:21,524 - INFO - Epoch 153: Train loss: 0.058414
+2024-06-18 18:32:25,602 - INFO - Epoch 154: Train loss: 0.058468
+2024-06-18 18:33:29,306 - INFO - Epoch 155: Train loss: 0.058267
+2024-06-18 18:34:59,834 - INFO - Epoch 156: Train loss: 0.057923, Valid loss: 0.057275
+2024-06-18 18:36:03,513 - INFO - Epoch 157: Train loss: 0.058411
+2024-06-18 18:37:07,742 - INFO - Epoch 158: Train loss: 0.057797
+2024-06-18 18:38:11,474 - INFO - Epoch 159: Train loss: 0.057848
+2024-06-18 18:39:42,400 - INFO - Epoch 160: Train loss: 0.057494, Valid loss: 0.058541
+2024-06-18 18:40:46,114 - INFO - Epoch 161: Train loss: 0.057694
+2024-06-18 18:41:49,924 - INFO - Epoch 162: Train loss: 0.057469
+2024-06-18 18:42:53,700 - INFO - Epoch 163: Train loss: 0.057522
+2024-06-18 18:44:24,100 - INFO - Epoch 164: Train loss: 0.057435, Valid loss: 0.057067
+2024-06-18 18:45:27,862 - INFO - Epoch 165: Train loss: 0.057315
+2024-06-18 18:46:31,548 - INFO - Epoch 166: Train loss: 0.057262
+2024-06-18 18:47:35,305 - INFO - Epoch 167: Train loss: 0.057268
+2024-06-18 18:49:06,598 - INFO - Epoch 168: Train loss: 0.057180, Valid loss: 0.056670
+2024-06-18 18:50:09,651 - INFO - Epoch 169: Train loss: 0.057121
+2024-06-18 18:51:13,424 - INFO - Epoch 170: Train loss: 0.057603
+2024-06-18 18:52:17,375 - INFO - Epoch 171: Train loss: 0.057026
+2024-06-18 18:53:47,911 - INFO - Epoch 172: Train loss: 0.057063, Valid loss: 0.057613
+2024-06-18 18:54:51,152 - INFO - Epoch 173: Train loss: 0.056698
+2024-06-18 18:55:55,002 - INFO - Epoch 174: Train loss: 0.056633
+2024-06-18 18:56:58,775 - INFO - Epoch 175: Train loss: 0.057062
+2024-06-18 18:58:29,478 - INFO - Epoch 176: Train loss: 0.056682, Valid loss: 0.056484
+2024-06-18 18:59:33,366 - INFO - Epoch 177: Train loss: 0.056967
+2024-06-18 19:00:37,320 - INFO - Epoch 178: Train loss: 0.056796
+2024-06-18 19:01:41,200 - INFO - Epoch 179: Train loss: 0.056445
+2024-06-18 19:03:11,381 - INFO - Epoch 180: Train loss: 0.056426, Valid loss: 0.056223
+2024-06-18 19:04:15,437 - INFO - Epoch 181: Train loss: 0.056245
+2024-06-18 19:05:19,402 - INFO - Epoch 182: Train loss: 0.056397
+2024-06-18 19:06:24,084 - INFO - Epoch 183: Train loss: 0.056123
+2024-06-18 19:07:55,116 - INFO - Epoch 184: Train loss: 0.056203, Valid loss: 0.055625
+2024-06-18 19:08:58,816 - INFO - Epoch 185: Train loss: 0.056428
+2024-06-18 19:10:02,884 - INFO - Epoch 186: Train loss: 0.055980
+2024-06-18 19:11:06,660 - INFO - Epoch 187: Train loss: 0.056075
+2024-06-18 19:12:37,148 - INFO - Epoch 188: Train loss: 0.056135, Valid loss: 0.055485
+2024-06-18 19:13:41,020 - INFO - Epoch 189: Train loss: 0.055642
+2024-06-18 19:14:44,661 - INFO - Epoch 190: Train loss: 0.055657
+2024-06-18 19:15:48,161 - INFO - Epoch 191: Train loss: 0.055655
+2024-06-18 19:17:18,698 - INFO - Epoch 192: Train loss: 0.055740, Valid loss: 0.055835
+2024-06-18 19:18:22,766 - INFO - Epoch 193: Train loss: 0.055648
+2024-06-18 19:19:26,658 - INFO - Epoch 194: Train loss: 0.055623
+2024-06-18 19:20:30,582 - INFO - Epoch 195: Train loss: 0.055426
+2024-06-18 19:22:01,471 - INFO - Epoch 196: Train loss: 0.055382, Valid loss: 0.055614
+2024-06-18 19:23:05,985 - INFO - Epoch 197: Train loss: 0.055531
+2024-06-18 19:24:09,779 - INFO - Epoch 198: Train loss: 0.055549
+2024-06-18 19:25:13,367 - INFO - Epoch 199: Train loss: 0.055167
+2024-06-18 19:26:42,999 - INFO - Epoch 200: Train loss: 0.055265, Valid loss: 0.054662
+2024-06-18 19:27:46,938 - INFO - Epoch 201: Train loss: 0.054847
+2024-06-18 19:28:50,734 - INFO - Epoch 202: Train loss: 0.054955
+2024-06-18 19:29:54,404 - INFO - Epoch 203: Train loss: 0.054868
+2024-06-18 19:31:24,456 - INFO - Epoch 204: Train loss: 0.054765, Valid loss: 0.054837
+2024-06-18 19:32:27,919 - INFO - Epoch 205: Train loss: 0.055082
+2024-06-18 19:33:31,777 - INFO - Epoch 206: Train loss: 0.054809
+2024-06-18 19:34:35,398 - INFO - Epoch 207: Train loss: 0.054619
+2024-06-18 19:36:05,244 - INFO - Epoch 208: Train loss: 0.054750, Valid loss: 0.055265
+2024-06-18 19:37:08,824 - INFO - Epoch 209: Train loss: 0.054828
+2024-06-18 19:38:12,180 - INFO - Epoch 210: Train loss: 0.054545
+2024-06-18 19:39:15,743 - INFO - Epoch 211: Train loss: 0.054660
+2024-06-18 19:40:47,035 - INFO - Epoch 212: Train loss: 0.054708, Valid loss: 0.054158
+2024-06-18 19:41:50,812 - INFO - Epoch 213: Train loss: 0.054757
+2024-06-18 19:42:54,276 - INFO - Epoch 214: Train loss: 0.054246
+2024-06-18 19:43:57,837 - INFO - Epoch 215: Train loss: 0.055004
+2024-06-18 19:45:28,270 - INFO - Epoch 216: Train loss: 0.054208, Valid loss: 0.053960
+2024-06-18 19:46:31,881 - INFO - Epoch 217: Train loss: 0.054226
+2024-06-18 19:47:35,397 - INFO - Epoch 218: Train loss: 0.054368
+2024-06-18 19:48:39,154 - INFO - Epoch 219: Train loss: 0.054249
+2024-06-18 19:50:09,722 - INFO - Epoch 220: Train loss: 0.054055, Valid loss: 0.053560
+2024-06-18 19:51:13,442 - INFO - Epoch 221: Train loss: 0.054197
+2024-06-18 19:52:17,367 - INFO - Epoch 222: Train loss: 0.053919
+2024-06-18 19:53:21,184 - INFO - Epoch 223: Train loss: 0.054163
+2024-06-18 19:54:51,426 - INFO - Epoch 224: Train loss: 0.054079, Valid loss: 0.053851
+2024-06-18 19:55:55,020 - INFO - Epoch 225: Train loss: 0.053604
+2024-06-18 19:56:59,201 - INFO - Epoch 226: Train loss: 0.053958
+2024-06-18 19:58:02,921 - INFO - Epoch 227: Train loss: 0.053633
+2024-06-18 19:59:33,368 - INFO - Epoch 228: Train loss: 0.053656, Valid loss: 0.053118
+2024-06-18 20:00:37,179 - INFO - Epoch 229: Train loss: 0.053635
+2024-06-18 20:01:41,000 - INFO - Epoch 230: Train loss: 0.053629
+2024-06-18 20:02:44,758 - INFO - Epoch 231: Train loss: 0.053252
+2024-06-18 20:04:14,955 - INFO - Epoch 232: Train loss: 0.053538, Valid loss: 0.053170
+2024-06-18 20:05:18,710 - INFO - Epoch 233: Train loss: 0.053327
+2024-06-18 20:06:22,217 - INFO - Epoch 234: Train loss: 0.053718
+2024-06-18 20:07:25,694 - INFO - Epoch 235: Train loss: 0.053490
+2024-06-18 20:08:55,815 - INFO - Epoch 236: Train loss: 0.053258, Valid loss: 0.053102
+2024-06-18 20:09:59,674 - INFO - Epoch 237: Train loss: 0.053215
+2024-06-18 20:11:03,480 - INFO - Epoch 238: Train loss: 0.053266
+2024-06-18 20:12:06,919 - INFO - Epoch 239: Train loss: 0.053306
+2024-06-18 20:13:36,796 - INFO - Epoch 240: Train loss: 0.053342, Valid loss: 0.054095
+2024-06-18 20:14:40,489 - INFO - Epoch 241: Train loss: 0.053305
+2024-06-18 20:15:44,511 - INFO - Epoch 242: Train loss: 0.053026
+2024-06-18 20:16:48,286 - INFO - Epoch 243: Train loss: 0.053280
+2024-06-18 20:18:18,446 - INFO - Epoch 244: Train loss: 0.053076, Valid loss: 0.053205
+2024-06-18 20:19:21,838 - INFO - Epoch 245: Train loss: 0.053027
+2024-06-18 20:20:25,758 - INFO - Epoch 246: Train loss: 0.053303
+2024-06-18 20:21:29,562 - INFO - Epoch 247: Train loss: 0.052894
+2024-06-18 20:22:59,694 - INFO - Epoch 248: Train loss: 0.052596, Valid loss: 0.052292
+2024-06-18 20:24:03,187 - INFO - Epoch 249: Train loss: 0.052802
+2024-06-18 20:25:06,992 - INFO - Epoch 250: Train loss: 0.052394
+2024-06-18 20:26:10,571 - INFO - Epoch 251: Train loss: 0.052483
+2024-06-18 20:27:40,503 - INFO - Epoch 252: Train loss: 0.053479, Valid loss: 0.052487
+2024-06-18 20:28:43,999 - INFO - Epoch 253: Train loss: 0.052690
+2024-06-18 20:29:47,750 - INFO - Epoch 254: Train loss: 0.052602
+2024-06-18 20:30:51,357 - INFO - Epoch 255: Train loss: 0.052601
+2024-06-18 20:32:21,558 - INFO - Epoch 256: Train loss: 0.052425, Valid loss: 0.052174
+2024-06-18 20:33:24,978 - INFO - Epoch 257: Train loss: 0.052103
+2024-06-18 20:34:28,748 - INFO - Epoch 258: Train loss: 0.052115
+2024-06-18 20:35:32,975 - INFO - Epoch 259: Train loss: 0.052542
+2024-06-18 20:37:02,722 - INFO - Epoch 260: Train loss: 0.052309, Valid loss: 0.052517
+2024-06-18 20:38:06,921 - INFO - Epoch 261: Train loss: 0.052217
+2024-06-18 20:39:10,560 - INFO - Epoch 262: Train loss: 0.052177
+2024-06-18 20:40:14,657 - INFO - Epoch 263: Train loss: 0.051844
+2024-06-18 20:41:45,323 - INFO - Epoch 264: Train loss: 0.052057, Valid loss: 0.051463
+2024-06-18 20:42:49,579 - INFO - Epoch 265: Train loss: 0.052193
+2024-06-18 20:43:53,099 - INFO - Epoch 266: Train loss: 0.051875
+2024-06-18 20:44:56,596 - INFO - Epoch 267: Train loss: 0.051605
+2024-06-18 20:46:26,365 - INFO - Epoch 268: Train loss: 0.051787, Valid loss: 0.051256
+2024-06-18 20:47:30,084 - INFO - Epoch 269: Train loss: 0.051872
+2024-06-18 20:48:33,860 - INFO - Epoch 270: Train loss: 0.051713
+2024-06-18 20:49:37,515 - INFO - Epoch 271: Train loss: 0.051904
+2024-06-18 20:51:07,961 - INFO - Epoch 272: Train loss: 0.051954, Valid loss: 0.051680
+2024-06-18 20:52:11,338 - INFO - Epoch 273: Train loss: 0.051705
+2024-06-18 20:53:15,506 - INFO - Epoch 274: Train loss: 0.051461
+2024-06-18 20:54:19,086 - INFO - Epoch 275: Train loss: 0.051393
+2024-06-18 20:55:48,971 - INFO - Epoch 276: Train loss: 0.051688, Valid loss: 0.051178
+2024-06-18 20:56:52,945 - INFO - Epoch 277: Train loss: 0.051622
+2024-06-18 20:57:56,391 - INFO - Epoch 278: Train loss: 0.051394
+2024-06-18 20:58:59,958 - INFO - Epoch 279: Train loss: 0.051535
+2024-06-18 21:00:29,923 - INFO - Epoch 280: Train loss: 0.051601, Valid loss: 0.052004
+2024-06-18 21:01:33,556 - INFO - Epoch 281: Train loss: 0.051459
+2024-06-18 21:02:37,377 - INFO - Epoch 282: Train loss: 0.051389
+2024-06-18 21:03:41,024 - INFO - Epoch 283: Train loss: 0.051197
+2024-06-18 21:05:11,668 - INFO - Epoch 284: Train loss: 0.051330, Valid loss: 0.050611
+2024-06-18 21:06:15,390 - INFO - Epoch 285: Train loss: 0.052174
+2024-06-18 21:07:19,061 - INFO - Epoch 286: Train loss: 0.051391
+2024-06-18 21:08:22,519 - INFO - Epoch 287: Train loss: 0.051289
+2024-06-18 21:09:52,460 - INFO - Epoch 288: Train loss: 0.051343, Valid loss: 0.051316
+2024-06-18 21:10:56,537 - INFO - Epoch 289: Train loss: 0.051393
+2024-06-18 21:12:00,302 - INFO - Epoch 290: Train loss: 0.050975
+2024-06-18 21:13:03,869 - INFO - Epoch 291: Train loss: 0.050988
+2024-06-18 21:14:34,576 - INFO - Epoch 292: Train loss: 0.051184, Valid loss: 0.052913
+2024-06-18 21:15:38,358 - INFO - Epoch 293: Train loss: 0.051027
+2024-06-18 21:16:41,970 - INFO - Epoch 294: Train loss: 0.050985
+2024-06-18 21:17:46,045 - INFO - Epoch 295: Train loss: 0.050783
+2024-06-18 21:19:16,460 - INFO - Epoch 296: Train loss: 0.050909, Valid loss: 0.050305
+2024-06-18 21:20:19,871 - INFO - Epoch 297: Train loss: 0.051133
+2024-06-18 21:21:23,639 - INFO - Epoch 298: Train loss: 0.051205
+2024-06-18 21:22:28,342 - INFO - Epoch 299: Train loss: 0.050715
+2024-06-18 21:23:58,603 - INFO - Epoch 300: Train loss: 0.050600, Valid loss: 0.050124
+2024-06-18 21:25:02,082 - INFO - Epoch 301: Train loss: 0.050615
+2024-06-18 21:26:05,773 - INFO - Epoch 302: Train loss: 0.050764
+2024-06-18 21:27:09,554 - INFO - Epoch 303: Train loss: 0.050422
+2024-06-18 21:28:39,358 - INFO - Epoch 304: Train loss: 0.050348, Valid loss: 0.051035
+2024-06-18 21:29:43,347 - INFO - Epoch 305: Train loss: 0.050569
+2024-06-18 21:30:47,951 - INFO - Epoch 306: Train loss: 0.050272
+2024-06-18 21:31:51,775 - INFO - Epoch 307: Train loss: 0.050406
+2024-06-18 21:33:22,271 - INFO - Epoch 308: Train loss: 0.050574, Valid loss: 0.049750
+2024-06-18 21:34:25,968 - INFO - Epoch 309: Train loss: 0.050336
+2024-06-18 21:35:29,693 - INFO - Epoch 310: Train loss: 0.050230
+2024-06-18 21:36:33,391 - INFO - Epoch 311: Train loss: 0.050274
+2024-06-18 21:38:03,170 - INFO - Epoch 312: Train loss: 0.050613, Valid loss: 0.050426
+2024-06-18 21:39:07,055 - INFO - Epoch 313: Train loss: 0.050415
+2024-06-18 21:40:11,067 - INFO - Epoch 314: Train loss: 0.050157
+2024-06-18 21:41:14,806 - INFO - Epoch 315: Train loss: 0.050268
+2024-06-18 21:42:45,201 - INFO - Epoch 316: Train loss: 0.050692, Valid loss: 0.050281
+2024-06-18 21:43:48,813 - INFO - Epoch 317: Train loss: 0.050115
+2024-06-18 21:44:52,541 - INFO - Epoch 318: Train loss: 0.050263
+2024-06-18 21:45:56,648 - INFO - Epoch 319: Train loss: 0.049979
+2024-06-18 21:47:27,518 - INFO - Epoch 320: Train loss: 0.050225, Valid loss: 0.049538
+2024-06-18 21:48:31,447 - INFO - Epoch 321: Train loss: 0.051412
+2024-06-18 21:49:35,664 - INFO - Epoch 322: Train loss: 0.050698
+2024-06-18 21:50:39,518 - INFO - Epoch 323: Train loss: 0.050285
+2024-06-18 21:52:09,539 - INFO - Epoch 324: Train loss: 0.050300, Valid loss: 0.050238
+2024-06-18 21:53:13,610 - INFO - Epoch 325: Train loss: 0.050078
+2024-06-18 21:54:17,168 - INFO - Epoch 326: Train loss: 0.050028
+2024-06-18 21:55:21,247 - INFO - Epoch 327: Train loss: 0.049910
+2024-06-18 21:56:51,898 - INFO - Epoch 328: Train loss: 0.050161, Valid loss: 0.050188
+2024-06-18 21:57:55,437 - INFO - Epoch 329: Train loss: 0.049964
+2024-06-18 21:58:59,583 - INFO - Epoch 330: Train loss: 0.050773
+2024-06-18 22:00:03,443 - INFO - Epoch 331: Train loss: 0.050396
+2024-06-18 22:01:33,970 - INFO - Epoch 332: Train loss: 0.049974, Valid loss: 0.049707
+2024-06-18 22:02:37,734 - INFO - Epoch 333: Train loss: 0.049652
+2024-06-18 22:03:41,548 - INFO - Epoch 334: Train loss: 0.050027
+2024-06-18 22:04:45,375 - INFO - Epoch 335: Train loss: 0.049638
+2024-06-18 22:06:15,555 - INFO - Epoch 336: Train loss: 0.049544, Valid loss: 0.049112
+2024-06-18 22:07:19,462 - INFO - Epoch 337: Train loss: 0.049525
+2024-06-18 22:08:23,431 - INFO - Epoch 338: Train loss: 0.049608
+2024-06-18 22:09:27,351 - INFO - Epoch 339: Train loss: 0.049501
+2024-06-18 22:10:58,100 - INFO - Epoch 340: Train loss: 0.049507, Valid loss: 0.050239
+2024-06-18 22:12:02,060 - INFO - Epoch 341: Train loss: 0.049926
+2024-06-18 22:13:05,708 - INFO - Epoch 342: Train loss: 0.049815
+2024-06-18 22:14:09,354 - INFO - Epoch 343: Train loss: 0.049798
+2024-06-18 22:15:40,171 - INFO - Epoch 344: Train loss: 0.049769, Valid loss: 0.049199
+2024-06-18 22:16:44,086 - INFO - Epoch 345: Train loss: 0.049553
+2024-06-18 22:17:47,541 - INFO - Epoch 346: Train loss: 0.049344
+2024-06-18 22:18:51,344 - INFO - Epoch 347: Train loss: 0.049471
+2024-06-18 22:20:22,037 - INFO - Epoch 348: Train loss: 0.049498, Valid loss: 0.048961
+2024-06-18 22:21:25,803 - INFO - Epoch 349: Train loss: 0.049734
+2024-06-18 22:22:29,670 - INFO - Epoch 350: Train loss: 0.049905
+2024-06-18 22:23:33,393 - INFO - Epoch 351: Train loss: 0.049500
+2024-06-18 22:25:03,830 - INFO - Epoch 352: Train loss: 0.049994, Valid loss: 0.050334
+2024-06-18 22:26:07,634 - INFO - Epoch 353: Train loss: 0.049453
+2024-06-18 22:27:11,337 - INFO - Epoch 354: Train loss: 0.049260
+2024-06-18 22:28:14,910 - INFO - Epoch 355: Train loss: 0.049157
+2024-06-18 22:29:45,443 - INFO - Epoch 356: Train loss: 0.049430, Valid loss: 0.048990
+2024-06-18 22:30:49,424 - INFO - Epoch 357: Train loss: 0.049413
+2024-06-18 22:31:52,981 - INFO - Epoch 358: Train loss: 0.049096
+2024-06-18 22:32:56,866 - INFO - Epoch 359: Train loss: 0.049059
+2024-06-18 22:34:27,063 - INFO - Epoch 360: Train loss: 0.048878, Valid loss: 0.049205
+2024-06-18 22:35:30,881 - INFO - Epoch 361: Train loss: 0.049087
+2024-06-18 22:36:34,738 - INFO - Epoch 362: Train loss: 0.049432
+2024-06-18 22:37:38,652 - INFO - Epoch 363: Train loss: 0.049198
+2024-06-18 22:39:09,277 - INFO - Epoch 364: Train loss: 0.049107, Valid loss: 0.049054
+2024-06-18 22:40:13,058 - INFO - Epoch 365: Train loss: 0.049386
+2024-06-18 22:41:16,766 - INFO - Epoch 366: Train loss: 0.049377
+2024-06-18 22:42:20,495 - INFO - Epoch 367: Train loss: 0.049579
+2024-06-18 22:43:50,959 - INFO - Epoch 368: Train loss: 0.049056, Valid loss: 0.049148
+2024-06-18 22:44:54,426 - INFO - Epoch 369: Train loss: 0.049286
+2024-06-18 22:45:58,357 - INFO - Epoch 370: Train loss: 0.048900
+2024-06-18 22:47:01,762 - INFO - Epoch 371: Train loss: 0.049288
+2024-06-18 22:48:32,073 - INFO - Epoch 372: Train loss: 0.049354, Valid loss: 0.050162
+2024-06-18 22:49:35,865 - INFO - Epoch 373: Train loss: 0.049481
+2024-06-18 22:50:39,654 - INFO - Epoch 374: Train loss: 0.048886
+2024-06-18 22:51:43,530 - INFO - Epoch 375: Train loss: 0.049820
+2024-06-18 22:53:13,887 - INFO - Epoch 376: Train loss: 0.049226, Valid loss: 0.049237
+2024-06-18 22:54:17,882 - INFO - Epoch 377: Train loss: 0.048861
+2024-06-18 22:55:21,998 - INFO - Epoch 378: Train loss: 0.049172
+2024-06-18 22:56:25,380 - INFO - Epoch 379: Train loss: 0.048869
+2024-06-18 22:57:55,419 - INFO - Epoch 380: Train loss: 0.048903, Valid loss: 0.049007
+2024-06-18 22:58:59,037 - INFO - Epoch 381: Train loss: 0.049759
+2024-06-18 23:00:02,577 - INFO - Epoch 382: Train loss: 0.049107
+2024-06-18 23:01:06,703 - INFO - Epoch 383: Train loss: 0.048954
+2024-06-18 23:02:36,657 - INFO - Epoch 384: Train loss: 0.049884, Valid loss: 0.050010
+2024-06-18 23:03:40,176 - INFO - Epoch 385: Train loss: 0.050247
+2024-06-18 23:04:44,363 - INFO - Epoch 386: Train loss: 0.048900
+2024-06-18 23:05:48,398 - INFO - Epoch 387: Train loss: 0.048671
+2024-06-18 23:07:19,351 - INFO - Epoch 388: Train loss: 0.048585, Valid loss: 0.048627
+2024-06-18 23:08:23,048 - INFO - Epoch 389: Train loss: 0.048857
+2024-06-18 23:09:27,161 - INFO - Epoch 390: Train loss: 0.048757
+2024-06-18 23:10:30,742 - INFO - Epoch 391: Train loss: 0.048540
+2024-06-18 23:12:01,122 - INFO - Epoch 392: Train loss: 0.048458, Valid loss: 0.048106
+2024-06-18 23:13:04,921 - INFO - Epoch 393: Train loss: 0.048848
+2024-06-18 23:14:08,696 - INFO - Epoch 394: Train loss: 0.049757
+2024-06-18 23:15:12,541 - INFO - Epoch 395: Train loss: 0.048706
+2024-06-18 23:16:42,865 - INFO - Epoch 396: Train loss: 0.048818, Valid loss: 0.049021
+2024-06-18 23:17:46,592 - INFO - Epoch 397: Train loss: 0.048445
+2024-06-18 23:18:50,150 - INFO - Epoch 398: Train loss: 0.048378
+2024-06-18 23:19:53,910 - INFO - Epoch 399: Train loss: 0.048255
+2024-06-18 23:21:23,835 - INFO - Epoch 400: Train loss: 0.048365, Valid loss: 0.048244
+2024-06-18 23:22:27,806 - INFO - Epoch 401: Train loss: 0.048994
+2024-06-18 23:23:31,596 - INFO - Epoch 402: Train loss: 0.048501
+2024-06-18 23:24:35,493 - INFO - Epoch 403: Train loss: 0.048598
+2024-06-18 23:26:05,609 - INFO - Epoch 404: Train loss: 0.048133, Valid loss: 0.048223
+2024-06-18 23:27:09,424 - INFO - Epoch 405: Train loss: 0.048440
+2024-06-18 23:28:13,178 - INFO - Epoch 406: Train loss: 0.048233
+2024-06-18 23:29:17,211 - INFO - Epoch 407: Train loss: 0.048357
+2024-06-18 23:30:50,792 - INFO - Epoch 408: Train loss: 0.048811, Valid loss: 0.048740
+2024-06-18 23:31:57,310 - INFO - Epoch 409: Train loss: 0.048755
+2024-06-18 23:33:03,406 - INFO - Epoch 410: Train loss: 0.048239
+2024-06-18 23:34:09,192 - INFO - Epoch 411: Train loss: 0.048577
+2024-06-18 23:35:42,428 - INFO - Epoch 412: Train loss: 0.048278, Valid loss: 0.048212
+2024-06-18 23:36:49,182 - INFO - Epoch 413: Train loss: 0.048190
+2024-06-18 23:37:55,374 - INFO - Epoch 414: Train loss: 0.048314
+2024-06-18 23:39:00,840 - INFO - Epoch 415: Train loss: 0.048377
+2024-06-18 23:40:34,504 - INFO - Epoch 416: Train loss: 0.048454, Valid loss: 0.048014
+2024-06-18 23:41:41,118 - INFO - Epoch 417: Train loss: 0.048268
+2024-06-18 23:42:47,285 - INFO - Epoch 418: Train loss: 0.048017
+2024-06-18 23:43:53,342 - INFO - Epoch 419: Train loss: 0.048151
+2024-06-18 23:45:26,373 - INFO - Epoch 420: Train loss: 0.048194, Valid loss: 0.048274
+2024-06-18 23:46:32,618 - INFO - Epoch 421: Train loss: 0.048404
+2024-06-18 23:47:38,903 - INFO - Epoch 422: Train loss: 0.048463
+2024-06-18 23:48:45,050 - INFO - Epoch 423: Train loss: 0.048466
+2024-06-18 23:50:18,344 - INFO - Epoch 424: Train loss: 0.048335, Valid loss: 0.047702
+2024-06-18 23:51:24,503 - INFO - Epoch 425: Train loss: 0.048069
+2024-06-18 23:52:30,693 - INFO - Epoch 426: Train loss: 0.048190
+2024-06-18 23:53:36,711 - INFO - Epoch 427: Train loss: 0.048897
+2024-06-18 23:55:09,420 - INFO - Epoch 428: Train loss: 0.047824, Valid loss: 0.048039
+2024-06-18 23:56:16,463 - INFO - Epoch 429: Train loss: 0.048509
+2024-06-18 23:57:22,759 - INFO - Epoch 430: Train loss: 0.048504
+2024-06-18 23:58:28,888 - INFO - Epoch 431: Train loss: 0.047754
+2024-06-19 00:00:02,333 - INFO - Epoch 432: Train loss: 0.047831, Valid loss: 0.047513
+2024-06-19 00:01:08,198 - INFO - Epoch 433: Train loss: 0.047904
+2024-06-19 00:02:14,383 - INFO - Epoch 434: Train loss: 0.048299
+2024-06-19 00:03:20,511 - INFO - Epoch 435: Train loss: 0.047876
+2024-06-19 00:04:53,903 - INFO - Epoch 436: Train loss: 0.047906, Valid loss: 0.047743
+2024-06-19 00:06:00,219 - INFO - Epoch 437: Train loss: 0.047683
+2024-06-19 00:07:06,147 - INFO - Epoch 438: Train loss: 0.047938
+2024-06-19 00:08:11,783 - INFO - Epoch 439: Train loss: 0.047978
+2024-06-19 00:09:44,627 - INFO - Epoch 440: Train loss: 0.047735, Valid loss: 0.048263
+2024-06-19 00:10:50,760 - INFO - Epoch 441: Train loss: 0.047906
+2024-06-19 00:11:56,684 - INFO - Epoch 442: Train loss: 0.047500
+2024-06-19 00:13:02,699 - INFO - Epoch 443: Train loss: 0.047636
+2024-06-19 00:14:36,154 - INFO - Epoch 444: Train loss: 0.047946, Valid loss: 0.047461
+2024-06-19 00:15:42,215 - INFO - Epoch 445: Train loss: 0.047374
+2024-06-19 00:16:48,143 - INFO - Epoch 446: Train loss: 0.047598
+2024-06-19 00:17:54,241 - INFO - Epoch 447: Train loss: 0.047384
+2024-06-19 00:19:27,010 - INFO - Epoch 448: Train loss: 0.047894, Valid loss: 0.047320
+2024-06-19 00:20:32,916 - INFO - Epoch 449: Train loss: 0.047777
+2024-06-19 00:21:38,880 - INFO - Epoch 450: Train loss: 0.047502
+2024-06-19 00:22:44,797 - INFO - Epoch 451: Train loss: 0.047625
+2024-06-19 00:24:17,760 - INFO - Epoch 452: Train loss: 0.047814, Valid loss: 0.047778
+2024-06-19 00:25:23,872 - INFO - Epoch 453: Train loss: 0.047433
+2024-06-19 00:26:30,219 - INFO - Epoch 454: Train loss: 0.047505
+2024-06-19 00:27:36,005 - INFO - Epoch 455: Train loss: 0.047651
+2024-06-19 00:29:09,299 - INFO - Epoch 456: Train loss: 0.047450, Valid loss: 0.047453
+2024-06-19 00:30:15,405 - INFO - Epoch 457: Train loss: 0.047695
+2024-06-19 00:31:21,528 - INFO - Epoch 458: Train loss: 0.047557
+2024-06-19 00:32:27,810 - INFO - Epoch 459: Train loss: 0.048277
+2024-06-19 00:34:00,623 - INFO - Epoch 460: Train loss: 0.048296, Valid loss: 0.048589
+2024-06-19 00:35:06,667 - INFO - Epoch 461: Train loss: 0.047593
+2024-06-19 00:36:12,682 - INFO - Epoch 462: Train loss: 0.047853
+2024-06-19 00:37:19,255 - INFO - Epoch 463: Train loss: 0.047663
+2024-06-19 00:38:52,436 - INFO - Epoch 464: Train loss: 0.047341, Valid loss: 0.046984
+2024-06-19 00:39:58,753 - INFO - Epoch 465: Train loss: 0.047372
+2024-06-19 00:41:05,496 - INFO - Epoch 466: Train loss: 0.047478
+2024-06-19 00:42:11,441 - INFO - Epoch 467: Train loss: 0.047657
+2024-06-19 00:43:44,630 - INFO - Epoch 468: Train loss: 0.047388, Valid loss: 0.047360
+2024-06-19 00:44:50,622 - INFO - Epoch 469: Train loss: 0.047161
+2024-06-19 00:45:57,126 - INFO - Epoch 470: Train loss: 0.047697
+2024-06-19 00:47:03,186 - INFO - Epoch 471: Train loss: 0.047322
+2024-06-19 00:48:36,452 - INFO - Epoch 472: Train loss: 0.047037, Valid loss: 0.047250
+2024-06-19 00:49:43,711 - INFO - Epoch 473: Train loss: 0.047252
+2024-06-19 00:50:49,508 - INFO - Epoch 474: Train loss: 0.047407
+2024-06-19 00:51:55,683 - INFO - Epoch 475: Train loss: 0.047691
+2024-06-19 00:53:28,527 - INFO - Epoch 476: Train loss: 0.047337, Valid loss: 0.047185
+2024-06-19 00:54:31,883 - INFO - Epoch 477: Train loss: 0.047758
+2024-06-19 00:55:35,605 - INFO - Epoch 478: Train loss: 0.047280
+2024-06-19 00:56:39,454 - INFO - Epoch 479: Train loss: 0.047145
+2024-06-19 00:58:09,549 - INFO - Epoch 480: Train loss: 0.047118, Valid loss: 0.046867
+2024-06-19 00:59:13,334 - INFO - Epoch 481: Train loss: 0.047157
+2024-06-19 01:00:17,052 - INFO - Epoch 482: Train loss: 0.048557
+2024-06-19 01:01:20,630 - INFO - Epoch 483: Train loss: 0.048961
+2024-06-19 01:02:50,319 - INFO - Epoch 484: Train loss: 0.047234, Valid loss: 0.047046
+2024-06-19 01:03:54,282 - INFO - Epoch 485: Train loss: 0.047038
+2024-06-19 01:04:57,667 - INFO - Epoch 486: Train loss: 0.046876
+2024-06-19 01:06:01,473 - INFO - Epoch 487: Train loss: 0.046905
+2024-06-19 01:07:31,465 - INFO - Epoch 488: Train loss: 0.047049, Valid loss: 0.047555
+2024-06-19 01:08:35,293 - INFO - Epoch 489: Train loss: 0.047157
+2024-06-19 01:09:38,785 - INFO - Epoch 490: Train loss: 0.047374
+2024-06-19 01:10:42,323 - INFO - Epoch 491: Train loss: 0.047010
+2024-06-19 01:12:12,417 - INFO - Epoch 492: Train loss: 0.046946, Valid loss: 0.046618
+2024-06-19 01:13:16,147 - INFO - Epoch 493: Train loss: 0.047472
+2024-06-19 01:14:19,694 - INFO - Epoch 494: Train loss: 0.047161
+2024-06-19 01:15:23,265 - INFO - Epoch 495: Train loss: 0.047230
+2024-06-19 01:16:53,420 - INFO - Epoch 496: Train loss: 0.047405, Valid loss: 0.047833
+2024-06-19 01:17:57,066 - INFO - Epoch 497: Train loss: 0.047202
+2024-06-19 01:19:00,751 - INFO - Epoch 498: Train loss: 0.046891
+2024-06-19 01:20:04,161 - INFO - Epoch 499: Train loss: 0.047353
+2024-06-19 01:21:34,481 - INFO - Epoch 500: Train loss: 0.047090, Valid loss: 0.046698
+2024-06-19 01:22:38,410 - INFO - Epoch 501: Train loss: 0.046808
+2024-06-19 01:23:42,360 - INFO - Epoch 502: Train loss: 0.046852
+2024-06-19 01:24:46,270 - INFO - Epoch 503: Train loss: 0.046977
+2024-06-19 01:26:16,135 - INFO - Epoch 504: Train loss: 0.046801, Valid loss: 0.046882
+2024-06-19 01:27:19,466 - INFO - Epoch 505: Train loss: 0.047902
+2024-06-19 01:28:23,193 - INFO - Epoch 506: Train loss: 0.047272
+2024-06-19 01:29:26,576 - INFO - Epoch 507: Train loss: 0.052233
+2024-06-19 01:30:56,377 - INFO - Epoch 508: Train loss: 0.049330, Valid loss: 0.047825
+2024-06-19 01:32:00,094 - INFO - Epoch 509: Train loss: 0.047941
+2024-06-19 01:33:03,921 - INFO - Epoch 510: Train loss: 0.047213
+2024-06-19 01:34:07,633 - INFO - Epoch 511: Train loss: 0.047409
+2024-06-19 01:35:37,584 - INFO - Epoch 512: Train loss: 0.047723, Valid loss: 0.047210
+2024-06-19 01:36:41,037 - INFO - Epoch 513: Train loss: 0.047495
+2024-06-19 01:37:44,703 - INFO - Epoch 514: Train loss: 0.047370
+2024-06-19 01:38:48,603 - INFO - Epoch 515: Train loss: 0.047883
+2024-06-19 01:40:18,520 - INFO - Epoch 516: Train loss: 0.046931, Valid loss: 0.047354
+2024-06-19 01:41:21,970 - INFO - Epoch 517: Train loss: 0.046885
+2024-06-19 01:42:25,487 - INFO - Epoch 518: Train loss: 0.047136
+2024-06-19 01:43:28,961 - INFO - Epoch 519: Train loss: 0.047085
+2024-06-19 01:44:58,914 - INFO - Epoch 520: Train loss: 0.047195, Valid loss: 0.047086
+2024-06-19 01:46:02,476 - INFO - Epoch 521: Train loss: 0.047022
+2024-06-19 01:47:05,999 - INFO - Epoch 522: Train loss: 0.046954
+2024-06-19 01:48:09,199 - INFO - Epoch 523: Train loss: 0.046632
+2024-06-19 01:49:39,525 - INFO - Epoch 524: Train loss: 0.047006, Valid loss: 0.047212
+2024-06-19 01:50:43,059 - INFO - Epoch 525: Train loss: 0.047383
+2024-06-19 01:51:46,878 - INFO - Epoch 526: Train loss: 0.046813
+2024-06-19 01:52:50,440 - INFO - Epoch 527: Train loss: 0.046961
+2024-06-19 01:54:20,361 - INFO - Epoch 528: Train loss: 0.047776, Valid loss: 0.047858
+2024-06-19 01:55:23,922 - INFO - Epoch 529: Train loss: 0.046721
+2024-06-19 01:56:27,389 - INFO - Epoch 530: Train loss: 0.046913
+2024-06-19 01:57:31,000 - INFO - Epoch 531: Train loss: 0.046748
+2024-06-19 01:59:01,350 - INFO - Epoch 532: Train loss: 0.046564, Valid loss: 0.046358
+2024-06-19 02:00:04,871 - INFO - Epoch 533: Train loss: 0.046525
+2024-06-19 02:01:08,650 - INFO - Epoch 534: Train loss: 0.046706
+2024-06-19 02:02:12,158 - INFO - Epoch 535: Train loss: 0.046695
+2024-06-19 02:03:41,725 - INFO - Epoch 536: Train loss: 0.046694, Valid loss: 0.046645
+2024-06-19 02:04:45,052 - INFO - Epoch 537: Train loss: 0.046634
+2024-06-19 02:05:48,725 - INFO - Epoch 538: Train loss: 0.047028
+2024-06-19 02:06:52,821 - INFO - Epoch 539: Train loss: 0.047191
+2024-06-19 02:08:22,814 - INFO - Epoch 540: Train loss: 0.046916, Valid loss: 0.046811
+2024-06-19 02:09:26,532 - INFO - Epoch 541: Train loss: 0.046596
+2024-06-19 02:10:30,109 - INFO - Epoch 542: Train loss: 0.046809
+2024-06-19 02:11:33,764 - INFO - Epoch 543: Train loss: 0.046557
+2024-06-19 02:13:03,120 - INFO - Epoch 544: Train loss: 0.046743, Valid loss: 0.046326
+2024-06-19 02:14:06,660 - INFO - Epoch 545: Train loss: 0.049875
+2024-06-19 02:15:10,066 - INFO - Epoch 546: Train loss: 0.046957
+2024-06-19 02:16:13,883 - INFO - Epoch 547: Train loss: 0.047147
+2024-06-19 02:17:43,482 - INFO - Epoch 548: Train loss: 0.046538, Valid loss: 0.046249
+2024-06-19 02:18:46,834 - INFO - Epoch 549: Train loss: 0.046793
+2024-06-19 02:19:50,633 - INFO - Epoch 550: Train loss: 0.046794
+2024-06-19 02:20:53,973 - INFO - Epoch 551: Train loss: 0.046727
+2024-06-19 02:22:23,093 - INFO - Epoch 552: Train loss: 0.046688, Valid loss: 0.047047
+2024-06-19 02:23:26,525 - INFO - Epoch 553: Train loss: 0.046350
+2024-06-19 02:24:30,274 - INFO - Epoch 554: Train loss: 0.046363
+2024-06-19 02:25:33,926 - INFO - Epoch 555: Train loss: 0.046596
+2024-06-19 02:27:04,255 - INFO - Epoch 556: Train loss: 0.046188, Valid loss: 0.046101
+2024-06-19 02:28:07,932 - INFO - Epoch 557: Train loss: 0.047763
+2024-06-19 02:29:11,997 - INFO - Epoch 558: Train loss: 0.050056
+2024-06-19 02:30:15,399 - INFO - Epoch 559: Train loss: 0.046736
+2024-06-19 02:31:44,951 - INFO - Epoch 560: Train loss: 0.046515, Valid loss: 0.046578
+2024-06-19 02:32:48,277 - INFO - Epoch 561: Train loss: 0.046229
+2024-06-19 02:33:51,978 - INFO - Epoch 562: Train loss: 0.046542
+2024-06-19 02:34:55,638 - INFO - Epoch 563: Train loss: 0.046363
+2024-06-19 02:36:25,684 - INFO - Epoch 564: Train loss: 0.046249, Valid loss: 0.046662
+2024-06-19 02:37:29,317 - INFO - Epoch 565: Train loss: 0.046303
+2024-06-19 02:38:32,946 - INFO - Epoch 566: Train loss: 0.046558
+2024-06-19 02:39:36,380 - INFO - Epoch 567: Train loss: 0.046466
+2024-06-19 02:41:06,379 - INFO - Epoch 568: Train loss: 0.046098, Valid loss: 0.045791
+2024-06-19 02:42:10,010 - INFO - Epoch 569: Train loss: 0.046097
+2024-06-19 02:43:13,598 - INFO - Epoch 570: Train loss: 0.046260
+2024-06-19 02:44:17,178 - INFO - Epoch 571: Train loss: 0.046211
+2024-06-19 02:45:46,951 - INFO - Epoch 572: Train loss: 0.046166, Valid loss: 0.046451
+2024-06-19 02:46:50,609 - INFO - Epoch 573: Train loss: 0.046022
+2024-06-19 02:47:54,329 - INFO - Epoch 574: Train loss: 0.046617
+2024-06-19 02:48:57,890 - INFO - Epoch 575: Train loss: 0.047128
+2024-06-19 02:50:27,767 - INFO - Epoch 576: Train loss: 0.045877, Valid loss: 0.045640
+2024-06-19 02:51:31,187 - INFO - Epoch 577: Train loss: 0.045954
+2024-06-19 02:52:34,852 - INFO - Epoch 578: Train loss: 0.046031
+2024-06-19 02:53:38,473 - INFO - Epoch 579: Train loss: 0.046341
+2024-06-19 02:55:08,495 - INFO - Epoch 580: Train loss: 0.045996, Valid loss: 0.045375
+2024-06-19 02:56:12,149 - INFO - Epoch 581: Train loss: 0.045876
+2024-06-19 02:57:16,562 - INFO - Epoch 582: Train loss: 0.045747
+2024-06-19 02:58:20,232 - INFO - Epoch 583: Train loss: 0.045771
+2024-06-19 02:59:49,956 - INFO - Epoch 584: Train loss: 0.045662, Valid loss: 0.045519
+2024-06-19 03:00:53,538 - INFO - Epoch 585: Train loss: 0.047831
+2024-06-19 03:01:57,310 - INFO - Epoch 586: Train loss: 0.046034
+2024-06-19 03:03:00,986 - INFO - Epoch 587: Train loss: 0.046137
+2024-06-19 03:04:30,906 - INFO - Epoch 588: Train loss: 0.045949, Valid loss: 0.045800
+2024-06-19 03:05:34,473 - INFO - Epoch 589: Train loss: 0.045771
+2024-06-19 03:06:38,058 - INFO - Epoch 590: Train loss: 0.045804
+2024-06-19 03:07:41,417 - INFO - Epoch 591: Train loss: 0.045730
+2024-06-19 03:09:11,407 - INFO - Epoch 592: Train loss: 0.045720, Valid loss: 0.045314
+2024-06-19 03:10:14,888 - INFO - Epoch 593: Train loss: 0.045839
+2024-06-19 03:11:18,721 - INFO - Epoch 594: Train loss: 0.045923
+2024-06-19 03:12:22,368 - INFO - Epoch 595: Train loss: 0.045932
+2024-06-19 03:13:52,457 - INFO - Epoch 596: Train loss: 0.046030, Valid loss: 0.045823
+2024-06-19 03:14:56,267 - INFO - Epoch 597: Train loss: 0.046841
+2024-06-19 03:15:59,909 - INFO - Epoch 598: Train loss: 0.045854
+2024-06-19 03:17:03,638 - INFO - Epoch 599: Train loss: 0.045772
+2024-06-19 03:18:33,229 - INFO - Epoch 600: Train loss: 0.046871, Valid loss: 0.046401
+2024-06-19 03:19:36,848 - INFO - Epoch 601: Train loss: 0.046093
+2024-06-19 03:20:40,626 - INFO - Epoch 602: Train loss: 0.045777
+2024-06-19 03:21:43,953 - INFO - Epoch 603: Train loss: 0.045596
+2024-06-19 03:23:14,109 - INFO - Epoch 604: Train loss: 0.045567, Valid loss: 0.045713
+2024-06-19 03:24:17,840 - INFO - Epoch 605: Train loss: 0.045195
+2024-06-19 03:25:21,514 - INFO - Epoch 606: Train loss: 0.045346
+2024-06-19 03:26:25,466 - INFO - Epoch 607: Train loss: 0.045675
+2024-06-19 03:27:55,539 - INFO - Epoch 608: Train loss: 0.045383, Valid loss: 0.045925
+2024-06-19 03:28:59,199 - INFO - Epoch 609: Train loss: 0.045452
+2024-06-19 03:30:02,987 - INFO - Epoch 610: Train loss: 0.045592
+2024-06-19 03:31:06,484 - INFO - Epoch 611: Train loss: 0.045653
+2024-06-19 03:32:36,694 - INFO - Epoch 612: Train loss: 0.045281, Valid loss: 0.045041
+2024-06-19 03:33:40,421 - INFO - Epoch 613: Train loss: 0.045551
+2024-06-19 03:34:43,671 - INFO - Epoch 614: Train loss: 0.045372
+2024-06-19 03:35:47,182 - INFO - Epoch 615: Train loss: 0.045728
+2024-06-19 03:37:16,954 - INFO - Epoch 616: Train loss: 0.045316, Valid loss: 0.045527
+2024-06-19 03:38:20,623 - INFO - Epoch 617: Train loss: 0.045767
+2024-06-19 03:39:24,493 - INFO - Epoch 618: Train loss: 0.045603
+2024-06-19 03:40:27,849 - INFO - Epoch 619: Train loss: 0.045478
+2024-06-19 03:41:57,956 - INFO - Epoch 620: Train loss: 0.045573, Valid loss: 0.045686
+2024-06-19 03:43:01,406 - INFO - Epoch 621: Train loss: 0.045490
+2024-06-19 03:44:05,003 - INFO - Epoch 622: Train loss: 0.045468
+2024-06-19 03:45:09,218 - INFO - Epoch 623: Train loss: 0.045134
+2024-06-19 03:46:38,952 - INFO - Epoch 624: Train loss: 0.045373, Valid loss: 0.048562
+2024-06-19 03:47:42,262 - INFO - Epoch 625: Train loss: 0.046162
+2024-06-19 03:48:46,223 - INFO - Epoch 626: Train loss: 0.045421
+2024-06-19 03:49:50,062 - INFO - Epoch 627: Train loss: 0.045224
+2024-06-19 03:51:20,226 - INFO - Epoch 628: Train loss: 0.045074, Valid loss: 0.045111
+2024-06-19 03:52:23,625 - INFO - Epoch 629: Train loss: 0.045204
+2024-06-19 03:53:27,595 - INFO - Epoch 630: Train loss: 0.045533
+2024-06-19 03:54:31,285 - INFO - Epoch 631: Train loss: 0.045373
+2024-06-19 03:56:00,882 - INFO - Epoch 632: Train loss: 0.045801, Valid loss: 0.045234
+2024-06-19 03:57:04,666 - INFO - Epoch 633: Train loss: 0.045214
+2024-06-19 03:58:08,255 - INFO - Epoch 634: Train loss: 0.045263
+2024-06-19 03:59:11,999 - INFO - Epoch 635: Train loss: 0.045212
+2024-06-19 04:00:41,797 - INFO - Epoch 636: Train loss: 0.045105, Valid loss: 0.045107
+2024-06-19 04:01:45,539 - INFO - Epoch 637: Train loss: 0.045020
+2024-06-19 04:02:49,099 - INFO - Epoch 638: Train loss: 0.045166
+2024-06-19 04:03:52,746 - INFO - Epoch 639: Train loss: 0.045356
+2024-06-19 04:05:22,067 - INFO - Epoch 640: Train loss: 0.045225, Valid loss: 0.044809
+2024-06-19 04:06:25,434 - INFO - Epoch 641: Train loss: 0.045431
+2024-06-19 04:07:29,019 - INFO - Epoch 642: Train loss: 0.045572
+2024-06-19 04:08:32,494 - INFO - Epoch 643: Train loss: 0.045484
+2024-06-19 04:10:02,223 - INFO - Epoch 644: Train loss: 0.044990, Valid loss: 0.045216
+2024-06-19 04:11:06,130 - INFO - Epoch 645: Train loss: 0.045587
+2024-06-19 04:12:09,554 - INFO - Epoch 646: Train loss: 0.045074
+2024-06-19 04:13:13,232 - INFO - Epoch 647: Train loss: 0.045411
+2024-06-19 04:14:43,287 - INFO - Epoch 648: Train loss: 0.045397, Valid loss: 0.052572
+2024-06-19 04:15:47,106 - INFO - Epoch 649: Train loss: 0.046171
+2024-06-19 04:16:51,194 - INFO - Epoch 650: Train loss: 0.044915
+2024-06-19 04:17:54,763 - INFO - Epoch 651: Train loss: 0.045225
+2024-06-19 04:19:24,396 - INFO - Epoch 652: Train loss: 0.044789, Valid loss: 0.044955
+2024-06-19 04:20:28,068 - INFO - Epoch 653: Train loss: 0.045076
+2024-06-19 04:21:31,735 - INFO - Epoch 654: Train loss: 0.045242
+2024-06-19 04:22:35,318 - INFO - Epoch 655: Train loss: 0.045527
+2024-06-19 04:24:04,823 - INFO - Epoch 656: Train loss: 0.045142, Valid loss: 0.045192
+2024-06-19 04:25:08,647 - INFO - Epoch 657: Train loss: 0.045352
+2024-06-19 04:26:11,921 - INFO - Epoch 658: Train loss: 0.045747
+2024-06-19 04:27:15,766 - INFO - Epoch 659: Train loss: 0.045851
+2024-06-19 04:28:46,013 - INFO - Epoch 660: Train loss: 0.046554, Valid loss: 0.045852
+2024-06-19 04:29:49,408 - INFO - Epoch 661: Train loss: 0.045349
+2024-06-19 04:30:53,236 - INFO - Epoch 662: Train loss: 0.045635
+2024-06-19 04:31:56,693 - INFO - Epoch 663: Train loss: 0.044968
+2024-06-19 04:33:26,625 - INFO - Epoch 664: Train loss: 0.044793, Valid loss: 0.044392
+2024-06-19 04:34:29,838 - INFO - Epoch 665: Train loss: 0.044923
+2024-06-19 04:35:33,806 - INFO - Epoch 666: Train loss: 0.044962
+2024-06-19 04:36:37,474 - INFO - Epoch 667: Train loss: 0.044800
+2024-06-19 04:38:07,223 - INFO - Epoch 668: Train loss: 0.044769, Valid loss: 0.044646
+2024-06-19 04:39:10,966 - INFO - Epoch 669: Train loss: 0.045089
+2024-06-19 04:40:14,644 - INFO - Epoch 670: Train loss: 0.045122
+2024-06-19 04:41:18,277 - INFO - Epoch 671: Train loss: 0.045103
+2024-06-19 04:42:48,171 - INFO - Epoch 672: Train loss: 0.044757, Valid loss: 0.045129
+2024-06-19 04:43:51,925 - INFO - Epoch 673: Train loss: 0.044892
+2024-06-19 04:44:55,258 - INFO - Epoch 674: Train loss: 0.045631
+2024-06-19 04:45:59,065 - INFO - Epoch 675: Train loss: 0.044716
+2024-06-19 04:47:28,605 - INFO - Epoch 676: Train loss: 0.045144, Valid loss: 0.045355
+2024-06-19 04:48:32,208 - INFO - Epoch 677: Train loss: 0.044728
+2024-06-19 04:49:36,141 - INFO - Epoch 678: Train loss: 0.045624
+2024-06-19 04:50:40,343 - INFO - Epoch 679: Train loss: 0.045513
+2024-06-19 04:52:10,213 - INFO - Epoch 680: Train loss: 0.045336, Valid loss: 0.044993
+2024-06-19 04:53:13,778 - INFO - Epoch 681: Train loss: 0.045001
+2024-06-19 04:54:17,634 - INFO - Epoch 682: Train loss: 0.044620
+2024-06-19 04:55:21,377 - INFO - Epoch 683: Train loss: 0.044510
+2024-06-19 04:56:51,372 - INFO - Epoch 684: Train loss: 0.045012, Valid loss: 0.044152
+2024-06-19 04:57:55,050 - INFO - Epoch 685: Train loss: 0.044706
+2024-06-19 04:58:58,818 - INFO - Epoch 686: Train loss: 0.045272
+2024-06-19 05:00:02,326 - INFO - Epoch 687: Train loss: 0.044872
+2024-06-19 05:01:31,790 - INFO - Epoch 688: Train loss: 0.044329, Valid loss: 0.044379
+2024-06-19 05:02:35,407 - INFO - Epoch 689: Train loss: 0.044663
+2024-06-19 05:03:39,234 - INFO - Epoch 690: Train loss: 0.044356
+2024-06-19 05:04:42,825 - INFO - Epoch 691: Train loss: 0.044862
+2024-06-19 05:06:12,821 - INFO - Epoch 692: Train loss: 0.044439, Valid loss: 0.043761
+2024-06-19 05:07:16,242 - INFO - Epoch 693: Train loss: 0.044394
+2024-06-19 05:08:19,591 - INFO - Epoch 694: Train loss: 0.045117
+2024-06-19 05:09:23,295 - INFO - Epoch 695: Train loss: 0.045581
+2024-06-19 05:10:53,034 - INFO - Epoch 696: Train loss: 0.045618, Valid loss: 0.044958
+2024-06-19 05:11:56,287 - INFO - Epoch 697: Train loss: 0.045551
+2024-06-19 05:12:59,835 - INFO - Epoch 698: Train loss: 0.045210
+2024-06-19 05:14:03,424 - INFO - Epoch 699: Train loss: 0.044712
+2024-06-19 05:15:33,086 - INFO - Epoch 700: Train loss: 0.044593, Valid loss: 0.044696
+2024-06-19 05:16:36,502 - INFO - Epoch 701: Train loss: 0.046535
+2024-06-19 05:17:40,112 - INFO - Epoch 702: Train loss: 0.044780
+2024-06-19 05:18:43,668 - INFO - Epoch 703: Train loss: 0.044710
+2024-06-19 05:20:13,770 - INFO - Epoch 704: Train loss: 0.044356, Valid loss: 0.044648
+2024-06-19 05:21:17,570 - INFO - Epoch 705: Train loss: 0.044682
+2024-06-19 05:22:20,919 - INFO - Epoch 706: Train loss: 0.044825
+2024-06-19 05:23:24,654 - INFO - Epoch 707: Train loss: 0.044493
+2024-06-19 05:24:54,688 - INFO - Epoch 708: Train loss: 0.045892, Valid loss: 0.045488
+2024-06-19 05:25:58,357 - INFO - Epoch 709: Train loss: 0.044777
+2024-06-19 05:27:01,975 - INFO - Epoch 710: Train loss: 0.044227
+2024-06-19 05:28:05,409 - INFO - Epoch 711: Train loss: 0.044336
+2024-06-19 05:29:34,874 - INFO - Epoch 712: Train loss: 0.044217, Valid loss: 0.043862
+2024-06-19 05:30:38,511 - INFO - Epoch 713: Train loss: 0.044404
+2024-06-19 05:31:42,483 - INFO - Epoch 714: Train loss: 0.044037
+2024-06-19 05:32:46,121 - INFO - Epoch 715: Train loss: 0.044281
+2024-06-19 05:34:15,694 - INFO - Epoch 716: Train loss: 0.044290, Valid loss: 0.044224
+2024-06-19 05:35:19,523 - INFO - Epoch 717: Train loss: 0.044307
+2024-06-19 05:36:23,182 - INFO - Epoch 718: Train loss: 0.046028
+2024-06-19 05:37:26,633 - INFO - Epoch 719: Train loss: 0.044947
+2024-06-19 05:38:56,039 - INFO - Epoch 720: Train loss: 0.044680, Valid loss: 0.044369
+2024-06-19 05:39:59,365 - INFO - Epoch 721: Train loss: 0.044276
+2024-06-19 05:41:02,996 - INFO - Epoch 722: Train loss: 0.045211
+2024-06-19 05:42:06,403 - INFO - Epoch 723: Train loss: 0.044638
+2024-06-19 05:43:36,121 - INFO - Epoch 724: Train loss: 0.044452, Valid loss: 0.044080
+2024-06-19 05:44:39,605 - INFO - Epoch 725: Train loss: 0.044469
+2024-06-19 05:45:43,049 - INFO - Epoch 726: Train loss: 0.043902
+2024-06-19 05:46:46,463 - INFO - Epoch 727: Train loss: 0.044238
+2024-06-19 05:48:16,057 - INFO - Epoch 728: Train loss: 0.044346, Valid loss: 0.044358
+2024-06-19 05:49:19,630 - INFO - Epoch 729: Train loss: 0.044306
+2024-06-19 05:50:23,105 - INFO - Epoch 730: Train loss: 0.044030
+2024-06-19 05:51:26,580 - INFO - Epoch 731: Train loss: 0.043873
+2024-06-19 05:52:56,357 - INFO - Epoch 732: Train loss: 0.044166, Valid loss: 0.044723
+2024-06-19 05:53:59,661 - INFO - Epoch 733: Train loss: 0.044528
+2024-06-19 05:55:02,922 - INFO - Epoch 734: Train loss: 0.044688
+2024-06-19 05:56:06,458 - INFO - Epoch 735: Train loss: 0.043893
+2024-06-19 05:57:36,279 - INFO - Epoch 736: Train loss: 0.044715, Valid loss: 0.043561
+2024-06-19 05:58:39,737 - INFO - Epoch 737: Train loss: 0.044794
+2024-06-19 05:59:43,295 - INFO - Epoch 738: Train loss: 0.044601
+2024-06-19 06:00:46,618 - INFO - Epoch 739: Train loss: 0.044229
+2024-06-19 06:02:16,643 - INFO - Epoch 740: Train loss: 0.044043, Valid loss: 0.043741
+2024-06-19 06:03:20,370 - INFO - Epoch 741: Train loss: 0.044124
+2024-06-19 06:04:24,295 - INFO - Epoch 742: Train loss: 0.043901
+2024-06-19 06:05:27,499 - INFO - Epoch 743: Train loss: 0.044083
+2024-06-19 06:06:57,205 - INFO - Epoch 744: Train loss: 0.044318, Valid loss: 0.044081
+2024-06-19 06:08:00,457 - INFO - Epoch 745: Train loss: 0.045045
+2024-06-19 06:09:04,265 - INFO - Epoch 746: Train loss: 0.043942
+2024-06-19 06:10:07,781 - INFO - Epoch 747: Train loss: 0.044602
+2024-06-19 06:11:37,745 - INFO - Epoch 748: Train loss: 0.044106, Valid loss: 0.044059
+2024-06-19 06:12:40,912 - INFO - Epoch 749: Train loss: 0.044279
+2024-06-19 06:13:44,303 - INFO - Epoch 750: Train loss: 0.044791
+2024-06-19 06:14:47,704 - INFO - Epoch 751: Train loss: 0.044389
+2024-06-19 06:16:17,547 - INFO - Epoch 752: Train loss: 0.044319, Valid loss: 0.043705
+2024-06-19 06:17:21,062 - INFO - Epoch 753: Train loss: 0.044314
+2024-06-19 06:18:24,357 - INFO - Epoch 754: Train loss: 0.044638
+2024-06-19 06:19:27,679 - INFO - Epoch 755: Train loss: 0.044505
+2024-06-19 06:20:57,288 - INFO - Epoch 756: Train loss: 0.045481, Valid loss: 0.044975
+2024-06-19 06:22:00,639 - INFO - Epoch 757: Train loss: 0.044266
+2024-06-19 06:23:04,262 - INFO - Epoch 758: Train loss: 0.044491
+2024-06-19 06:24:07,964 - INFO - Epoch 759: Train loss: 0.044302
+2024-06-19 06:25:38,684 - INFO - Epoch 760: Train loss: 0.045010, Valid loss: 0.044680
+2024-06-19 06:26:42,045 - INFO - Epoch 761: Train loss: 0.043829
+2024-06-19 06:27:45,739 - INFO - Epoch 762: Train loss: 0.044025
+2024-06-19 06:28:48,779 - INFO - Epoch 763: Train loss: 0.043948
+2024-06-19 06:30:18,481 - INFO - Epoch 764: Train loss: 0.044160, Valid loss: 0.044374
+2024-06-19 06:31:22,169 - INFO - Epoch 765: Train loss: 0.044127
+2024-06-19 06:32:25,899 - INFO - Epoch 766: Train loss: 0.044001
+2024-06-19 06:33:30,043 - INFO - Epoch 767: Train loss: 0.043894
+2024-06-19 06:34:59,614 - INFO - Epoch 768: Train loss: 0.043745, Valid loss: 0.044180
+2024-06-19 06:36:02,883 - INFO - Epoch 769: Train loss: 0.044411
+2024-06-19 06:37:06,770 - INFO - Epoch 770: Train loss: 0.044038
+2024-06-19 06:38:10,334 - INFO - Epoch 771: Train loss: 0.043626
+2024-06-19 06:39:40,285 - INFO - Epoch 772: Train loss: 0.043642, Valid loss: 0.043655
+2024-06-19 06:40:43,716 - INFO - Epoch 773: Train loss: 0.043836
+2024-06-19 06:41:46,890 - INFO - Epoch 774: Train loss: 0.043563
+2024-06-19 06:42:50,614 - INFO - Epoch 775: Train loss: 0.043820
+2024-06-19 06:44:20,411 - INFO - Epoch 776: Train loss: 0.044751, Valid loss: 0.044403
+2024-06-19 06:45:24,023 - INFO - Epoch 777: Train loss: 0.044293
+2024-06-19 06:46:27,780 - INFO - Epoch 778: Train loss: 0.044101
+2024-06-19 06:47:31,478 - INFO - Epoch 779: Train loss: 0.043813
+2024-06-19 06:49:01,304 - INFO - Epoch 780: Train loss: 0.045639, Valid loss: 0.044379
+2024-06-19 06:50:04,731 - INFO - Epoch 781: Train loss: 0.044002
+2024-06-19 06:51:08,561 - INFO - Epoch 782: Train loss: 0.043938
+2024-06-19 06:52:11,934 - INFO - Epoch 783: Train loss: 0.043637
+2024-06-19 06:53:42,812 - INFO - Epoch 784: Train loss: 0.043833, Valid loss: 0.043553
+2024-06-19 06:54:46,281 - INFO - Epoch 785: Train loss: 0.045092
+2024-06-19 06:55:49,635 - INFO - Epoch 786: Train loss: 0.044274
+2024-06-19 06:56:53,405 - INFO - Epoch 787: Train loss: 0.043746
+2024-06-19 06:58:23,274 - INFO - Epoch 788: Train loss: 0.043835, Valid loss: 0.043705
+2024-06-19 06:59:26,840 - INFO - Epoch 789: Train loss: 0.043845
+2024-06-19 07:00:30,338 - INFO - Epoch 790: Train loss: 0.043625
+2024-06-19 07:01:33,419 - INFO - Epoch 791: Train loss: 0.044287
+2024-06-19 07:03:03,323 - INFO - Epoch 792: Train loss: 0.043955, Valid loss: 0.044542
+2024-06-19 07:04:06,829 - INFO - Epoch 793: Train loss: 0.043957
+2024-06-19 07:05:10,571 - INFO - Epoch 794: Train loss: 0.043852
+2024-06-19 07:06:14,072 - INFO - Epoch 795: Train loss: 0.043684
+2024-06-19 07:07:44,393 - INFO - Epoch 796: Train loss: 0.044014, Valid loss: 0.043293
+2024-06-19 07:08:47,934 - INFO - Epoch 797: Train loss: 0.043675
+2024-06-19 07:09:51,590 - INFO - Epoch 798: Train loss: 0.043565
+2024-06-19 07:10:55,054 - INFO - Epoch 799: Train loss: 0.044209
+2024-06-19 07:12:24,402 - INFO - Epoch 800: Train loss: 0.043460, Valid loss: 0.043506
+2024-06-19 07:13:27,631 - INFO - Epoch 801: Train loss: 0.043502
+2024-06-19 07:14:31,147 - INFO - Epoch 802: Train loss: 0.043363
+2024-06-19 07:15:34,550 - INFO - Epoch 803: Train loss: 0.043889
+2024-06-19 07:17:04,760 - INFO - Epoch 804: Train loss: 0.044168, Valid loss: 0.044029
+2024-06-19 07:18:08,407 - INFO - Epoch 805: Train loss: 0.043938
+2024-06-19 07:19:12,325 - INFO - Epoch 806: Train loss: 0.044388
+2024-06-19 07:20:16,206 - INFO - Epoch 807: Train loss: 0.044186
+2024-06-19 07:21:46,246 - INFO - Epoch 808: Train loss: 0.043502, Valid loss: 0.043737
+2024-06-19 07:22:49,912 - INFO - Epoch 809: Train loss: 0.043424
+2024-06-19 07:23:53,680 - INFO - Epoch 810: Train loss: 0.043971
+2024-06-19 07:24:57,134 - INFO - Epoch 811: Train loss: 0.043686
+2024-06-19 07:26:27,850 - INFO - Epoch 812: Train loss: 0.043401, Valid loss: 0.043313
+2024-06-19 07:27:31,338 - INFO - Epoch 813: Train loss: 0.043549
+2024-06-19 07:28:35,151 - INFO - Epoch 814: Train loss: 0.043810
+2024-06-19 07:29:38,726 - INFO - Epoch 815: Train loss: 0.043854
+2024-06-19 07:31:08,617 - INFO - Epoch 816: Train loss: 0.043279, Valid loss: 0.043311
+2024-06-19 07:32:12,414 - INFO - Epoch 817: Train loss: 0.043341
+2024-06-19 07:33:15,962 - INFO - Epoch 818: Train loss: 0.043557
+2024-06-19 07:34:19,515 - INFO - Epoch 819: Train loss: 0.043616
+2024-06-19 07:35:49,639 - INFO - Epoch 820: Train loss: 0.043356, Valid loss: 0.043300
+2024-06-19 07:36:53,025 - INFO - Epoch 821: Train loss: 0.043675
+2024-06-19 07:37:56,623 - INFO - Epoch 822: Train loss: 0.043317
+2024-06-19 07:39:00,390 - INFO - Epoch 823: Train loss: 0.053530
+2024-06-19 07:40:29,946 - INFO - Epoch 824: Train loss: 0.046284, Valid loss: 0.044998
+2024-06-19 07:41:33,706 - INFO - Epoch 825: Train loss: 0.044850
+2024-06-19 07:42:37,256 - INFO - Epoch 826: Train loss: 0.044244
+2024-06-19 07:43:40,640 - INFO - Epoch 827: Train loss: 0.044735
+2024-06-19 07:45:10,395 - INFO - Epoch 828: Train loss: 0.043709, Valid loss: 0.043457
+2024-06-19 07:46:14,085 - INFO - Epoch 829: Train loss: 0.043652
+2024-06-19 07:47:18,066 - INFO - Epoch 830: Train loss: 0.043450
+2024-06-19 07:48:21,590 - INFO - Epoch 831: Train loss: 0.043661
+2024-06-19 07:49:51,588 - INFO - Epoch 832: Train loss: 0.043422, Valid loss: 0.042978
+2024-06-19 07:50:55,504 - INFO - Epoch 833: Train loss: 0.043439
+2024-06-19 07:51:59,021 - INFO - Epoch 834: Train loss: 0.043168
+2024-06-19 07:53:02,283 - INFO - Epoch 835: Train loss: 0.043169
+2024-06-19 07:54:32,431 - INFO - Epoch 836: Train loss: 0.043575, Valid loss: 0.043225
+2024-06-19 07:55:36,097 - INFO - Epoch 837: Train loss: 0.043121
+2024-06-19 07:56:39,563 - INFO - Epoch 838: Train loss: 0.043433
+2024-06-19 07:57:43,495 - INFO - Epoch 839: Train loss: 0.043371
+2024-06-19 07:59:13,085 - INFO - Epoch 840: Train loss: 0.043096, Valid loss: 0.042879
+2024-06-19 08:00:16,636 - INFO - Epoch 841: Train loss: 0.044087
+2024-06-19 08:01:20,648 - INFO - Epoch 842: Train loss: 0.043529
+2024-06-19 08:02:24,071 - INFO - Epoch 843: Train loss: 0.043267
+2024-06-19 08:03:54,047 - INFO - Epoch 844: Train loss: 0.043016, Valid loss: 0.042916
+2024-06-19 08:04:57,608 - INFO - Epoch 845: Train loss: 0.043437
+2024-06-19 08:06:01,339 - INFO - Epoch 846: Train loss: 0.043189
+2024-06-19 08:07:05,897 - INFO - Epoch 847: Train loss: 0.043244
+2024-06-19 08:08:35,416 - INFO - Epoch 848: Train loss: 0.043154, Valid loss: 0.043049
+2024-06-19 08:09:39,053 - INFO - Epoch 849: Train loss: 0.043200
+2024-06-19 08:10:42,690 - INFO - Epoch 850: Train loss: 0.045712
+2024-06-19 08:11:46,523 - INFO - Epoch 851: Train loss: 0.043761
+2024-06-19 08:13:15,954 - INFO - Epoch 852: Train loss: 0.043386, Valid loss: 0.043300
+2024-06-19 08:14:19,514 - INFO - Epoch 853: Train loss: 0.043430
+2024-06-19 08:15:24,440 - INFO - Epoch 854: Train loss: 0.043590
+2024-06-19 08:16:27,859 - INFO - Epoch 855: Train loss: 0.043561
+2024-06-19 08:17:57,781 - INFO - Epoch 856: Train loss: 0.043207, Valid loss: 0.042750
+2024-06-19 08:19:01,248 - INFO - Epoch 857: Train loss: 0.043242
+2024-06-19 08:20:04,752 - INFO - Epoch 858: Train loss: 0.043048
+2024-06-19 08:21:08,008 - INFO - Epoch 859: Train loss: 0.042992
+2024-06-19 08:22:37,902 - INFO - Epoch 860: Train loss: 0.043844, Valid loss: 0.052498
+2024-06-19 08:23:41,183 - INFO - Epoch 861: Train loss: 0.044076
+2024-06-19 08:24:44,746 - INFO - Epoch 862: Train loss: 0.043291
+2024-06-19 08:25:48,238 - INFO - Epoch 863: Train loss: 0.043349
+2024-06-19 08:27:18,155 - INFO - Epoch 864: Train loss: 0.043208, Valid loss: 0.042929
+2024-06-19 08:28:21,764 - INFO - Epoch 865: Train loss: 0.042885
+2024-06-19 08:29:25,757 - INFO - Epoch 866: Train loss: 0.044014
+2024-06-19 08:30:29,483 - INFO - Epoch 867: Train loss: 0.043429
+2024-06-19 08:31:59,344 - INFO - Epoch 868: Train loss: 0.043563, Valid loss: 0.043260
+2024-06-19 08:33:02,882 - INFO - Epoch 869: Train loss: 0.043217
+2024-06-19 08:34:06,493 - INFO - Epoch 870: Train loss: 0.042980
+2024-06-19 08:35:10,066 - INFO - Epoch 871: Train loss: 0.043259
+2024-06-19 08:36:39,731 - INFO - Epoch 872: Train loss: 0.043217, Valid loss: 0.042877
+2024-06-19 08:37:43,266 - INFO - Epoch 873: Train loss: 0.043316
+2024-06-19 08:38:47,578 - INFO - Epoch 874: Train loss: 0.043484
+2024-06-19 08:39:51,165 - INFO - Epoch 875: Train loss: 0.042839
+2024-06-19 08:41:20,956 - INFO - Epoch 876: Train loss: 0.042887, Valid loss: 0.042666
+2024-06-19 08:42:24,405 - INFO - Epoch 877: Train loss: 0.043121
+2024-06-19 08:43:27,971 - INFO - Epoch 878: Train loss: 0.043300
+2024-06-19 08:44:31,580 - INFO - Epoch 879: Train loss: 0.043005
+2024-06-19 08:46:01,585 - INFO - Epoch 880: Train loss: 0.042943, Valid loss: 0.042316
+2024-06-19 08:47:05,480 - INFO - Epoch 881: Train loss: 0.043194
+2024-06-19 08:48:09,701 - INFO - Epoch 882: Train loss: 0.042854
+2024-06-19 08:49:13,411 - INFO - Epoch 883: Train loss: 0.042962
+2024-06-19 08:50:43,234 - INFO - Epoch 884: Train loss: 0.043039, Valid loss: 0.043785
+2024-06-19 08:51:47,015 - INFO - Epoch 885: Train loss: 0.043364
+2024-06-19 08:52:50,594 - INFO - Epoch 886: Train loss: 0.042991
+2024-06-19 08:53:54,306 - INFO - Epoch 887: Train loss: 0.042965
+2024-06-19 08:55:24,225 - INFO - Epoch 888: Train loss: 0.043024, Valid loss: 0.043264
+2024-06-19 08:56:28,874 - INFO - Epoch 889: Train loss: 0.042970
+2024-06-19 08:57:32,712 - INFO - Epoch 890: Train loss: 0.043055
+2024-06-19 08:58:36,629 - INFO - Epoch 891: Train loss: 0.042951
+2024-06-19 09:00:06,322 - INFO - Epoch 892: Train loss: 0.043083, Valid loss: 0.042771
+2024-06-19 09:01:09,885 - INFO - Epoch 893: Train loss: 0.043689
+2024-06-19 09:02:13,623 - INFO - Epoch 894: Train loss: 0.043056
+2024-06-19 09:03:17,330 - INFO - Epoch 895: Train loss: 0.042810
+2024-06-19 09:04:48,015 - INFO - Epoch 896: Train loss: 0.042939, Valid loss: 0.042684
+2024-06-19 09:05:51,855 - INFO - Epoch 897: Train loss: 0.042949
+2024-06-19 09:06:55,357 - INFO - Epoch 898: Train loss: 0.042840
+2024-06-19 09:07:58,903 - INFO - Epoch 899: Train loss: 0.042752
+2024-06-19 09:09:28,466 - INFO - Epoch 900: Train loss: 0.042641, Valid loss: 0.042597
+2024-06-19 09:10:32,007 - INFO - Epoch 901: Train loss: 0.043733
+2024-06-19 09:11:35,753 - INFO - Epoch 902: Train loss: 0.043007
+2024-06-19 09:12:39,493 - INFO - Epoch 903: Train loss: 0.043227
+2024-06-19 09:14:10,111 - INFO - Epoch 904: Train loss: 0.042630, Valid loss: 0.042443
+2024-06-19 09:15:13,271 - INFO - Epoch 905: Train loss: 0.042969
+2024-06-19 09:16:16,958 - INFO - Epoch 906: Train loss: 0.042664
+2024-06-19 09:17:20,562 - INFO - Epoch 907: Train loss: 0.042927
+2024-06-19 09:18:50,242 - INFO - Epoch 908: Train loss: 0.042949, Valid loss: 0.043125
+2024-06-19 09:19:54,005 - INFO - Epoch 909: Train loss: 0.042545
+2024-06-19 09:20:57,222 - INFO - Epoch 910: Train loss: 0.042981
+2024-06-19 09:22:00,986 - INFO - Epoch 911: Train loss: 0.042461
+2024-06-19 09:23:30,772 - INFO - Epoch 912: Train loss: 0.042683, Valid loss: 0.042797
+2024-06-19 09:24:34,390 - INFO - Epoch 913: Train loss: 0.042910
+2024-06-19 09:25:38,155 - INFO - Epoch 914: Train loss: 0.043156
+2024-06-19 09:26:41,755 - INFO - Epoch 915: Train loss: 0.043273
+2024-06-19 09:28:11,526 - INFO - Epoch 916: Train loss: 0.043270, Valid loss: 0.042986
+2024-06-19 09:29:15,439 - INFO - Epoch 917: Train loss: 0.043029
+2024-06-19 09:30:19,047 - INFO - Epoch 918: Train loss: 0.044097
+2024-06-19 09:31:22,642 - INFO - Epoch 919: Train loss: 0.044339
+2024-06-19 09:32:52,462 - INFO - Epoch 920: Train loss: 0.043053, Valid loss: 0.043151
+2024-06-19 09:33:55,814 - INFO - Epoch 921: Train loss: 0.042950
+2024-06-19 09:34:59,642 - INFO - Epoch 922: Train loss: 0.042755
+2024-06-19 09:36:03,766 - INFO - Epoch 923: Train loss: 0.042876
+2024-06-19 09:37:33,550 - INFO - Epoch 924: Train loss: 0.044981, Valid loss: 0.043292
+2024-06-19 09:38:36,995 - INFO - Epoch 925: Train loss: 0.043144
+2024-06-19 09:39:40,504 - INFO - Epoch 926: Train loss: 0.043276
+2024-06-19 09:40:44,238 - INFO - Epoch 927: Train loss: 0.043457
+2024-06-19 09:42:14,312 - INFO - Epoch 928: Train loss: 0.042691, Valid loss: 0.042408
+2024-06-19 09:43:17,947 - INFO - Epoch 929: Train loss: 0.044148
+2024-06-19 09:44:21,574 - INFO - Epoch 930: Train loss: 0.043376
+2024-06-19 09:45:25,041 - INFO - Epoch 931: Train loss: 0.042910
+2024-06-19 09:46:54,679 - INFO - Epoch 932: Train loss: 0.042625, Valid loss: 0.042253
+2024-06-19 09:47:58,343 - INFO - Epoch 933: Train loss: 0.042724
+2024-06-19 09:49:02,282 - INFO - Epoch 934: Train loss: 0.042926
+2024-06-19 09:50:05,503 - INFO - Epoch 935: Train loss: 0.043205
+2024-06-19 09:51:34,907 - INFO - Epoch 936: Train loss: 0.042767, Valid loss: 0.042565
+2024-06-19 09:52:38,477 - INFO - Epoch 937: Train loss: 0.045532
+2024-06-19 09:53:41,916 - INFO - Epoch 938: Train loss: 0.043679
+2024-06-19 09:54:45,295 - INFO - Epoch 939: Train loss: 0.042832
+2024-06-19 09:56:15,206 - INFO - Epoch 940: Train loss: 0.043231, Valid loss: 0.042204
+2024-06-19 09:57:18,738 - INFO - Epoch 941: Train loss: 0.042661
+2024-06-19 09:58:22,659 - INFO - Epoch 942: Train loss: 0.042635
+2024-06-19 09:59:26,543 - INFO - Epoch 943: Train loss: 0.043013
+2024-06-19 10:00:56,272 - INFO - Epoch 944: Train loss: 0.042582, Valid loss: 0.042619
+2024-06-19 10:01:59,782 - INFO - Epoch 945: Train loss: 0.042692
+2024-06-19 10:03:03,250 - INFO - Epoch 946: Train loss: 0.043132
+2024-06-19 10:04:06,787 - INFO - Epoch 947: Train loss: 0.043198
+2024-06-19 10:05:37,109 - INFO - Epoch 948: Train loss: 0.043050, Valid loss: 0.042753
+2024-06-19 10:06:40,606 - INFO - Epoch 949: Train loss: 0.042823
+2024-06-19 10:07:44,327 - INFO - Epoch 950: Train loss: 0.042745
+2024-06-19 10:08:47,644 - INFO - Epoch 951: Train loss: 0.042629
+2024-06-19 10:10:17,115 - INFO - Epoch 952: Train loss: 0.042665, Valid loss: 0.042896
+2024-06-19 10:11:20,429 - INFO - Epoch 953: Train loss: 0.044146
+2024-06-19 10:12:23,744 - INFO - Epoch 954: Train loss: 0.042620
+2024-06-19 10:13:27,023 - INFO - Epoch 955: Train loss: 0.042992
+2024-06-19 10:14:56,606 - INFO - Epoch 956: Train loss: 0.043015, Valid loss: 0.042453
+2024-06-19 10:15:59,785 - INFO - Epoch 957: Train loss: 0.043134
+2024-06-19 10:17:03,413 - INFO - Epoch 958: Train loss: 0.042512
+2024-06-19 10:18:07,114 - INFO - Epoch 959: Train loss: 0.042570
+2024-06-19 10:19:36,834 - INFO - Epoch 960: Train loss: 0.042386, Valid loss: 0.042029
+2024-06-19 10:20:40,503 - INFO - Epoch 961: Train loss: 0.042765
+2024-06-19 10:21:44,010 - INFO - Epoch 962: Train loss: 0.042411
+2024-06-19 10:22:47,570 - INFO - Epoch 963: Train loss: 0.042575
+2024-06-19 10:24:17,365 - INFO - Epoch 964: Train loss: 0.042551, Valid loss: 0.044050
+2024-06-19 10:25:21,322 - INFO - Epoch 965: Train loss: 0.042984
+2024-06-19 10:26:24,916 - INFO - Epoch 966: Train loss: 0.042332
+2024-06-19 10:27:28,409 - INFO - Epoch 967: Train loss: 0.042276
+2024-06-19 10:28:58,954 - INFO - Epoch 968: Train loss: 0.043586, Valid loss: 0.042199
+2024-06-19 10:30:02,494 - INFO - Epoch 969: Train loss: 0.042491
+2024-06-19 10:31:06,132 - INFO - Epoch 970: Train loss: 0.042635
+2024-06-19 10:32:09,938 - INFO - Epoch 971: Train loss: 0.043768
+2024-06-19 10:33:39,587 - INFO - Epoch 972: Train loss: 0.042970, Valid loss: 0.043696
+2024-06-19 10:34:43,390 - INFO - Epoch 973: Train loss: 0.042826
+2024-06-19 10:35:47,043 - INFO - Epoch 974: Train loss: 0.042463
+2024-06-19 10:36:50,685 - INFO - Epoch 975: Train loss: 0.042349
+2024-06-19 10:38:20,140 - INFO - Epoch 976: Train loss: 0.042705, Valid loss: 0.042402
+2024-06-19 10:39:23,761 - INFO - Epoch 977: Train loss: 0.042490
+2024-06-19 10:40:27,508 - INFO - Epoch 978: Train loss: 0.042717
+2024-06-19 10:41:30,918 - INFO - Epoch 979: Train loss: 0.042540
+2024-06-19 10:43:00,594 - INFO - Epoch 980: Train loss: 0.042387, Valid loss: 0.043804
+2024-06-19 10:44:04,080 - INFO - Epoch 981: Train loss: 0.042972
+2024-06-19 10:45:07,647 - INFO - Epoch 982: Train loss: 0.043309
+2024-06-19 10:46:11,276 - INFO - Epoch 983: Train loss: 0.042633
+2024-06-19 10:47:41,122 - INFO - Epoch 984: Train loss: 0.042728, Valid loss: 0.041945
+2024-06-19 10:48:44,890 - INFO - Epoch 985: Train loss: 0.042753
+2024-06-19 10:49:48,514 - INFO - Epoch 986: Train loss: 0.045017
+2024-06-19 10:50:52,164 - INFO - Epoch 987: Train loss: 0.042832
+2024-06-19 10:52:22,572 - INFO - Epoch 988: Train loss: 0.042463, Valid loss: 0.043033
+2024-06-19 10:53:26,286 - INFO - Epoch 989: Train loss: 0.044631
+2024-06-19 10:54:30,246 - INFO - Epoch 990: Train loss: 0.042773
+2024-06-19 10:55:34,429 - INFO - Epoch 991: Train loss: 0.042443
+2024-06-19 10:57:03,828 - INFO - Epoch 992: Train loss: 0.042351, Valid loss: 0.042904
+2024-06-19 10:58:07,344 - INFO - Epoch 993: Train loss: 0.042174
+2024-06-19 10:59:11,055 - INFO - Epoch 994: Train loss: 0.042971
+2024-06-19 11:00:14,588 - INFO - Epoch 995: Train loss: 0.042430
+2024-06-19 11:01:44,869 - INFO - Epoch 996: Train loss: 0.042449, Valid loss: 0.042035
+2024-06-19 11:02:48,237 - INFO - Epoch 997: Train loss: 0.042272
+2024-06-19 11:03:51,919 - INFO - Epoch 998: Train loss: 0.042395
+2024-06-19 11:04:55,453 - INFO - Epoch 999: Train loss: 0.043185
+2024-06-19 11:06:25,782 - INFO - Epoch 1000: Train loss: 0.042877, Valid loss: 0.042249
+2024-06-19 11:07:29,595 - INFO - Epoch 1001: Train loss: 0.042352
+2024-06-19 11:08:33,626 - INFO - Epoch 1002: Train loss: 0.042476
+2024-06-19 11:09:37,192 - INFO - Epoch 1003: Train loss: 0.042202
+2024-06-19 11:11:07,212 - INFO - Epoch 1004: Train loss: 0.042379, Valid loss: 0.041854
+2024-06-19 11:12:10,829 - INFO - Epoch 1005: Train loss: 0.041986
+2024-06-19 11:13:14,846 - INFO - Epoch 1006: Train loss: 0.042175

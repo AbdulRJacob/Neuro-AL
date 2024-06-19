@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 from datasets.CLEVR.CLEVR import CLEVRHans
-from datasets.SHAPES_9.SHAPES import SHAPESDATASET
+from datasets.SHAPES.SHAPES import SHAPESDATASET
 from neuro_modules.evaluation import evaluate_classification
 
 

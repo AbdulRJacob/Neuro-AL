@@ -65,8 +65,8 @@ def train_nal_clevr(num_examples: int):
 
     clevr_NAL = get_clevr_nal_model()
     clevr_NAL.dataset = data
-    postive_class = [0]
-    negative_class = [1]
+    postive_class = [0]  # Positve Class [0,1,2]
+    negative_class = [1] # Negative Class [0,1,2]
 
     print("Choosing Examples...")
 
@@ -126,7 +126,7 @@ def clevr_nal_inference(img_path: str, aba_path: list[str], include_pos = False)
     if has_predicate:
         return 2
     
-    # Second Pass: Class 2
+    # Second Pass: Class 1
     nal.load_framework(aba_path[1])
     all_models = nal.run_learnt_framework()
     total_model = len(all_models)
@@ -137,10 +137,6 @@ def clevr_nal_inference(img_path: str, aba_path: list[str], include_pos = False)
         return 0
     else:
         return 1
-        
 
-if __name__ == "__main__":  
-    train_nal_clevr(num_examples=20)
-    
 
 

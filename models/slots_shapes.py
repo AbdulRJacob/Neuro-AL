@@ -6,13 +6,11 @@ from typing import Callable, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
-from PIL import Image
-from torch import Tensor
 from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from datasets.SHAPES_9.SHAPES import SHAPESDATASET
+from datasets.SHAPES.SHAPES import SHAPESDATASET
 import neuro_modules.utils as utils
 from neuro_modules.slots import SlotAutoencoder
 from neuro_modules.slots import cluster_slots

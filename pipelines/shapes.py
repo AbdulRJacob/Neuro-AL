@@ -1,7 +1,7 @@
 import os
 import torch
 
-from datasets.SHAPES_9.SHAPES import SHAPESDATASET as SHAPESDATASET_9
+from datasets.SHAPES.SHAPES import SHAPESDATASET
 from neuro_modules.slots import SlotAutoencoder
 from neuro_modules.NAL import NAL
 
@@ -66,7 +66,7 @@ def shapes_9_nal_training(num_examples: int, class_ids: list, order = False):
     NUM_SLOTS = 10
     THRESHOLD = 0.7
 
-    data = SHAPESDATASET_9(cache=True,transform=SHAPESDATASET_9.get_transform())
+    data = SHAPESDATASET(cache=True,transform=SHAPESDATASET.get_transform())
 
     shapes_NAL = get_shape_9_nal_model()
     shapes_NAL.dataset = data

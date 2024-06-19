@@ -1,35 +1,5 @@
 % Background Knowledge 
 % Learnt Rules 
 c(A) :- alpha_2(B,A), cube(B), in(A,B).
-c(A) :- alpha_3(B,A), cylinder(B), in(A,B).
-c_alpha_2(A,B) :- image(B), yellow(A).
-c_alpha_2(A,B) :- image(B), blue(A).
-c_alpha_2(A,B) :- image(B), green(A).
-c_alpha_2(A,B) :- image(B), gray(A).
-c_alpha_2(A,B) :- image(B), purple(A).
-c_alpha_3(A,B) :- image(B), gray(A).
-c_alpha_3(A,B) :- image(B), purple(A).
-c_alpha_3(A,B) :- alpha_20(B,A), image(B), red(A).
-c_alpha_3(A,B) :- image(B), yellow(A).
-c_alpha_3(A,B) :- image(B), cyan(A).
-c_alpha_3(A,B) :- alpha_27(B,A), image(B), blue(A).
-c_alpha_20(A,B) :- alpha_28(A,B), in(A,B).
-c_alpha_27(A,B) :- alpha_29(B,A), cylinder(B), image(A).
-c_alpha_28(A,B) :- large(B), image(A).
-c_alpha_29(A,B) :- alpha_30(A,B), c_alpha_2(A,B).
-c_alpha_30(A,B) :- alpha_31(B,A), image(B), large(A).
-c_alpha_31(A,B) :- alpha_32(A,B), c_alpha_28(A,B).
-c_alpha_32(A,B) :- rubber(B), image(A).
+c_alpha_2(A,B) :- image(B), small(A).
 alpha_2(A,B) :- not c_alpha_2(A,B), cube(A), in(B,A).
-alpha_3(A,B) :- not c_alpha_3(A,B), cylinder(A), in(B,A).
-alpha_20(A,B) :- not c_alpha_20(A,B), image(A), red(B).
-alpha_27(A,B) :- not c_alpha_27(A,B), image(A), blue(B).
-alpha_28(A,B) :- not c_alpha_28(A,B), in(A,B).
-alpha_29(A,B) :- not c_alpha_29(A,B), cylinder(A), image(B).
-alpha_30(A,B) :- not c_alpha_30(A,B), c_alpha_2(A,B).
-alpha_31(A,B) :- not c_alpha_31(A,B), image(A), large(B).
-alpha_32(A,B) :- not c_alpha_32(A,B), c_alpha_28(A,B).
-
-
-
-

@@ -97,7 +97,6 @@ class DINOSlotAutoencoder(nn.Module):
         slots = self.slot_attention(input_to_slots)
         ## atten shape is (b,k,n) -> (b,k,sqrt(n),sqrt(N)) -> (b,k,h,w) nearest neighbour 
         y, mask = self.decoder(slots)  # Reconstructed patch features
-        print(slots.shape)
   
         return h, y, slots, mask
     

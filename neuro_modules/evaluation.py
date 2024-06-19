@@ -11,7 +11,7 @@ from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_
 
 from sklearn.metrics import adjusted_rand_score
 
-from datasets.SHAPES_9.SHAPES import SHAPESDATASET
+from datasets.SHAPES.SHAPES import SHAPESDATASET
 from datasets.CLEVR.CLEVR import CLEVRHans, CLEVR
 from datasets.CLEVR.CLEVR import dataset as ds
 
@@ -540,7 +540,7 @@ def test_clustering():
 if __name__ == "__main__": 
 
     dataset_test = CLEVRHans(split="test")
-    aba_path = ["clevr_bk_c3_SOLVED.aba","clevr_bk_c4_SOLVED.aba"]
+    aba_path = ["results/CLEVR/clevr_bk_1_SOVLED.aba","results/CLEVR/clevr_bk_2_SOVLED.aba"]
 
     y_pred = []
     y_true = []
@@ -552,7 +552,5 @@ if __name__ == "__main__":
         pred = clevr.clevr_nal_inference(image,aba_path)
         y_pred.append(pred)
         y_true.append(np.argmax(target))
-
-    
 
     evaluate_classification(y_true,y_pred,["Class 1", "Class 2", "Class 3"], "cm_best.png")

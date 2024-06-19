@@ -1,5 +1,0 @@
-% Background Knowledge 
-% Learnt Rules 
-c(A) :- alpha_2(B,A), cube(B), in(A,B).
-c_alpha_2(A,B) :- image(B), small(A).
-alpha_2(A,B) :- not c_alpha_2(A,B), cube(A), in(B,A).

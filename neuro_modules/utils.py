@@ -355,26 +355,21 @@ def get_diverse_slots(data, num_clusters):
   return diverse_sample_indices
 
 def visualize_tsne(data, num_clusters):
-    # Prepare the data
     representations = np.array([agg_rep for _, _ ,agg_rep in data])
     num_samples, num_rows, num_columns = representations.shape
     flattened_slots = representations.reshape(num_samples, -1)
     
-    # Perform KMeans clustering
     kmeans = KMeans(n_clusters=num_clusters)
     kmeans.fit(flattened_slots)
     cluster_centers = kmeans.cluster_centers_
     closest, _ = pairwise_distances_argmin_min(cluster_centers, flattened_slots)
     diverse_sample_indices = [data[idx][0] for idx in closest]
     
-    # Perform t-SNE
     tsne = TSNE(n_components=2, random_state=42)
     tsne_results = tsne.fit_transform(flattened_slots)
     
-    # Visualize the results
     plt.figure(figsize=(12, 8))
     
-    # Extract the classes from the data
     classes = [data[idx][1] for idx in range(len(data))]
     
     for class_label in set(classes):
