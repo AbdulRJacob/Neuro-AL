@@ -100,14 +100,10 @@ class PascalVOC(Dataset):
     def __len__(self):
         return len(self.labels)
     
-if __name__ == "__main__":
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor()
-    ])
-
-    dataset = PascalVOC(data_dir='/mnt/d/fyp/Pascal_VOC/VOCdevkit/', year='2012', split='val', transform=transform, cache=False)
-    
-    # Fetch a sample
-    info= dataset[0]
-    print(info["input"].shape)
+    def get_transforms():
+        transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor()
+            ])
+        
+        return transform

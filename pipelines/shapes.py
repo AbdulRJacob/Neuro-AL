@@ -61,7 +61,7 @@ def get_rule(num_class: int):
     if num_class <= 12:
         return 6
 
-def shapes_9_nal_training(num_examples: int, class_ids: list, order = False):
+def shapes_nal_training(num_examples: int, class_ids: list, order = False):
     
     NUM_SLOTS = 10
     THRESHOLD = 0.7
@@ -106,7 +106,7 @@ def shapes_9_nal_training(num_examples: int, class_ids: list, order = False):
         shapes_NAL.run_aba_framework(filename, id=get_rule(postive_class), ground= ground)
 
 
-def shapes_9_nal_inference(img_path: str, aba_path: str, include_pos = False):
+def shapes_nal_inference(img_path: str, aba_path: str, include_pos = False):
 
     """
         Inference for Classification Task
@@ -118,8 +118,8 @@ def shapes_9_nal_inference(img_path: str, aba_path: str, include_pos = False):
     prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS)
     nal.populate_aba_framework_inference(prediction,include_pos)
 
-
-    all_models = nal.run_learnt_framework(aba_path)
+    nal.load_framework(aba_path)
+    all_models = nal.run_learnt_framework()
 
     total_model = len(all_models)
     present = 0
@@ -140,31 +140,14 @@ def shapes_9_nal_inference(img_path: str, aba_path: str, include_pos = False):
 if __name__ == "__main__":
 
     ## Example Training and Inference
-    
-    # shapes_4_nal_training(10,[1,2])
-    # test_img = "/mnt/d/fyp/SHAPES_9/training_data/c1_s10/c1_10.png"
-    # aba_path = "shapes_9_bk_r1_SOLVED.aba"
-    # prediction = shapes_9_nal_inference(test_img,aba_path)
 
-    # if prediction:
-    #     print("positive")
-    # else:
-    #     print("negative")
+    shapes_nal_training(num_examples=10,class_ids=[1,2]) 
+    test_img = "datasets/SHAPES/training_data/c1_s10/c1_10.png"
+    aba_path = "shapes_9_bk_r1_SOLVED.aba"
+    prediction = shapes_nal_inference(test_img,aba_path)
 
-
-    classes = [[7,8]]
-    for c in classes:
-        shapes_9_nal_training(15,c, order=True)
-
-    # test_img = "/mnt/d/fyp/SHAPES_9/training_data/c1_s10/c1_10.png"
-    # test_img2 = "/mnt/d/fyp/SHAPES_9/training_data/c2_s10/c2_10.png"
-
-    # nal = get_shape_9_nal_model()
-
-    # labels = nal.run_slot_attention_kmean(test_img)
-    # nal.populate_aba_framework_general(labels,True)
-    # labels = nal.run_slot_attention_kmean(test_img2)
-    # nal.populate_aba_framework_general(labels,False)
-    # nal.run_aba_framework()
-
+    if prediction:
+        print("positive")
+    else:
+        print("negative")
 

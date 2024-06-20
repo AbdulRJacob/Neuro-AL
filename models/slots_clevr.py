@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument("--data_dir", type=str, default="../datasets/SHAPES/training_data")
+    parser.add_argument("--data_dir", type=str, default="../datasets/CLEVR/")
     parser.add_argument("--max_num_obj", type=int, default=9)
     parser.add_argument("--input_res", type=int, default=64)
     # model

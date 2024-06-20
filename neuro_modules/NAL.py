@@ -28,9 +28,10 @@ class NAL:
 
         if isPath:
             image = Image.open(image).convert('RGB')
+            input_tensor = transform(image)
+        else:
+            input_tensor = image
 
-        input_tensor = transform(image)
-        
         input_batch = input_tensor.unsqueeze(0)
 
         input_batch = (input_batch - 127.5) / 127.5

@@ -1,10 +1,11 @@
 import copy
 import os
 import random
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import torch
+from torch import Tensor
 import torch.nn as nn
 from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
@@ -94,7 +95,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument("--data_dir", type=str, default="/vol/bitbucket/arj220/d/Pascal_VOC/Pascal_VOC/VOCdevkit")
+    parser.add_argument("--data_dir", type=str, default="../datasets/PASCAL/")
     parser.add_argument("--max_num_obj", type=int, default=6)
     parser.add_argument("--input_res", type=int, default=224)
     # model

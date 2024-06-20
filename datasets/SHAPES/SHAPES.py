@@ -488,7 +488,7 @@ class Colour(Enum):
 class SHAPESDATASET(Dataset):
     def __init__(
         self,
-        data_dir: str = "/mnt/d/fyp/SHAPES_9/training_data/",
+        data_dir: str = "datasets/SHAPES/training_data/",
         transform=None,
         target_transform=None,
         cache: bool = True,
@@ -697,7 +697,7 @@ def generate_dataset_SHAPES(rule, label, num_of_images, isPostive):
     
 if __name__ == "__main__":
     
-   train_test_split = (1000,500)
+   train_test_split = (100,100)
    labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"],["c11","c12"]]
    rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
             ["c(A) :- green(O1), triangle(O1), small(O1) in(A,O1), image(A)"],

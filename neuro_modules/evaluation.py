@@ -78,7 +78,7 @@ def visualise_clustering_maps(clustering_map,true_map):
     plt.savefig('clustering_map_clvr.png')
 
 
-def visualise_slots(self, p_eg: list[int], n_eg: list[int], num_examples):
+def visualise_slots_tsne(self, p_eg: list[int], n_eg: list[int], num_examples):
     data = self.dataset.get_all_data()
     data_s = []
     rep_negative = []

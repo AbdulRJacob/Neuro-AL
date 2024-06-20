@@ -160,7 +160,7 @@ class CLEVR(Dataset):
 
 class CLEVRHans(Dataset):
     def __init__(self, data_dir = "", split='train', transform=None, cache=False):
-        self.data_dir =  "/mnt/d/fyp/CLEVR-Hans3"
+        self.data_dir =  "datasets/CLEVR/"
         self.split = split
         self.transform = transform
         self.cache = cache
