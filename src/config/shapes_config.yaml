@@ -1,0 +1,22 @@
+
+data:
+  data_dir: "data/raw/SHAPES/"
+  max_num_obj: 9
+  input_res: 64
+
+model:
+  width: 32
+  num_slots: 10
+  slot_dim: 32
+  routing_iters: 3
+
+training:
+  exp_name: "default"
+  seed: 8
+  epochs: 1500
+  batch_size: 64
+  learning_rate: 0.0002
+  weight_decay: 0.000001
+  deterministic: true
+  model_dir: ""
+  logging_dir: ""
