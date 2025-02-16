@@ -6,7 +6,7 @@ import heapq
 from PIL import Image
 from torchvision import transforms
 from symbolic_modules.aba_framework import ABAFramework
-import neuro_modules.utils as utils
+import utils.utils as utils
 
 class NAL:
     def __init__(self, model, dataset, object_info) -> None:

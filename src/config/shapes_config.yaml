@@ -3,6 +3,7 @@ data:
   data_dir: "data/raw/SHAPES/"
   max_num_obj: 9
   input_res: 64
+  dataset_size: 10  # dataset size for (training, testing) set e.g (10,10)
 
 model:
   width: 32
@@ -18,5 +19,13 @@ training:
   learning_rate: 0.0002
   weight_decay: 0.000001
   deterministic: true
-  model_dir: ""
-  logging_dir: ""
+  model_dir: "models/shapes/"
+  logging_dir: "models/shapes/logs_slots.txt"
+  gpu: false
+
+sym_training:
+  model_path: "models/shapes/shapes_m1.pt"
+  num_examples: 10
+  rule_id: 1         # 1 - 5
+  logging_dir: "models/shapes/logs_aba.txt"
+

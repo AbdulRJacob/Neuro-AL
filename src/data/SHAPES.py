@@ -704,17 +704,24 @@ def generate_dataset_SHAPES(rule, label, num_of_images, isPostive):
 
     
 if __name__ == "__main__":
+
+   
+    with open("config/shapes_config.yaml", 'r') as file:
+        config = yaml.safe_load(file)
+
+    num_of_imgs = config['data']['dataset_size']
     
-   train_test_split = (10,10)
-   labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"],["c11","c12"]]
-   rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
+    train_test_split = (num_of_imgs,num_of_imgs)
+
+    labels = [["c1","c2"],["c3","c4"],["c5","c6"],["c7","c8"],["c9","c10"],["c11","c12"]]
+    rules = [["c(A) :- blue(O1), square(O1), in(A,O1), image(A)"],
             ["c(A) :- green(O1), triangle(O1), small(O1) in(A,O1), image(A)"],
             ["c(A) :- blue(O1), triangle(O1), in(A,O1), red(O2), circle(O2), large(O2) in(A,O2), image(A)"],
             ["c(A) :- blue(O1), square(O1), in(A,O1), green(O2), triangle(O2), in(A,O2), above(O1,O2), image(A)"],
             ["c(A) :- red(O1), triangle(O1), in(A,O1), green(O2), circle(O2), small(O2), in(A,O2), left(O1,O2), image(A)"],
             ["c(A) :- not exception1(A), image(A).", "exception1(A) :- blue(O1), circle(O1),in(A,O1), image(A)."]]
    
-   for i in range(0,len(labels)):
+    for i in range(0,len(labels)):
         rule = rules[i] 
         label = labels[i]
         l1 = label[0]

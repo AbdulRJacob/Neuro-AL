@@ -14,29 +14,41 @@ RUN apt-get update && \
     python3.10-venv \
     python3.10-dev \
     python3-pip \
+    gcc \
+    curl \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set the default Python version to 3.12
+# Set the default Python version to 3.10
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+
+# Install SWI-Prolog
+RUN apt-get update && \
+    apt-get install -y swi-prolog && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a working directory
 WORKDIR /neuro_al
+
+VOLUME ["/neuro_al"]
 
 # Copy the requirements file into the container
 COPY req.txt ./
 
 # Install Python dependencies
 RUN pip install --upgrade pip setuptools wheel
-RUN apt-get install gcc python3-dev
-RUN pip3 install --no-cache-dir -r req.txt
+RUN pip install --no-cache-dir -r req.txt
+
+# Set Python Path
+ENV PYTHONPATH="/neuro_al:$PYTHONPATH"
 
 # Copy the rest of the application code into the container
 COPY src/ .
+RUN mkdir symbolic_modules
+COPY symbolic_modules/ symbolic_modules/
+RUN mkdir data_structures
+COPY data_structures/ data_structures/
 
-# Expose port 80 if needed (adjust as necessary)
-EXPOSE 80
-
-# Set the command to run your application (adjust as necessary)
-CMD ["bash"]
-
+# Set the command to run container
+CMD ["tail", "-f", "/dev/null"]

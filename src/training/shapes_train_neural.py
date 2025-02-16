@@ -36,7 +36,7 @@ def seed_all(seed, deterministic=True):
 
 
 def run_epoch(
-    model: nn.Module, dataloader: DataLoader, optimizer: Optional[Optimizer] = None
+    model: nn.Module, dataloader: DataLoader, gpu: bool = False, optimizer: Optional[Optimizer] = None
 ):
     training = False if optimizer is None else True
     model.train(training)
@@ -48,12 +48,13 @@ def run_epoch(
     total_loss, count = 0, 0
     alpha = 0.7
 
-
-    for _, (x, y) in loader:
+    for ldr in loader:
+        x = ldr[1]['input']
+        y = ldr[1]['target']
         x = (x / 127.5 ) - 1
         y = y.float()
-        y = y.cuda()
-        x = x.cuda()
+        y = y.cuda() if gpu else y
+        x = x.cuda() if gpu else x
         model.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(training):
             recon_combined , _ ,_ ,_, y_hat = model(x)
@@ -108,7 +109,7 @@ if __name__ == "__main__":
     import yaml
 
     # Load the config.yaml
-    with open('config.yaml', 'r') as file:
+    with open("config/shapes_config.yaml", 'r') as file:
         config = yaml.safe_load(file)
 
     # Accessing values from the YAML
@@ -129,7 +130,8 @@ if __name__ == "__main__":
     weight_decay = config['training']['weight_decay']
     deterministic = config['training']['deterministic']
     logging_dir = config['training']['logging_dir']
-    model_dir = config['training'['model_dir']]
+    model_dir = config['training']['model_dir']
+    gpu_present = config['training']['gpu']
 
     seed_all(seed, deterministic)
     os.makedirs(model_dir + f"./checkpoints/{exp_name}", exist_ok=True)
@@ -199,7 +201,9 @@ if __name__ == "__main__":
         routing_iters=
         routing_iters,
         classes= {"shape": 3,"colour": 3, "size": 2}
-    ).cuda()
+    )
+
+    model = model.cuda() if gpu_present else model
 
 
     optimizer = AdamW(
@@ -207,8 +211,6 @@ if __name__ == "__main__":
         learning_rate, weight_decay=
         weight_decay
     )
-
-    
 
     checkpoint_path = os.getcwd() + model_dir + '/checkpoints/default/ckpt.pt'
 
@@ -245,13 +247,13 @@ if __name__ == "__main__":
     logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
     print("\nRunning sanity check...")
-    _ = run_epoch(model, dataloaders["val"])
+    _ = run_epoch(model, dataloaders["val"],gpu=gpu_present)
 
 
     for epoch in range(1, 
     epochs):
         print("\nEpoch {}:".format(epoch))
-        train_loss  = run_epoch(model, dataloaders["train"], optimizer)
+        train_loss  = run_epoch(model, dataloaders["train"], gpu_present, optimizer)
 
         if epoch % 4 == 0:
             valid_loss = run_epoch(model, dataloaders["val"])
@@ -260,8 +262,8 @@ if __name__ == "__main__":
 
             x = (x / 127.5 ) - 1
             y = y.float()
-            y = y.cuda()
-            x = x.cuda()
+            y = y.cuda() if gpu_present else y
+            x = x.cuda() if gpu_present else x
             _ , _ ,_ ,_, y_hat = model(x)
             step = int(epoch * len(dataloaders["train"]))
 

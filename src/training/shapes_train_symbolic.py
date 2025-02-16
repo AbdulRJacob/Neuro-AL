@@ -6,6 +6,12 @@ from data.SHAPES import SHAPESDATASET
 from models.slot_ae import SlotAutoencoder
 from models.NAL import NAL
 
+def get_config():
+    with open("config/shapes_config.yaml", 'r') as file:
+        config = yaml.safe_load(file)
+    
+    return config
+
 
 def get_class_dict(object_dict : dict):
     length_dict = {}
@@ -19,8 +25,14 @@ def get_shape_9_nal_model():
     object_info = {"object" : ["Triangle","Circle","Square"],
                    "colour": ["Red","Green","Blue"],
                    "size:":  ["Large","Small"]}
+    
 
-    ckpt = torch.load(os.getcwd() + "/models/shapes_m1.pt",map_location='cpu')
+    config = get_config()
+
+    # Accessing values from the YAML
+    model_dir = config['sym_training']['model_path']
+
+    ckpt = torch.load(model_dir ,map_location='cpu')
 
     model = SlotAutoencoder(
             in_shape=(3,64,64),
@@ -93,7 +105,8 @@ def shapes_nal_training(num_examples: int, class_ids: list, order = False):
         if shapes_NAL.check_prediction_quailty(prediction,THRESHOLD):
             shapes_NAL.populate_aba_framework(prediction,False,include_pos=ground)
     
-    filename = f"shapes_9_bk_r{get_rule(postive_class)}.aba"
+    config = get_config()
+    filename = config['training']['model_dir'] + f"shapes_9_bk_r{get_rule(postive_class)}.aba"
 
     if ground:
         add_shape_bk(shapes_NAL)
@@ -108,8 +121,16 @@ def shapes_nal_training(num_examples: int, class_ids: list, order = False):
 
 if __name__ == "__main__":
 
-    ## Example Training and Inference
+    with open("config/shapes_config.yaml", 'r') as file:
+        config = yaml.safe_load(file)
 
-    shapes_nal_training(num_examples=10,class_ids=[1,2]) 
+    num_examples = config['sym_training']['num_examples']
+    rule_id = config['sym_training']['rule_id']
+
+    rule_to_class = {1 : [1,2], 2: [3,4], 3:[5,6], 4:[7,8], 5:[9,10]}
+
+    shapes_nal_training(num_examples=num_examples,class_ids=rule_to_class[rule_id]) 
+
+
 
     
