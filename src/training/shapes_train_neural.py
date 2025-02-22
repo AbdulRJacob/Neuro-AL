@@ -192,14 +192,10 @@ if __name__ == "__main__":
         in_shape=(3, 
         input_res, 
         input_res),
-        width=
-        width,
-        num_slots=
-        num_slots,
-        slot_dim=
-        slot_dim,
-        routing_iters=
-        routing_iters,
+        width=width, 
+        num_slots=num_slots,
+        slot_dim=slot_dim,
+        routing_iters=routing_iters,
         classes= {"shape": 3,"colour": 3, "size": 2}
     )
 

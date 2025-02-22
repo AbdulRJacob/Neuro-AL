@@ -1,0 +1,30 @@
+
+data:
+  dataset_source: ""
+  data_dir: "/mnt/CLEVR/"   # DO NOT EDIT
+  max_num_obj: 9
+  input_res: 64
+
+model:
+  width: 32
+  num_slots: 11
+  slot_dim: 32
+  routing_iters: 3
+
+training:
+  exp_name: "default"
+  seed: 8
+  epochs: 1500
+  batch_size: 64
+  learning_rate: 0.0002
+  weight_decay: 0.000006
+  deterministic: true
+  model_dir: "models/clevr/"
+  logging_dir: "models/clevr/logs_slots.txt"
+  gpu: false
+
+sym_training:
+  model_path: "models/clevr/clevr_m1.pt"
+  num_examples: 10
+  logging_dir: "models/clevr/logs_aba.txt"
+

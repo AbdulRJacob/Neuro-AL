@@ -1,4 +1,5 @@
 import os
+import yaml
 import numpy as np
 import tensorflow.compat.v1 as tf
 import torch.nn as nn
@@ -49,9 +50,15 @@ def dataset(tfrecords_path, read_buffer_size=None, map_parallel_calls=None):
       buffer_size=read_buffer_size)
   return raw_dataset.map(_decode, num_parallel_calls=map_parallel_calls)
 
+
+def load_config(config_path="config/clevr_config.yaml"):
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+    return config
+
 class CLEVR(Dataset):
     def __init__(self, data_dir = "", split='train', transform=None, cache=False):
-        self.data_dir =  "/mnt/d/fyp/CLEVR_v1.0/CLEVR_v1.0"
+        self.data_dir =  load_config()['data']['data_dir']
         self.split = split
         self.transform = transform
         self.cache = cache
@@ -64,8 +71,8 @@ class CLEVR(Dataset):
         data_file = os.path.join(self.data_dir, f'scenes/CLEVR_{self.split}_scenes.json')
         with open(data_file, 'r') as f:
             data = json.load(f)
-        self.labels = [scene['objects'] for scene in data['scenes']]
-        
+        self.labels = [scene['objects'] for scene in data['scenes']][:1000]
+
         # Load images and cache if required
         self.image_paths = [os.path.join(self.data_dir, f'images/{self.split}/CLEVR_{self.split}_{str(i).zfill(6)}.png') for i in range(len(self.labels))]
 
@@ -104,18 +111,26 @@ class CLEVR(Dataset):
 
     def process_scene(self,scene_info):
         
-
-        labels_arr = [[d["3d_coords"], d['shape'], d['color'], d['size'], d['material']] for d in scene_info]
+        labels_arr = [[d['shape'], d['color'], d['size'], d['material'], d["pixel_coords"]]for d in scene_info]
         all_labels = self._get_all_labels()
-        feature_list = [l[1:] for  l in labels_arr]
+        feature_list = [l[:-1] for  l in labels_arr]
 
-        loc_list = (np.array([l[0] for  l in labels_arr], dtype=float) + 3.) / 6
+        loc_arr = np.array([l[-1] for  l in labels_arr], dtype=float)
+        # Normalize x, y, z to [0, 1]
+        normalized_x = loc_arr[:, 0] / 500.  # h
+        normalized_y = loc_arr[:, 1] / 300.  # w 
+        normalized_z = loc_arr[:, 2] / 16.   # d 
+
+        # Combine the normalized coordinates into a single list (loc_list)
+        loc_list = np.column_stack((normalized_x, normalized_y, normalized_z))
+
+        # loc_list = (np.array([l[-1] for  l in labels_arr], dtype=float) + 3.) / 6
 
         encoder = OneHotEncoder(categories=all_labels,sparse_output=False)
         one_hot_encoded = encoder.fit_transform(feature_list)
 
         result = np.hstack((loc_list, one_hot_encoded))
-
+        
         is_real = np.ones((result.shape[0], 1)) 
         result_with_real = np.hstack((result, is_real))
 
@@ -129,7 +144,7 @@ class CLEVR(Dataset):
     
 
     def _load_data(self, idx):
-        img_path = self.image_paths[idx]
+        img_path = self.image_paths[idx] if os.path.exists(self.image_paths[idx]) else self.image_paths[0]
         img = Image.open(img_path).convert("RGB")
         label = self.process_scene(self.labels[idx])
         if self.transform is not None:

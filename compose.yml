@@ -1,0 +1,9 @@
+services:
+  neuro_al:
+    build:
+      context: .
+    volumes:
+      - ./src:/neuro_al
+      - ${VOLUME_CLEVR}:/mnt/CLEVR
+    stdin_open: true
+    tty: true

@@ -45,10 +45,6 @@ ENV PYTHONPATH="/neuro_al:$PYTHONPATH"
 
 # Copy the rest of the application code into the container
 COPY src/ .
-RUN mkdir symbolic_modules
-COPY symbolic_modules/ symbolic_modules/
-RUN mkdir data_structures
-COPY data_structures/ data_structures/
 
 # Set the command to run container
 CMD ["tail", "-f", "/dev/null"]

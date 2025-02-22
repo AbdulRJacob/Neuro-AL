@@ -1,6 +1,7 @@
 import copy
 import os
 import random
+from datetime import datetime
 from typing import Callable, Optional, Tuple
 
 import numpy as np
@@ -12,9 +13,9 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from datasets.CLEVR import CLEVR
-import neuro_modules.utils as utils
-from neuro_modules.slots import SlotAutoencoder
+from data.CLEVR import CLEVR
+import utils.utils as utils
+from models.slot_ae import SlotAutoencoder
 import logging
 
 
@@ -36,7 +37,7 @@ def seed_all(seed, deterministic=True):
 
 
 def run_epoch(
-    model: nn.Module, dataloader: DataLoader, optimizer: Optional[Optimizer] = None
+    model: nn.Module, dataloader: DataLoader, gpu: bool = False, optimizer: Optional[Optimizer] = None
 ):
     training = False if optimizer is None else True
     model.train(training)
@@ -52,13 +53,13 @@ def run_epoch(
     for _, (x, y) in loader:
         x = (x / 127.5 ) - 1
         y = y.float()
-        y = y.cuda()
-        x = x.cuda()
+        y = y.cuda() if gpu else y
+        x = x.cuda() if gpu else x
         model.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(training):
             recon_combined , _ ,_ ,_, y_hat = model(x)
             
-            cost_matrix = utils.calculate_distances(y,y_hat,args.num_slots)
+            cost_matrix = utils.calculate_distances(y,y_hat,num_slots)
 
             h_match = utils.hungarian_algorithm(cost_matrix)
             h_loss = torch.sum(h_match[0])
@@ -82,46 +83,51 @@ def run_epoch(
 
 
 if __name__ == "__main__":
-    import argparse
 
-    parser = argparse.ArgumentParser()
-    # data
-    parser.add_argument("--data_dir", type=str, default="../datasets/CLEVR/")
-    parser.add_argument("--max_num_obj", type=int, default=9)
-    parser.add_argument("--input_res", type=int, default=64)
-    # model
-    parser.add_argument("--width", type=int, default=32)
-    parser.add_argument("--num_slots", type=int, default=10)
-    parser.add_argument("--slot_dim", type=int, default=32)
-    parser.add_argument("--routing_iters", type=int, default=3)
-    # training
-    parser.add_argument("--exp_name", type=str, default="default")
-    parser.add_argument("--seed", type=int, default=8)
-    parser.add_argument("--epochs", type=int, default=1500)
-    parser.add_argument("--batch_size", type=int, default=64)
-    parser.add_argument("--learning_rate", type=float, default=2e-4)
-    parser.add_argument("--weight_decay", type=float, default=1e-6)
-    parser.add_argument("--deterministic", action="store_true", default=True)
-    args = parser.parse_known_args()[0]
+    import yaml
 
-    seed_all(args.seed, args.deterministic)
-    os.makedirs(f"./checkpoints/{args.exp_name}", exist_ok=True)
+    # Load the config.yaml
+    with open("config/clevr_config.yaml", 'r') as file:
+        config = yaml.safe_load(file)
+
+    data_dir = config['data']['data_dir']
+    max_num_obj = config['data']['max_num_obj']
+    input_res = config['data']['input_res']
+
+    width = config['model']['width']
+    num_slots = config['model']['num_slots']
+    slot_dim = config['model']['slot_dim']
+    routing_iters = config['model']['routing_iters']
+
+    exp_name = config['training']['exp_name']
+    seed = config['training']['seed']
+    epochs = config['training']['epochs']
+    batch_size = config['training']['batch_size']
+    learning_rate = config['training']['learning_rate']
+    weight_decay = config['training']['weight_decay']
+    deterministic = config['training']['deterministic']
+    logging_dir = config['training']['logging_dir']
+    model_dir = config['training']['model_dir']
+    gpu_present = config['training']['gpu']
+    
+    seed_all(seed, deterministic)
+    os.makedirs(f"./checkpoints/{exp_name}", exist_ok=True)
 
     n = 1
-    h, w = int(args.input_res * n), int(args.input_res * n)
+    h, w = int(input_res * n), int(input_res * n)
     aug = {
         "train": transforms.Compose(
             [
                 transforms.Resize((h, w), antialias=None),
-                # transforms.CenterCrop(args.input_res),
-                # transforms.RandomCrop(args.input_res),
+                # transforms.CenterCrop(input_res),
+                # transforms.RandomCrop(input_res),
                 transforms.PILToTensor(),  # (0,255)
             ]
         ),
         "val": transforms.Compose(
             [
                 transforms.Resize((h, w), antialias=None),
-                # transforms.CenterCrop(args.input_res),
+                # transforms.CenterCrop(input_res),
                 transforms.PILToTensor(),  # (0,255)
             ]
         ),
@@ -129,7 +135,7 @@ if __name__ == "__main__":
 
     datasets = {
         split: CLEVR(
-            data_dir=args.data_dir,
+            data_dir=data_dir,
             transform=aug[split],
             cache=True,
         )
@@ -139,7 +145,7 @@ if __name__ == "__main__":
     datasets["test"] = copy.deepcopy(datasets["val"])
 
     kwargs = {
-        "batch_size": args.batch_size,
+        "batch_size": batch_size,
         "num_workers": os.cpu_count(),  # 4 cores to spare
         "pin_memory": True,
     }
@@ -155,20 +161,24 @@ if __name__ == "__main__":
     }
 
     model = SlotAutoencoder(
-        in_shape=(3, args.input_res, args.input_res),
-        width=args.width,
-        num_slots=args.num_slots,
-        slot_dim=args.slot_dim,
-        routing_iters=args.routing_iters,
-        classes= {"shape": 4,"color": 9, "size": 3, "material": 3}
-    ).cuda()
+        in_shape=(3, input_res, input_res),
+        width=width,
+        num_slots=num_slots,
+        slot_dim=slot_dim,
+        routing_iters=routing_iters,
+        classes= {"shape": 3,"color": 8, "size": 2, "material": 2},
+        obj_info= {"coords": 3, "real": 1}
+
+    )
+
+    model = model.cuda() if gpu_present else model
 
 
     optimizer = AdamW(
-        model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
+        model.parameters(), lr=learning_rate, weight_decay=weight_decay
     )
 
-    checkpoint_path = os.getcwd() + '/checkpoints/default/ckpt.pt'
+    checkpoint_path = os.getcwd() + model_dir + '/checkpoints/default/ckpt.pt' 
 
     if os.path.exists(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
@@ -182,20 +192,23 @@ if __name__ == "__main__":
         
 
     print(f"{model}\n#params: {sum(p.numel() for p in model.parameters()):,}")
-    for k in sorted(vars(args)):
-        print(f"--{k}={vars(args)[k]}")
+    # Print config details
+    for section, values in config.items():
+        for key, value in values.items():
+            print(f"--{key}={value}")
 
 
     if os.path.exists(checkpoint_path):
         optimizer = AdamW(
-            model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
+            model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
 
     best_loss = 1e6
 
     # Configure logging
-    log_file_path = "./logs/training_log_clevr.txt"
+    log_file_path = logging_dir
     if not os.path.exists(log_file_path):
+        os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
         with open(log_file_path, 'w') as file:
             file.write("Log file created\n")
             print("Log file created at:", log_file_path)
@@ -204,22 +217,22 @@ if __name__ == "__main__":
     logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
     print("\nRunning sanity check...")
-    _ = run_epoch(model, dataloaders["val"])
+    _ = run_epoch(model, dataloaders["val"],gpu=gpu_present)
 
 
-    for epoch in range(1, args.epochs):
+    for epoch in range(1, epochs):
         print("\nEpoch {}:".format(epoch))
-        train_loss  = run_epoch(model, dataloaders["train"], optimizer)
+        train_loss  = run_epoch(model, dataloaders["train"], gpu_present, optimizer)
 
         if epoch % 4 == 0:
-            valid_loss = run_epoch(model, dataloaders["val"])
+            valid_loss = run_epoch(model, dataloaders["val"],gpu=gpu_present)
 
             x, y = next(iter(dataloaders["val"]))
 
             x = (x / 127.5 ) - 1
             y = y.float()
-            y = y.cuda()
-            x = x.cuda()
+            y = y.cuda() if gpu_present else y
+            x = x.cuda() if gpu_present else x
             _ , _ ,_ ,_, y_hat = model(x)
             step = int(epoch * len(dataloaders["train"]))
 
@@ -234,14 +247,14 @@ if __name__ == "__main__":
                 best_loss = valid_loss
                 step = int(epoch * len(dataloaders["train"]))
                 save_dict = {
-                    "hparams": vars(args),
+                    "hparams": config,
                     "epoch": epoch,
                     "step": step,
                     "best_loss": best_loss,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict(),
                 }
-                torch.save(save_dict, f"./checkpoints/{args.exp_name}/{step}_ckpt.pt")
+                torch.save(save_dict, f"./checkpoints/{exp_name}/{step}_ckpt.pt")
 
             logging.info("Epoch {}: Train loss: {:.6f}, Valid loss: {:.6f}".format(epoch, train_loss, valid_loss))
         else:
