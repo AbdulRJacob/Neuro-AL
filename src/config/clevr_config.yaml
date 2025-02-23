@@ -1,7 +1,9 @@
 
 data:
-  dataset_source: ""
+  dataset_source_clevr: ""
+  dataset_source_clevr_hans: ""
   data_dir: "/mnt/CLEVR/"   # DO NOT EDIT
+  data_dir_clvr_hans: "/mnt/CLEVR_Hans/"
   max_num_obj: 9
   input_res: 64
 
@@ -26,5 +28,15 @@ training:
 sym_training:
   model_path: "models/clevr/clevr_m1.pt"
   num_examples: 10
+  class_order :      # Denotes order of training, first pass will train c0 & c1 second pass c1 & c2
+    - 2
+    - 0
+    - 1
   logging_dir: "models/clevr/logs_aba.txt"
+
+inference:
+  first_pass: "models/clevr/clevr_bk_pos_class_3_SOLVED.aba"
+  second_pass: "models/clevr/clevr_bk_pos_class_1_SOLVED.aba"
+  example_img: "/mnt/CLEVR_Hans/test/images/CLEVR_Hans_classid_2_000749.png"
+
 

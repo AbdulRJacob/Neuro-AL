@@ -169,8 +169,8 @@ class CLEVR(Dataset):
 
 
 class CLEVRHans(Dataset):
-    def __init__(self, data_dir = "", split='train', transform=None, cache=False):
-        self.data_dir =  "datasets/CLEVR/"
+    def __init__(self, data_dir = "", split='train', transform=None, cache=True):
+        self.data_dir =  data_dir
         self.split = split
         self.transform = transform
         self.cache = cache
@@ -184,8 +184,8 @@ class CLEVRHans(Dataset):
         data_file = os.path.join(self.data_dir, f'{self.split}/CLEVR_HANS_scenes_{self.split}.json')
         with open(data_file, 'r') as f:
             data = json.load(f)
-        self.labels = [(scene["class_id"], scene['objects']) for scene in data['scenes']]
-        self.image_paths = [os.path.join(self.data_dir, f'{self.split}/images/{scene["image_filename"]}') for scene in data['scenes']]
+        self.labels = [(scene["class_id"], scene['objects']) for scene in data['scenes']][:1000]
+        self.image_paths = [os.path.join(self.data_dir, f'{self.split}/images/{scene["image_filename"]}') for scene in data['scenes']][:1000]
 
         if self.cache:
             self._data = []
@@ -222,18 +222,26 @@ class CLEVRHans(Dataset):
 
     def process_scene(self,scene_info):
         
-
-        labels_arr = [[d["3d_coords"], d['shape'], d['color'], d['size'], d['material']] for d in scene_info]
+        labels_arr = [[d['shape'], d['color'], d['size'], d['material'], d["pixel_coords"]]for d in scene_info]
         all_labels = self._get_all_labels()
-        feature_list = [l[1:] for  l in labels_arr]
+        feature_list = [l[:-1] for  l in labels_arr]
 
-        loc_list = (np.array([l[0] for  l in labels_arr], dtype=float) + 3.) / 6
+        loc_arr = np.array([l[-1] for  l in labels_arr], dtype=float)
+        # Normalize x, y, z to [0, 1]
+        normalized_x = loc_arr[:, 0] / 500.  # h
+        normalized_y = loc_arr[:, 1] / 300.  # w 
+        normalized_z = loc_arr[:, 2] / 16.   # d 
+
+        # Combine the normalized coordinates into a single list (loc_list)
+        loc_list = np.column_stack((normalized_x, normalized_y, normalized_z))
+
+        # loc_list = (np.array([l[-1] for  l in labels_arr], dtype=float) + 3.) / 6
 
         encoder = OneHotEncoder(categories=all_labels,sparse_output=False)
         one_hot_encoded = encoder.fit_transform(feature_list)
 
         result = np.hstack((loc_list, one_hot_encoded))
-
+        
         is_real = np.ones((result.shape[0], 1)) 
         result_with_real = np.hstack((result, is_real))
 
@@ -247,7 +255,7 @@ class CLEVRHans(Dataset):
     
 
     def _load_data(self, idx):
-        img_path = self.image_paths[idx]
+        img_path = self.image_paths[idx] if os.path.exists(self.image_paths[idx]) else self.image_paths[0]
         img = Image.open(img_path).convert("RGB")
         cid, label = self.labels[idx]
         label = self.process_scene(label)
