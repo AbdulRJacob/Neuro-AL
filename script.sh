@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Function to read GPU flag from config.yaml
+use_gpu() {
+    grep -E '^gpu:\s*true' config.yaml &>/dev/null
+    return $?
+}
+
 # Function to setup environment
 setup() {
     echo "Checking Git submodules..."
@@ -18,7 +24,11 @@ setup() {
     docker build -t neuro-al .
     
     echo "Storing container ID..."
-    CONTAINER_ID=$(docker create --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
+    if use_gpu; then
+        CONTAINER_ID=$(docker create --gpus all --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
+    else
+        CONTAINER_ID=$(docker create --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
+    fi
     echo "$CONTAINER_ID" > container_id.txt
     echo "Container ID: $CONTAINER_ID"
 }
@@ -37,7 +47,7 @@ start_docker_compose() {
     VOLUME_CLEVR=$(grep 'dataset_source:' config/clevr_config.yaml | awk '{print $2}' | tr -d '"')
     VOLUME_CLEVR_HANS=$(grep 'dataset_source_clevr_hans:' config/clevr_config.yaml | awk '{print $2}' | tr -d '"')
 
-    if [ -z "$VOLUME_CLEVR" ] | [ -z "$VOLUME_CLEVR_HANS" ]; then
+    if [ -z "$VOLUME_CLEVR" ] || [ -z "$VOLUME_CLEVR_HANS" ]; then
         echo "Error: Could not find dataset_source path in clevr_config.yaml."
         exit 1
     fi
@@ -51,7 +61,11 @@ start_docker_compose() {
     echo "VOLUME_CLEVR_HANS=$VOLUME_CLEVR_HANS" >> .env
 
     echo "Building and starting containers using Docker Compose..."
-    docker-compose --env-file .env up -d --build
+    if use_gpu; then
+        docker-compose --env-file .env up -d --build --gpus all
+    else
+        docker-compose --env-file .env up -d --build
+    fi
 }
 
 # Function to train SHAPES model
@@ -72,7 +86,6 @@ train_shapes() {
 
 # Function to train CLEVR model using Docker Compose
 train_clevr() {
-
     start_docker_compose
     
     echo "Finding running container ID..."
@@ -136,7 +149,7 @@ cleanup() {
     echo "Removing aba_asp directory..."
     rm -rf src/symbolic_modules/aba_asp
     
-    echo "Removing backgrounds files from src/ directory..."
+    echo "Removing background files from src/ directory..."
     find src/ -type f -name "*.pl" -delete
     
     echo "Cleanup complete."

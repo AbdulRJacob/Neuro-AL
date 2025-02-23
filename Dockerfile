@@ -1,5 +1,5 @@
-# Use the official Ubuntu image from Docker Hub
-FROM ubuntu:22.04
+# Use NVIDIA CUDA base image with Ubuntu 22.04
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 # Set environment variables to avoid prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -28,6 +28,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install NVIDIA libraries
+RUN apt-get update && apt-get install -y \
+    nvidia-cuda-toolkit \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Create a working directory
 WORKDIR /neuro_al
 
@@ -45,6 +50,9 @@ ENV PYTHONPATH="/neuro_al:$PYTHONPATH"
 
 # Copy the rest of the application code into the container
 COPY src/ .
+
+# Ensure NVIDIA libraries are visible
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Set the command to run container
 CMD ["tail", "-f", "/dev/null"]
