@@ -89,12 +89,11 @@ kwargs = {"batch_size": batch_size, "num_workers": os.cpu_count(), "pin_memory":
 dataloaders = {split: DataLoader(datasets[split], shuffle=(split == "train"), drop_last=(split == "train"), **kwargs) for split in ["train", "val", "test"]}
 
 # Training function
-def run_epoch(model, dataloader, gpu=False, optimizer=None):
+def run_epoch(model, alpha, dataloader, gpu=False, optimizer=None):
     training = optimizer is not None
     model.train(training)
     loader = tqdm(enumerate(dataloader), total=len(dataloader), mininterval=0.1)
     total_loss, count = 0, 0
-    alpha = 0.7  
 
     for _, batch in loader:
         x, y = batch['input'], batch['target']
@@ -143,7 +142,7 @@ def objective(trial):
     # Initialize model
     model = SlotAutoencoder(
         in_shape=(3, input_res, input_res),
-        width=width,
+        width=slot_dim,
         num_slots=num_slots,  
         slot_dim=slot_dim,
         routing_iters=routing_iters,
@@ -155,8 +154,8 @@ def objective(trial):
     best_loss = float("inf")
 
     for epoch in range(epochs):
-        train_loss = run_epoch(model, dataloaders["train"], gpu_present, optimizer)
-        valid_loss = run_epoch(model, dataloaders["val"], gpu_present)
+        train_loss = run_epoch(model, alpha, dataloaders["train"], gpu_present, optimizer)
+        valid_loss = run_epoch(model, alpha, dataloaders["val"], gpu_present)
 
         logging.info(f"Trial {trial.number} | Epoch {epoch} | Train Loss: {train_loss:.6f} | Valid Loss: {valid_loss:.6f}")
 

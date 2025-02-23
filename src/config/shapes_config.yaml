@@ -3,7 +3,7 @@ data:
   data_dir: "data/raw/SHAPES/"
   max_num_obj: 9
   input_res: 64
-  dataset_size: 10  # dataset size for (training, testing) set e.g (10,10)
+  dataset_size: 100  # dataset size for (training, testing) set e.g (10,10)
 
 model:
   width: 32

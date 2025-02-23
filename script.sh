@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Function to read GPU setting from config.yaml
-use_gpu() {
-    grep -q 'gpu: true' config.yaml && echo "--gpus all" || echo ""
-}
-
 # Function to setup environment
 setup() {
     echo "Checking Git submodules..."
@@ -23,8 +18,9 @@ setup() {
     docker build -t neuro-al .
     
     echo "Storing container ID..."
-    GPU_FLAG=$(use_gpu)
-    CONTAINER_ID=$(docker create $GPU_FLAG --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
+    CONTAINER_ID=$(docker create --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
+    # CONTAINER_ID=$(docker create --gpus all --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al) ## uncomment to use gpu
+
     echo "$CONTAINER_ID" > container_id.txt
     echo "Container ID: $CONTAINER_ID"
 }
@@ -59,21 +55,8 @@ start_docker_compose() {
     VOLUME_CLEVR=$(grep 'dataset_source:' config/clevr_config.yaml | awk '{print $2}' | tr -d '"')
     VOLUME_CLEVR_HANS=$(grep 'dataset_source_clevr_hans:' config/clevr_config.yaml | awk '{print $2}' | tr -d '"')
 
-    if [ -z "$VOLUME_CLEVR" ] || [ -z "$VOLUME_CLEVR_HANS" ]; then
-        echo "Error: Could not find dataset_source path in clevr_config.yaml."
-        exit 1
-    fi
-    
-    echo "Setting volume mount path: $VOLUME_CLEVR"
-    export VOLUME_CLEVR=$VOLUME_CLEVR
-    echo "VOLUME_CLEVR=$VOLUME_CLEVR" >> .env
-    
-    echo "Setting volume mount path: $VOLUME_CLEVR_HANS"
-    export VOLUME_CLEVR_HANS=$VOLUME_CLEVR_HANS
-    echo "VOLUME_CLEVR_HANS=$VOLUME_CLEVR_HANS" >> .env
-
     echo "Building and starting containers using Docker Compose..."
-    GPU_FLAG=$(use_gpu)
+
     docker-compose --env-file .env up -d --build --force-recreate $GPU_FLAG
 }
 
@@ -83,7 +66,7 @@ train_shapes() {
     
     echo "Running SHAPES training scripts..."
     docker exec "$CONTAINER_ID" python3 data/SHAPES.py
-    docker exec "$CONTAINER_ID" python3 training/train_shapes.py
+    docker exec "$CONTAINER_ID" python3 training/shapes_train_neural.py
 }
 
 # Function to train CLEVR model using Docker Compose

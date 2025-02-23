@@ -149,7 +149,7 @@ def objective(trial):
     # Initialize model and optimizer
     model = SlotAutoencoder(
         in_shape=(3, input_res, input_res),
-        width=width,
+        width=slot_dim,
         num_slots=num_slots,  
         slot_dim=slot_dim,
         routing_iters=routing_iters,
