@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# Function to read GPU flag from config.yaml
+# Function to read GPU setting from config.yaml
 use_gpu() {
-    grep -E '^gpu:\s*true' config.yaml &>/dev/null
-    return $?
+    grep -q 'gpu: true' config.yaml && echo "--gpus all" || echo ""
 }
 
 # Function to setup environment
@@ -24,13 +23,26 @@ setup() {
     docker build -t neuro-al .
     
     echo "Storing container ID..."
-    if use_gpu; then
-        CONTAINER_ID=$(docker create --gpus all --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
-    else
-        CONTAINER_ID=$(docker create --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
-    fi
+    GPU_FLAG=$(use_gpu)
+    CONTAINER_ID=$(docker create $GPU_FLAG --name neuro-al-container -v $(pwd)/src:/neuro_al neuro-al)
     echo "$CONTAINER_ID" > container_id.txt
     echo "Container ID: $CONTAINER_ID"
+}
+
+# Function to start the container if not already running
+start_container() {
+    echo "Finding running container ID..."
+    CONTAINER_ID=$(docker ps -q --filter "name=neuro-al")
+    
+    if [ -z "$CONTAINER_ID" ]; then
+        if [ ! -f container_id.txt ]; then
+            echo "Error: Container not found. Run --setup first."
+            exit 1
+        fi
+        CONTAINER_ID=$(cat container_id.txt)
+        echo "Starting container..."
+        docker start "$CONTAINER_ID"
+    fi
 }
 
 # Function to start Docker Compose if not already running
@@ -61,23 +73,13 @@ start_docker_compose() {
     echo "VOLUME_CLEVR_HANS=$VOLUME_CLEVR_HANS" >> .env
 
     echo "Building and starting containers using Docker Compose..."
-    if use_gpu; then
-        docker-compose --env-file .env up -d --build --gpus all
-    else
-        docker-compose --env-file .env up -d --build
-    fi
+    GPU_FLAG=$(use_gpu)
+    docker-compose --env-file .env up -d --build --force-recreate $GPU_FLAG
 }
 
 # Function to train SHAPES model
 train_shapes() {
-    if [ ! -f container_id.txt ]; then
-        echo "Error: Container not found. Run --setup first."
-        exit 1
-    fi
-    CONTAINER_ID=$(cat container_id.txt)
-    
-    echo "Starting container..."
-    docker start "$CONTAINER_ID"
+    start_container
     
     echo "Running SHAPES training scripts..."
     docker exec "$CONTAINER_ID" python3 data/SHAPES.py
@@ -102,11 +104,7 @@ train_clevr() {
 
 # Function to run SHAPES inference
 shapes_inference() {
-    if [ ! -f container_id.txt ]; then
-        echo "Error: Container not found. Run --setup first."
-        exit 1
-    fi
-    CONTAINER_ID=$(cat container_id.txt)
+    start_container
     
     echo "Running SHAPES inference..."
     docker exec "$CONTAINER_ID" python3 inference/shape_inference.py
@@ -149,7 +147,7 @@ cleanup() {
     echo "Removing aba_asp directory..."
     rm -rf src/symbolic_modules/aba_asp
     
-    echo "Removing background files from src/ directory..."
+    echo "Removing backgrounds files from src/ directory..."
     find src/ -type f -name "*.pl" -delete
     
     echo "Cleanup complete."
