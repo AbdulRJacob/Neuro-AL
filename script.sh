@@ -23,6 +23,22 @@ setup() {
     echo "Container ID: $CONTAINER_ID"
 }
 
+# Function to start the container if not already running
+start_container() {
+    echo "Finding running container ID..."
+    CONTAINER_ID=$(docker ps -q --filter "name=neuro-al")
+    
+    if [ -z "$CONTAINER_ID" ]; then
+        if [ ! -f container_id.txt ]; then
+            echo "Error: Container not found. Run --setup first."
+            exit 1
+        fi
+        CONTAINER_ID=$(cat container_id.txt)
+        echo "Starting container..."
+        docker start "$CONTAINER_ID"
+    fi
+}
+
 # Function to start Docker Compose if not already running
 start_docker_compose() {
     echo "Checking if a Docker Compose container is already running..."
@@ -56,14 +72,7 @@ start_docker_compose() {
 
 # Function to train SHAPES model
 train_shapes() {
-    if [ ! -f container_id.txt ]; then
-        echo "Error: Container not found. Run --setup first."
-        exit 1
-    fi
-    CONTAINER_ID=$(cat container_id.txt)
-    
-    echo "Starting container..."
-    docker start "$CONTAINER_ID"
+    start_container
     
     echo "Running SHAPES training scripts..."
     docker exec "$CONTAINER_ID" python3 data/SHAPES.py
@@ -89,11 +98,7 @@ train_clevr() {
 
 # Function to run SHAPES inference
 shapes_inference() {
-    if [ ! -f container_id.txt ]; then
-        echo "Error: Container not found. Run --setup first."
-        exit 1
-    fi
-    CONTAINER_ID=$(cat container_id.txt)
+    start_container
     
     echo "Running SHAPES inference..."
     docker exec "$CONTAINER_ID" python3 inference/shape_inference.py

@@ -17,8 +17,8 @@ from data.CLEVR import dataset as ds
 
 from models.NAL import NAL
 import utils.utils as utils
-import pipelines.shapes as shapes
-import pipelines.clevr as clevr
+import training.shapes_train_neural as shapes
+import training.clevr_train_neural as clevr
 import models.slot_ae as slots
 
 transform = transforms.Compose(
@@ -286,10 +286,10 @@ def calcualte_AP():
 
 
 def nal_eval_metrics():
-    classes= [11,12]
+    classes= [1,2]
     dataset = SHAPESDATASET(cache=False).get_SHAPES_dataset(split="test")
     
-    aba_path = ""
+    aba_path = "models/shapes/shapes_9_bk_r1_SOLVED.aba"
 
     tp = 0
     tn = 0
@@ -539,18 +539,20 @@ def test_clustering():
      
 if __name__ == "__main__": 
 
-    dataset_test = CLEVRHans(split="test")
-    aba_path = ["results/CLEVR/clevr_bk_1_SOVLED.aba","results/CLEVR/clevr_bk_2_SOVLED.aba"]
+    analyse_SHAPES()
 
-    y_pred = []
-    y_true = []
+    # dataset_test = CLEVRHans(split="test")
+    # aba_path = ["results/CLEVR/clevr_bk_1_SOVLED.aba","results/CLEVR/clevr_bk_2_SOVLED.aba"]
+
+    # y_pred = []
+    # y_true = []
     
-    for i in range(len(dataset_test)):
-        image = dataset_test[i]["input"]
-        target = dataset_test[i]["class"]
+    # for i in range(len(dataset_test)):
+    #     image = dataset_test[i]["input"]
+    #     target = dataset_test[i]["class"]
 
-        pred = clevr.clevr_nal_inference(image,aba_path)
-        y_pred.append(pred)
-        y_true.append(np.argmax(target))
+    #     pred = clevr.clevr_nal_inference(image,aba_path)
+    #     y_pred.append(pred)
+    #     y_true.append(np.argmax(target))
 
-    evaluate_classification(y_true,y_pred,["Class 1", "Class 2", "Class 3"], "cm_best.png")
+    # evaluate_classification(y_true,y_pred,["Class 1", "Class 2", "Class 3"], "cm_best.png")

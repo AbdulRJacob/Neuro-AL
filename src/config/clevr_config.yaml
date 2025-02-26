@@ -10,7 +10,7 @@ data:
 model:
   width: 32
   num_slots: 11
-  slot_dim: 32
+  slot_dim: 64
   routing_iters: 3
 
 training:
