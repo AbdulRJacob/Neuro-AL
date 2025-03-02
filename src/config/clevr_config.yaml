@@ -1,9 +1,7 @@
 
 data:
-  dataset_source_clevr: ""
-  dataset_source_clevr_hans: ""
   data_dir: "/mnt/CLEVR/"   # DO NOT EDIT
-  data_dir_clvr_hans: "/mnt/CLEVR_Hans/"
+  data_dir_clvr_hans: "/mnt/CLEVR_Hans/" # DO NOT EDIT
   max_num_obj: 9
   input_res: 64
 

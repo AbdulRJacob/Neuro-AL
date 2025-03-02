@@ -170,7 +170,6 @@ def calcualte_AP():
     model= nal.model
 
     for ldr in loader:
-        print(ldr)
         x = ldr['input']
         y = ldr['target']
 
@@ -180,10 +179,10 @@ def calcualte_AP():
 
         y_hat = y_hat.detach().numpy()
 
-        ap = utils.average_precision(y_hat,y.numpy(),-1)
+        ap = utils.average_precision_shapes(y_hat,y.numpy(),-1)
         break
 
-    print("Average Precision: " + ap)
+    print("Average Precision: " + str(ap))
 
 
 def shapes_nal_eval_metrics():
@@ -244,18 +243,18 @@ def shapes_nal_eval_metrics():
     plt.xlabel('Predicted Label')
     plt.ylabel('True Label')
     plt.title('Confusion Matrix')
-    plt.savefig('confused_matrix_r4.png')
+    plt.savefig('shapes_cm.png')
 
 
 
 if __name__ == "__main__": 
 
-    print("======= ANALYSING SHAPES DATASET ============")
-    analyse_SHAPES()
+    # print("======= ANALYSING SHAPES DATASET ============")
+    # analyse_SHAPES()
 
-    print("========== SHAPES ML METRICS ===============")
-    shapes_nal_eval_metrics()
+    # print("========== SHAPES ML METRICS ===============")
+    # shapes_nal_eval_metrics()
 
     print("========= AP AND ARI METRICS ============")
-    # calcualte_AP()  # TODO Comment out CLEVR code to use for SHAPES in utils.average_precision
+    calcualte_AP()
     calcuate_ari_resutls(True)

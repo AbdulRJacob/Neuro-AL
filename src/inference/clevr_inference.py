@@ -20,7 +20,7 @@ def check_predicate_presence(s_models, total_model, pred_name="c"):
     return present > absent
 
 
-def clevr_nal_inference(img_path: str, aba_path: list[str], class_order, include_pos = False):
+def clevr_nal_inference(img_path: str, aba_path: list[str], class_order, include_pos = False, isPath=True):
 
     """
         CLEVR Hans Classification Task
@@ -38,7 +38,7 @@ def clevr_nal_inference(img_path: str, aba_path: list[str], class_order, include
     nal = sym.get_clevr_nal_model()
     NUM_SLOTS = 11
 
-    prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS,num_coords=3,isPath=True)
+    prediction, _ = nal.run_slot_attention_model(img_path,NUM_SLOTS,num_coords=3,isPath=isPath)
     nal.populate_aba_framework_inference(prediction,include_pos)
 
     # First Pass

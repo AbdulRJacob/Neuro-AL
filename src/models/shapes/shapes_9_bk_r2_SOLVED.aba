@@ -1,0 +1,7 @@
+% Background Knowledge 
+% Learnt Rules 
+c(A) :- alpha_2(B,A), triangle(B), in(A,B).
+c_alpha_2(A,B) :- image(B), blue(A).
+c_alpha_2(A,B) :- image(B), red(A).
+c_alpha_2(A,B) :- image(B), large(A).
+alpha_2(A,B) :- not c_alpha_2(A,B), triangle(A), in(B,A).

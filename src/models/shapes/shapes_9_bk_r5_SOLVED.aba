@@ -1,0 +1,9 @@
+% Background Knowledge 
+above(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), Y1 - Y2 < 0.
+left(S1,S2,I) :- position(I,S1,X1,Y1), position(I,S2,X2,Y2), X2 - X1 > 0.
+% Learnt Rules 
+c(A) :- alpha_2(B,A), small(B), circle(B), in(A,B).
+c_alpha_2(A,B) :- image(B), blue(A).
+c_alpha_2(A,B) :- image(B), red(A).
+c_alpha_2(A,B) :- green(C), triangle(A), left(A,C,B).
+alpha_2(A,B) :- not c_alpha_2(A,B), small(A), circle(A), in(B,A).

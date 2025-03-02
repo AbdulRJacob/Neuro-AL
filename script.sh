@@ -36,6 +36,8 @@ start_container() {
         CONTAINER_ID=$(cat container_id.txt)
         echo "Starting container..."
         docker start "$CONTAINER_ID"
+        docker exec "$CONTAINER_ID" python3 data/SHAPES.py
+
     fi
 }
 
@@ -49,22 +51,6 @@ start_docker_compose() {
         return
     fi
 
-    echo "Extracting CLEVR dataset path from config..."
-    VOLUME_CLEVR=$(grep 'dataset_source:' config/clevr_config.yaml | awk '{print $2}' | tr -d '"')
-    VOLUME_CLEVR_HANS=$(grep 'dataset_source_clevr_hans:' config/clevr_config.yaml | awk '{print $2}' | tr -d '"')
-
-    if [ -z "$VOLUME_CLEVR" ] | [ -z "$VOLUME_CLEVR_HANS" ]; then
-        echo "Error: Could not find dataset_source path in clevr_config.yaml."
-        exit 1
-    fi
-    
-    echo "Setting volume mount path: $VOLUME_CLEVR"
-    export VOLUME_CLEVR=$VOLUME_CLEVR
-    echo "VOLUME_CLEVR=$VOLUME_CLEVR" >> .env
-    
-    echo "Setting volume mount path: $VOLUME_CLEVR_HANS"
-    export VOLUME_CLEVR_HANS=$VOLUME_CLEVR_HANS
-    echo "VOLUME_CLEVR_HANS=$VOLUME_CLEVR_HANS" >> .env
 
     echo "Building and starting containers using Docker Compose..."
     docker-compose --env-file .env up -d --build
@@ -126,6 +112,30 @@ clevr_inference() {
     docker exec "$CONTAINER_ID" python3 inference/clevr_inference.py --image "$IMAGE_PATH"
 }
 
+# Function to evaluate SHAPES model
+eval_shapes() {
+    start_container
+    
+    echo "Running SHAPES evaluation..."
+    docker exec "$CONTAINER_ID" python3 evaluation/shapes_eval.py
+}
+
+# Function to evaluate CLEVR model
+eval_clevr() {
+    start_docker_compose
+    
+    echo "Finding running container ID..."
+    CONTAINER_ID=$(docker ps -q --filter "name=neuro-al")
+    
+    if [ -z "$CONTAINER_ID" ]; then
+        echo "Error: Could not find running container."
+        exit 1
+    fi
+    
+    echo "Running CLEVR evaluation..."
+    docker exec "$CONTAINER_ID" python3 evaluation/eval_clevr.py
+}
+
 # Function to clean up environment
 cleanup() {
     echo "Removing Docker container..."
@@ -158,6 +168,12 @@ case "$1" in
     --train_clevr)
         train_clevr
         ;;
+    --eval_shapes)
+        eval_shapes
+        ;;
+    --eval_clevr)
+        eval_clevr
+        ;;
     --shapes)
         shapes_inference
         ;;
@@ -168,7 +184,7 @@ case "$1" in
         cleanup
         ;;
     *)
-        echo "Usage: $0 --setup | --train_shapes | --train_clevr | --shapes | --clevr <image_path> | --cleanup"
+        echo "Usage: $0 --setup | --train_shapes | --train_clevr | --eval_shapes | --eval_clevr | --shapes | --clevr <image_path> | --cleanup"
         exit 1
         ;;
 esac

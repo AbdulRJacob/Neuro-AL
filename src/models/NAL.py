@@ -29,6 +29,8 @@ class NAL:
         if isPath:
             image = Image.open(image).convert('RGB')
             input_tensor = transform(image)
+        elif isinstance(image, Image.Image):
+            input_tensor = transform(image)
         else:
             input_tensor = image
 
