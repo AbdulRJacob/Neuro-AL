@@ -3,16 +3,16 @@
 # Function to setup environment
 setup() {
     echo "Checking Git submodules..."
-    if [ ! -d "symbolic/modules/aba_asp/.git" ]; then
+    if [ ! -d "symbolic_modules/aba_asp/.git" ]; then
         echo "Initializing aba_asp submodule..."
-        (cd symbolic/modules && git submodule update --init --recursive aba_asp)
+        (cd symbolic_modules && git submodule update --init --recursive aba_asp)
     else
         echo "Submodule aba_asp already initialized."
     fi
     
     echo "Copying aba_asp contents to src/symbolic_modules/"
-    mkdir -p src/symbolic_modules/
-    cp -r symbolic/modules/aba_asp/* src/symbolic_modules/
+    mkdir -p src/symbolic_modules/aba_asp
+    cp -r symbolic_modules/aba_asp/* src/symbolic_modules/aba_asp
     
     echo "Building Docker container..."
     docker build -t neuro-al .
